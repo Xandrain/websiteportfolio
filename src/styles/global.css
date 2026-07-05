@@ -13,6 +13,17 @@
   --color-line:       oklch(from #1A1917 l c h / 0.09);
   --color-overlay:    oklch(from #1A1917 l c h / 0.48);
 
+  /* ── Accent — a single emerald hue (~155°) carried across the site ──
+     Impact = the vivid "pop" for dots & marks; ink = the deep, AA-legible
+     (6.3:1 on paper) variant used for text, links and underlines. The soft/
+     pale/deep tones are the muted companions used only for the scattered
+     dot motif, giving a tonal spread within one green family. */
+  --color-accent:       #16A36A;  /* impact emerald — dots, decorative marks */
+  --color-accent-ink:   #0C6B43;  /* deep pine — links/underlines (AA on paper) */
+  --color-accent-soft:  #7FA98A;  /* muted sage companion */
+  --color-accent-pale:  #B8C6AE;  /* pale khaki-sage companion */
+  --color-accent-deep:  #2E5D46;  /* deep pine companion */
+
   /* ── Typography ─────────────────────────────────────────────── */
   --font-display: 'Bodoni Moda', Georgia, serif;
   --font-sans:    'Jost', system-ui, sans-serif;
@@ -50,13 +61,13 @@
   }
 
   ::selection {
-    background-color: var(--color-ink);
+    background-color: var(--color-accent-ink);
     color: var(--color-paper);
   }
 
   :focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-ink);
+    box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-accent-ink);
     border-radius: 2px;
   }
 
@@ -100,6 +111,16 @@
     letter-spacing: var(--letter-spacing-caps);
     text-transform: uppercase;
     color: var(--color-ink-muted);
+  }
+
+  /* Emerald status dot leading the eyebrow — the accent's smallest footprint. */
+  .eyebrow::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    flex: none;
   }
 
   /* Horizontal rule */

@@ -80,6 +80,24 @@ const year = new Date().getFullYear();
     letter-spacing: 0.02em;
   }
 
+  /* Emerald signature dot trailing the name, like a full stop. */
+  .site-footer__name::after {
+    content: "";
+    display: inline-block;
+    width: 0.3125rem;
+    height: 0.3125rem;
+    margin-left: 0.28rem;
+    vertical-align: 0.12em;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+  }
+
+  /* Section eyebrows pick up the accent (echoes the reference's tinted labels). */
+  .site-footer__nav .label,
+  .site-footer__social .label {
+    color: var(--color-accent-ink);
+  }
+
   .site-footer__tagline {
     margin-top: 0.625rem;
     font-size: 0.875rem;
@@ -105,7 +123,7 @@ const year = new Date().getFullYear();
     transition: color 0.2s;
   }
 
-  .site-footer__link:hover { color: var(--color-ink); }
+  .site-footer__link:hover { color: var(--color-accent-ink); }
 
   .site-footer__legal {
     max-width: var(--max-width-editorial);

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Dots from "../components/Dots.astro";
 import { SITE, NAV } from "../consts";
 
 // Primary routes (the traffic split) vs. secondary. Driven by consts.
@@ -15,6 +16,7 @@ const about = NAV.find((i) => i.href === "/about");
 >
   <section class="gate">
     <div class="gate__aura" aria-hidden="true"></div>
+    <Dots />
     <div class="gate__inner">
       <p class="gate__role">{SITE.role}</p>
 
@@ -191,7 +193,7 @@ const about = NAV.find((i) => i.href === "/about");
     bottom: -0.35rem;
     width: 0;
     height: 1px;
-    background: currentColor;
+    background: var(--color-accent-ink);
     transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 

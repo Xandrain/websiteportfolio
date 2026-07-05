@@ -1,0 +1,81 @@
+---
+/**
+ * Dots — a loose, editorial scatter of emerald circles used as a decorative
+ * accent (see the reference: a few vivid dots + several muted ones, upper
+ * region weighted). Purely ornamental: aria-hidden, non-interactive, and it
+ * fills its nearest positioned ancestor (`position: relative`).
+ *
+ * Each dot mixes size, one of the accent-family shades, and opacity to give a
+ * tonal spread within a single green hue. A slow, staggered bob animates them
+ * — fully suppressed under prefers-reduced-motion.
+ */
+interface Dot {
+  /** vertical / horizontal position within the parent, in % */
+  top: number;
+  left: number;
+  /** diameter in px */
+  size: number;
+  /** accent-family CSS custom property */
+  tone:
+    | "--color-accent"
+    | "--color-accent-ink"
+    | "--color-accent-soft"
+    | "--color-accent-pale"
+    | "--color-accent-deep";
+  opacity: number;
+}
+
+interface Props {
+  /** Override the default cluster if a page wants its own arrangement. */
+  dots?: Dot[];
+}
+
+// Default cluster — restrained on purpose (7 dots): two vivid emeralds carry
+// the "impact", the rest are muted companions that recede into the paper.
+const DEFAULT: Dot[] = [
+  { top: 13, left: 9,  size: 44, tone: "--color-accent",      opacity: 1    },
+  { top: 23, left: 17, size: 26, tone: "--color-accent-soft", opacity: 0.9  },
+  { top: 31, left: 6,  size: 15, tone: "--color-accent-pale", opacity: 0.85 },
+  { top: 11, left: 25, size: 17, tone: "--color-accent-deep", opacity: 0.7  },
+  { top: 41, left: 85, size: 30, tone: "--color-accent",      opacity: 0.85 },
+  { top: 55, left: 91, size: 12, tone: "--color-accent-soft", opacity: 0.7  },
+  { top: 62, left: 12, size: 11, tone: "--color-accent-pale", opacity: 0.6  },
+];
+
+const { dots = DEFAULT } = Astro.props;
+---
+
+<div class="dots" aria-hidden="true">
+  {dots.map((d, i) => (
+    <span
+      class="dots__dot"
+      style={`top:${d.top}%;left:${d.left}%;width:${d.size}px;height:${d.size}px;background:var(${d.tone});opacity:${d.opacity};animation-delay:${(i * 0.7).toFixed(2)}s`}
+    ></span>
+  ))}
+</div>
+
+<style>
+  .dots {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .dots__dot {
+    position: absolute;
+    border-radius: 9999px;
+    will-change: transform;
+    animation: dot-float 7s var(--ease-out-expo, ease-in-out) infinite alternate;
+  }
+
+  @keyframes dot-float {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-10px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dots__dot { animation: none; }
+  }
+</style>
