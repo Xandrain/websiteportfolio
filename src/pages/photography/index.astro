@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CollectionCard from "../../components/photography/CollectionCard.astro";
+import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import { collections } from "../../data/photography";
+---
+
+<BaseLayout
+  title="Photography"
+  description="Photography collections by Alexandre Haineaux — landscape, portrait, architecture, and documentary."
+>
+  <h1 class="sr-only">Photography</h1>
+
+  <!-- Collections grid -->
+  <section class="collections-section" aria-label="Photography collections">
+    <div class="collections-grid">
+      {collections.map((collection) => (
+        <CollectionCard collection={collection} />
+      ))}
+    </div>
+  </section>
+
+  <DisciplineSwitch
+    label="Also explore"
+    href="/productions"
+    name="Graphic Design & 3D"
+  />
+</BaseLayout>
+
+<style>
+  .collections-section {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 7rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .collections-section { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .collections-section { padding-inline: 3rem; } }
+
+  .collections-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
+
+  @media (min-width: 640px) {
+    .collections-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem 2rem;
+    }
+  }
+</style>

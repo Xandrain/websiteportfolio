@@ -1,0 +1,340 @@
+---
+/**
+ * SequencePlayer
+ * ──────────────
+ * Plays a WebP image sequence on a <canvas>.
+ * When no sequence is provided it renders the cover image as a static poster.
+ *
+ * Frame naming convention: 0001.webp, 0002.webp, … (4-digit zero-padded)
+ * Place frames in /public/sequences/<slug>/
+ *
+ * Props
+ * ─────
+ * cover       — URL of the poster / fallback image
+ * alt         — accessible alt text
+ * sequence    — optional { basePath, frameCount, fps }
+ * aspectRatio — CSS aspect-ratio value, default "16/9"
+ */
+
+import { srcset } from "../../lib/responsive";
+
+interface Props {
+  cover: string;
+  alt: string;
+  sequence?: {
+    basePath: string;
+    frameCount: number;
+    fps?: number;
+  };
+  aspectRatio?: string;
+}
+
+const {
+  cover,
+  alt,
+  sequence,
+  aspectRatio = "16/9",
+} = Astro.props;
+
+const hasSequence = !!sequence;
+---
+
+<div
+  class="sp"
+  class:list={[hasSequence && "sp--has-seq"]}
+  data-base={sequence?.basePath}
+  data-frames={sequence?.frameCount}
+  data-fps={sequence?.fps ?? 24}
+  aria-label={alt}
+  role="img"
+>
+  <!-- Poster image — always rendered, fades out when canvas starts -->
+  <img
+    class="sp__poster"
+    src={cover}
+    srcset={srcset(cover)}
+    sizes="(min-width: 640px) 60vw, 100vw"
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+  />
+
+  <!-- Canvas — only drawn into when a sequence is playing -->
+  {hasSequence && (
+    <canvas class="sp__canvas" aria-hidden="true"></canvas>
+  )}
+
+  <!-- Controls overlay — only rendered when sequence is present -->
+  {hasSequence && (
+    <div class="sp__ui" aria-hidden="true">
+      <button class="sp__btn sp__btn--play" title="Play">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M5 3l11 6-11 6V3z" fill="currentColor"/>
+        </svg>
+      </button>
+      <button class="sp__btn sp__btn--pause" title="Pause" hidden>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="3" y="3" width="4" height="12" rx="1" fill="currentColor"/>
+          <rect x="11" y="3" width="4" height="12" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="sp__bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="sp__progress"></div>
+      </div>
+    </div>
+  )}
+
+  <!-- Loading indicator -->
+  {hasSequence && (
+    <div class="sp__loader" hidden>
+      <span class="sp__loader-text">Loading</span>
+    </div>
+  )}
+</div>
+
+<script>
+  // One instance per .sp--has-seq element on the page
+  document.querySelectorAll<HTMLElement>(".sp--has-seq").forEach(initPlayer);
+
+  function initPlayer(el: HTMLElement) {
+    const basePath   = el.dataset.base!;
+    const frameCount = parseInt(el.dataset.frames!);
+    const fps        = parseInt(el.dataset.fps!) || 24;
+    const frameDur   = 1000 / fps;
+
+    const canvas  = el.querySelector<HTMLCanvasElement>(".sp__canvas")!;
+    const poster  = el.querySelector<HTMLImageElement>(".sp__poster")!;
+    const btnPlay = el.querySelector<HTMLButtonElement>(".sp__btn--play")!;
+    const btnPause= el.querySelector<HTMLButtonElement>(".sp__btn--pause")!;
+    const bar     = el.querySelector<HTMLElement>(".sp__bar")!;
+    const prog    = el.querySelector<HTMLElement>(".sp__progress")!;
+    const loader  = el.querySelector<HTMLElement>(".sp__loader")!;
+    const ctx     = canvas.getContext("2d")!;
+
+    let frames: ImageBitmap[] = [];
+    let loaded  = false;
+    let loading = false;
+    let playing = false;
+    let frameIdx = 0;
+    let lastTime = 0;
+    let rafId   = 0;
+
+    // ── Sync canvas size to element ──────────────────────────
+    function syncSize() {
+      canvas.width  = el.offsetWidth;
+      canvas.height = el.offsetHeight;
+      if (loaded && frames[frameIdx]) drawFrame(frameIdx);
+    }
+
+    const ro = new ResizeObserver(syncSize);
+    ro.observe(el);
+
+    // ── Preload frames as ImageBitmap (GPU-ready) ────────────
+    async function preload() {
+      if (loading || loaded) return;
+      loading = true;
+      loader.hidden = false;
+      btnPlay.style.opacity = "0.3";
+
+      const bitmaps: ImageBitmap[] = [];
+      for (let i = 1; i <= frameCount; i++) {
+        const url = `${basePath}${String(i).padStart(4, "0")}.webp`;
+        try {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          bitmaps.push(await createImageBitmap(blob));
+        } catch {
+          // If a frame fails, use the previous one (skip silently)
+          if (bitmaps.length > 0) bitmaps.push(bitmaps[bitmaps.length - 1]);
+        }
+      }
+
+      frames  = bitmaps;
+      loaded  = true;
+      loading = false;
+      loader.hidden = true;
+      btnPlay.style.opacity = "";
+      syncSize();
+    }
+
+    // ── Draw a single frame ──────────────────────────────────
+    function drawFrame(idx: number) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(frames[idx], 0, 0, canvas.width, canvas.height);
+    }
+
+    // ── Playback loop ────────────────────────────────────────
+    function tick(time: number) {
+      if (!playing) return;
+      if (time - lastTime >= frameDur) {
+        frameIdx = (frameIdx + 1) % frames.length;
+        drawFrame(frameIdx);
+        // Update progress bar
+        const pct = ((frameIdx + 1) / frames.length) * 100;
+        prog.style.width = `${pct}%`;
+        bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+        lastTime = time;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // ── Play / pause ─────────────────────────────────────────
+    function play() {
+      if (!loaded) return;
+      playing = true;
+      // Fade poster out, show canvas
+      poster.style.opacity = "0";
+      canvas.style.opacity = "1";
+      btnPlay.hidden  = true;
+      btnPause.hidden = false;
+      lastTime = 0;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function pause() {
+      playing = false;
+      cancelAnimationFrame(rafId);
+      btnPlay.hidden  = false;
+      btnPause.hidden = true;
+    }
+
+    // ── Scrubbing via progress bar ───────────────────────────
+    bar.addEventListener("click", (e) => {
+      if (!loaded) return;
+      const rect = bar.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      frameIdx = Math.min(Math.floor(ratio * frames.length), frames.length - 1);
+      drawFrame(frameIdx);
+    });
+
+    // ── Button listeners ─────────────────────────────────────
+    btnPlay.addEventListener("click", async () => {
+      if (!loaded && !loading) await preload();
+      play();
+    });
+    btnPause.addEventListener("click", pause);
+
+    // ── Lazy preload when visible ────────────────────────────
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        preload();
+        io.disconnect();
+      }
+    }, { rootMargin: "300px" });
+    io.observe(el);
+  }
+</script>
+
+<style>
+  .sp {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-paper-alt);
+  }
+
+  /* ── Poster image ────────────────────────────────────────── */
+  .sp__poster {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease;
+  }
+
+  /* ── Canvas ──────────────────────────────────────────────── */
+  .sp__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  /* ── Controls overlay ────────────────────────────────────── */
+  .sp__ui {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.25rem;
+    gap: 0.75rem;
+    background: linear-gradient(to top, rgba(10,9,8,0.45) 0%, transparent 45%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .sp:hover .sp__ui,
+  .sp:focus-within .sp__ui { opacity: 1; }
+
+  /* ── Play / pause button ─────────────────────────────────── */
+  .sp__btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(250,250,248,0.18);
+    border: 1px solid rgba(250,250,248,0.25);
+    color: rgba(250,250,248,0.90);
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .sp__btn:hover {
+    background: rgba(250,250,248,0.30);
+    transform: scale(1.08);
+  }
+
+  /* ── Progress bar ────────────────────────────────────────── */
+  .sp__bar {
+    flex: 1;
+    height: 2px;
+    background: rgba(250,250,248,0.22);
+    border-radius: 9999px;
+    cursor: pointer;
+    align-self: center;
+    overflow: hidden;
+  }
+
+  .sp__progress {
+    height: 100%;
+    width: 0%;
+    background: rgba(250,250,248,0.80);
+    border-radius: 9999px;
+    transition: width 0.05s linear;
+  }
+
+  /* ── Loading indicator ───────────────────────────────────── */
+  .sp__loader {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    translate: -50% 0;
+    pointer-events: none;
+  }
+
+  .sp__loader-text {
+    font-family: var(--font-sans);
+    font-size: 0.5625rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(250,250,248,0.55);
+
+    /* Pulsing dot animation */
+    &::after {
+      content: "…";
+      animation: dots 1.2s infinite;
+    }
+  }
+
+  @keyframes dots {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 1;   }
+  }
+</style>

@@ -1,0 +1,64 @@
+/**
+ * Self-hosted fonts — Bodoni Moda (display) + Jost (sans/body).
+ * Served from /fonts (public/fonts/*.woff2), latin subset.
+ * Self-hosted (not Google Fonts <link>) so the site works under a strict CSP
+ * with no third-party font origin, and avoids a second network round-trip.
+ */
+
+/* ── Jost — sans / body ──────────────────────────────────────── */
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/jost-300-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/jost-400-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/jost-500-latin.woff2") format("woff2");
+}
+
+/* ── Bodoni Moda — display / headings ────────────────────────── */
+@font-face {
+  font-family: "Bodoni Moda";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/bodoni-moda-400-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bodoni Moda";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/bodoni-moda-500-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bodoni Moda";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/bodoni-moda-700-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bodoni Moda";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/bodoni-moda-400-italic-latin.woff2") format("woff2");
+}

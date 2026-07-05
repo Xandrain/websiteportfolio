@@ -1,0 +1,228 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SequencePlayer from "../../components/productions/SequencePlayer.astro";
+import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
+import { projects } from "../../data/three-d";
+import { srcset } from "../../lib/responsive";
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const hasSequence = !!project.sequence;
+
+const isPV = project.category === "product-visualisation";
+const backHref = isPV ? "/productions/product-visualisation" : "/productions";
+const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
+---
+
+<BaseLayout title={project.title} description={project.description}>
+
+  <!-- Header -->
+  <section class="project-header">
+    <div class="project-header__inner">
+      <a href={backHref} class="back-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <polyline points="10,2 4,8 10,14" stroke="currentColor" stroke-width="1.25"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {backLabel}
+      </a>
+
+      <div>
+        <div class="project-header__meta">
+          <span class="label">{project.year}</span>
+          {project.tags.map((t) => <span class="label">{t}</span>)}
+        </div>
+        <h1 class="project-header__title">{project.title}</h1>
+        <p class="project-header__desc">{project.description}</p>
+      </div>
+    </div>
+  </section>
+
+  <ProductionsSubNav active={project.category} />
+
+  <!-- Sequence player (shown when sequence is defined) -->
+  {hasSequence && (
+    <section class="seq-section" aria-label="Visual sequence">
+      <div class="seq-section__inner">
+        <div class="seq-wrap">
+          <SequencePlayer
+            cover={project.cover}
+            alt={`${project.title} — motion sequence`}
+            sequence={project.sequence}
+            aspectRatio="16/9"
+          />
+        </div>
+        <p class="seq-hint">Click ▶ to play sequence — drag to scrub</p>
+      </div>
+    </section>
+  )}
+
+  <!-- Static images -->
+  {project.images && project.images.length > 0 && (
+    <section class="project-images" aria-label="Project images">
+      <div class="project-images__inner">
+        <div class="project-images__grid">
+          {project.images.map((src, i) => (
+            <div class="project-image-wrap">
+              <img
+                src={src}
+                srcset={srcset(src)}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                alt={`${project.title} — view ${i + 1}`}
+                width="1600"
+                height="900"
+                loading="lazy"
+                decoding="async"
+                class="project-image"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Footer -->
+  <div class="project-footer">
+    <div class="project-footer__inner">
+      <a href="/productions" class="back-link">← All projects</a>
+    </div>
+  </div>
+
+  <DisciplineSwitch label="Also explore" href="/photography" name="Photography" />
+</BaseLayout>
+
+<style>
+  .project-header {
+    padding-top: 6.5rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .project-header__inner {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  @media (min-width: 640px)  { .project-header__inner { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .project-header__inner { padding-inline: 3rem; } }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--color-ink-muted);
+    transition: color 0.2s;
+  }
+
+  .back-link:hover { color: var(--color-ink); }
+
+  .project-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .project-header__title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 6.5rem);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin-bottom: 1.125rem;
+  }
+
+  .project-header__desc {
+    max-width: 55ch;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+  }
+
+  /* ── Sequence player ─────────────────────────────────────── */
+  .seq-section {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 3.5rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .seq-section { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .seq-section { padding-inline: 3rem; } }
+
+  .seq-section__inner { width: 100%; }
+
+  .seq-wrap {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-line);
+  }
+
+  .seq-hint {
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    text-align: center;
+    margin-top: 0.875rem;
+  }
+
+  /* ── Images ──────────────────────────────────────────────── */
+  .project-images {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 3rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .project-images { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .project-images { padding-inline: 3rem; } }
+
+  .project-images__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .project-images__grid { grid-template-columns: repeat(2, 1fr); }
+    .project-images__grid > :first-child:nth-last-child(odd) { grid-column: span 2; }
+  }
+
+  .project-image-wrap { overflow: hidden; background: var(--color-paper-alt); }
+
+  .project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(12%);
+    transition: filter 0.5s;
+  }
+
+  .project-image:hover { filter: grayscale(0%); }
+
+  /* ── Footer ──────────────────────────────────────────────── */
+  .project-footer {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 2.5rem 1.5rem 0;
+    border-top: 1px solid var(--color-line);
+    margin-top: 3.5rem;
+  }
+
+  @media (min-width: 640px) { .project-footer { padding-inline: 2rem; } }
+</style>

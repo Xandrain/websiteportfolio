@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DisciplineSwitch from "../components/shared/DisciplineSwitch.astro";
+import ProfileBlock from "../components/about/ProfileBlock";
+import { SITE } from "../consts";
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${SITE.name} — ${SITE.role}. ${SITE.tagline}`}
+>
+  <h1 class="sr-only">About Alexandre Haineaux</h1>
+
+  <div class="profile-bg">
+    <ProfileBlock client:visible />
+  </div>
+
+  <DisciplineSwitch label="Explore the work" href="/photography" name="Photography" />
+</BaseLayout>
+
+<style>
+  .profile-bg {
+    position: relative;
+    padding-top: 6rem; /* compensate for fixed nav */
+  }
+
+  .profile-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 75% 55% at 50% 25%,
+      rgba(210, 202, 190, 0.18) 0%,
+      transparent 72%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .profile-bg > * {
+    position: relative;
+    z-index: 1;
+  }
+</style>

@@ -1,0 +1,121 @@
+---
+import { SITE, NAV } from "../consts";
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path.startsWith(href);
+---
+
+<header id="site-header" class="site-header">
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/" class="site-nav__brand" aria-label={`${SITE.name} — home`}>
+      {SITE.name}
+    </a>
+
+    <ul class="site-nav__links" role="list">
+      {NAV.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class:list={["site-nav__link", isActive(item.href) && "is-active"]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding: 1.25rem 1rem 0;
+    pointer-events: none;
+  }
+
+  .site-nav {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    width: 100%;
+    max-width: 42rem;
+    border-radius: 9999px;
+    background: rgba(250, 250, 248, 0.80);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 1px 2px rgba(26,25,23,0.06), inset 0 0 0 1px rgba(26,25,23,0.09);
+    padding: 0.5rem 1.25rem 0.5rem 1.375rem;
+    transition: background 0.5s, box-shadow 0.5s;
+  }
+
+  .site-nav__brand {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    color: var(--color-ink);
+    transition: opacity 0.25s;
+    white-space: nowrap;
+  }
+
+  .site-nav__brand:hover { opacity: 0.65; }
+
+  .site-nav__links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-nav__link {
+    position: relative;
+    display: inline-block;
+    padding: 0.25rem 0;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    color: var(--color-ink-soft);
+    transition: color 0.2s;
+  }
+
+  .site-nav__link::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: currentColor;
+    transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .site-nav__link:hover,
+  .site-nav__link.is-active {
+    color: var(--color-ink);
+  }
+
+  .site-nav__link.is-active::after,
+  .site-nav__link:hover::after { width: 100%; }
+
+  /* Compact on very small screens */
+  @media (max-width: 480px) {
+    .site-nav {
+      gap: 1rem;
+      padding-inline: 1rem;
+    }
+
+    .site-nav__links { gap: 1rem; }
+  }
+</style>

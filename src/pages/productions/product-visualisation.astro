@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectCard from "../../components/productions/ProjectCard.astro";
+import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
+import { projects } from "../../data/three-d";
+
+const pv = projects.filter((p) => p.category === "product-visualisation");
+---
+
+<BaseLayout
+  title="Product Visualisation"
+  description="Product visualisation by Alexandre Haineaux — bottles, labels, and packaging rendered in 3D, from studio beauty shots to wireframe breakdowns."
+>
+  <h1 class="sr-only">Product Visualisation</h1>
+
+  <div class="subnav-spacer" aria-hidden="true"></div>
+  <ProductionsSubNav active="product-visualisation" />
+
+  <!-- Projects grid -->
+  <section class="projects-section" aria-label="Product visualisation projects">
+    <div class="projects-inner">
+      <div class="projects-grid">
+        {pv.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <DisciplineSwitch label="Also explore" href="/photography" name="Photography" />
+</BaseLayout>
+
+<style>
+  .subnav-spacer { height: 5.5rem; }
+
+  .projects-section {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 3.5rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .projects-section { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .projects-section { padding-inline: 3rem; } }
+
+  .projects-inner { width: 100%; }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 3rem 2.5rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .projects-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>

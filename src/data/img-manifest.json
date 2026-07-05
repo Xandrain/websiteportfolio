@@ -1,0 +1,1372 @@
+{
+  "/photography/ar1.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar1-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar1-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/ar1-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/ar1-1600.webp"
+    }
+  ],
+  "/photography/ar2.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar2-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar2-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/ar2-1067.webp"
+    }
+  ],
+  "/photography/ar3.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar3-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar3-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/ar3-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/ar3-1600.webp"
+    }
+  ],
+  "/photography/ar4.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar4-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar4-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/ar4-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/ar4-1600.webp"
+    }
+  ],
+  "/photography/ar5.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar5-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar5-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/ar5-1067.webp"
+    }
+  ],
+  "/photography/ar6.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/ar6-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/ar6-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/ar6-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/ar6-1600.webp"
+    }
+  ],
+  "/photography/arch-cover.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/arch-cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/arch-cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/arch-cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/arch-cover-1600.webp"
+    }
+  ],
+  "/photography/field-cover.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/field-cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/field-cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/field-cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/field-cover-1600.webp"
+    }
+  ],
+  "/photography/fn1.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn1-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn1-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/fn1-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/fn1-1600.webp"
+    }
+  ],
+  "/photography/fn2.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn2-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn2-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/fn2-1067.webp"
+    }
+  ],
+  "/photography/fn3.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn3-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn3-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/fn3-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/fn3-1600.webp"
+    }
+  ],
+  "/photography/fn4.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn4-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn4-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/fn4-1067.webp"
+    }
+  ],
+  "/photography/fn5.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn5-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn5-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/fn5-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/fn5-1600.webp"
+    }
+  ],
+  "/photography/fn6.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/fn6-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/fn6-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/fn6-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/fn6-1600.webp"
+    }
+  ],
+  "/photography/nl-cover.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl-cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl-cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/nl-cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/nl-cover-1600.webp"
+    }
+  ],
+  "/photography/nl1.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl1-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl1-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/nl1-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/nl1-1600.webp"
+    }
+  ],
+  "/photography/nl2.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl2-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl2-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/nl2-1067.webp"
+    }
+  ],
+  "/photography/nl3.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl3-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl3-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/nl3-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/nl3-1600.webp"
+    }
+  ],
+  "/photography/nl4.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl4-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl4-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/nl4-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/nl4-1600.webp"
+    }
+  ],
+  "/photography/nl5.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl5-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl5-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/nl5-1067.webp"
+    }
+  ],
+  "/photography/nl6.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/nl6-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/nl6-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/nl6-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/nl6-1600.webp"
+    }
+  ],
+  "/photography/st1.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st1-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st1-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/st1-1067.webp"
+    }
+  ],
+  "/photography/st2.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st2-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st2-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/st2-1067.webp"
+    }
+  ],
+  "/photography/st3.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st3-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st3-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/st3-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/st3-1600.webp"
+    }
+  ],
+  "/photography/st4.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st4-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st4-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/st4-1067.webp"
+    }
+  ],
+  "/photography/st5.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st5-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st5-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/st5-1067.webp"
+    }
+  ],
+  "/photography/st6.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/st6-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/st6-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/st6-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/st6-1600.webp"
+    }
+  ],
+  "/photography/studio-cover.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/studio-cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/studio-cover-800.webp"
+    },
+    {
+      "w": 1067,
+      "src": "/photography/studio-cover-1067.webp"
+    }
+  ],
+  "/productions/91-1-herbal-serum/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/91-1-herbal-serum/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/91-1-herbal-serum/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/91-1-herbal-serum/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/91-1-herbal-serum/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/91-1-herbal-serum/01-1920.webp"
+    }
+  ],
+  "/productions/91-1-herbal-serum/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/91-1-herbal-serum/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/91-1-herbal-serum/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/91-1-herbal-serum/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/91-1-herbal-serum/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/91-1-herbal-serum/cover-1920.webp"
+    }
+  ],
+  "/productions/avocado-lms-bio/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/avocado-lms-bio/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/avocado-lms-bio/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/avocado-lms-bio/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/avocado-lms-bio/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/avocado-lms-bio/01-1920.webp"
+    }
+  ],
+  "/productions/avocado-lms-bio/02.webp": [
+    {
+      "w": 400,
+      "src": "/productions/avocado-lms-bio/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/avocado-lms-bio/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/avocado-lms-bio/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/avocado-lms-bio/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/avocado-lms-bio/02-1920.webp"
+    }
+  ],
+  "/productions/avocado-lms-bio/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/avocado-lms-bio/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/avocado-lms-bio/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/avocado-lms-bio/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/avocado-lms-bio/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/avocado-lms-bio/cover-1920.webp"
+    }
+  ],
+  "/productions/azureus/01.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/azureus/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/azureus/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/azureus/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/azureus/01-1600.webp"
+    },
+    {
+      "w": 1772,
+      "src": "/productions/azureus/01-1772.webp"
+    }
+  ],
+  "/productions/azureus/02.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/azureus/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/azureus/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/azureus/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/azureus/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/azureus/02-1920.webp"
+    }
+  ],
+  "/productions/azureus/03.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/azureus/03-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/azureus/03-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/azureus/03-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/azureus/03-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/azureus/03-1920.webp"
+    }
+  ],
+  "/productions/azureus/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/azureus/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/azureus/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/azureus/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/azureus/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/azureus/cover-1920.webp"
+    }
+  ],
+  "/productions/carl-fredricksen/01.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/carl-fredricksen/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/carl-fredricksen/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/carl-fredricksen/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/carl-fredricksen/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/carl-fredricksen/01-1920.webp"
+    }
+  ],
+  "/productions/carl-fredricksen/02.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/carl-fredricksen/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/carl-fredricksen/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/carl-fredricksen/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/carl-fredricksen/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/carl-fredricksen/02-1920.webp"
+    }
+  ],
+  "/productions/carl-fredricksen/03.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/carl-fredricksen/03-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/carl-fredricksen/03-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/carl-fredricksen/03-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/carl-fredricksen/03-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/carl-fredricksen/03-1920.webp"
+    }
+  ],
+  "/productions/carl-fredricksen/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/carl-fredricksen/cover-400.webp"
+    },
+    {
+      "w": 720,
+      "src": "/productions/carl-fredricksen/cover-720.webp"
+    }
+  ],
+  "/productions/chance-parfume/01.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/chance-parfume/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/chance-parfume/01-800.webp"
+    },
+    {
+      "w": 1080,
+      "src": "/productions/chance-parfume/01-1080.webp"
+    }
+  ],
+  "/productions/chance-parfume/02.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/chance-parfume/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/chance-parfume/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/chance-parfume/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/chance-parfume/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/chance-parfume/02-1920.webp"
+    }
+  ],
+  "/productions/chance-parfume/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/chance-parfume/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/chance-parfume/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/chance-parfume/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/chance-parfume/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/chance-parfume/cover-1920.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/01.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/crown-reinterpretation/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/crown-reinterpretation/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/crown-reinterpretation/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/crown-reinterpretation/01-1920.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/02.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/02-400.webp"
+    },
+    {
+      "w": 720,
+      "src": "/productions/crown-reinterpretation/02-720.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/03.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/03-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/crown-reinterpretation/03-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/crown-reinterpretation/03-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/crown-reinterpretation/03-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/crown-reinterpretation/03-1920.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/crown-reinterpretation/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/crown-reinterpretation/cover-1200.webp"
+    },
+    {
+      "w": 1249,
+      "src": "/productions/crown-reinterpretation/cover-1249.webp"
+    }
+  ],
+  "/productions/emperor-orange-lime/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/emperor-orange-lime/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/emperor-orange-lime/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/emperor-orange-lime/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/emperor-orange-lime/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/emperor-orange-lime/01-1920.webp"
+    }
+  ],
+  "/productions/emperor-orange-lime/02.webp": [
+    {
+      "w": 400,
+      "src": "/productions/emperor-orange-lime/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/emperor-orange-lime/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/emperor-orange-lime/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/emperor-orange-lime/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/emperor-orange-lime/02-1920.webp"
+    }
+  ],
+  "/productions/emperor-orange-lime/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/emperor-orange-lime/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/emperor-orange-lime/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/emperor-orange-lime/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/emperor-orange-lime/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/emperor-orange-lime/cover-1920.webp"
+    }
+  ],
+  "/productions/half-moon-eau-de-parfum/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/half-moon-eau-de-parfum/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/half-moon-eau-de-parfum/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/half-moon-eau-de-parfum/01-1200.webp"
+    },
+    {
+      "w": 1450,
+      "src": "/productions/half-moon-eau-de-parfum/01-1450.webp"
+    }
+  ],
+  "/productions/half-moon-eau-de-parfum/02.webp": [
+    {
+      "w": 400,
+      "src": "/productions/half-moon-eau-de-parfum/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/half-moon-eau-de-parfum/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/half-moon-eau-de-parfum/02-1200.webp"
+    },
+    {
+      "w": 1450,
+      "src": "/productions/half-moon-eau-de-parfum/02-1450.webp"
+    }
+  ],
+  "/productions/half-moon-eau-de-parfum/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/half-moon-eau-de-parfum/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/half-moon-eau-de-parfum/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/half-moon-eau-de-parfum/cover-1200.webp"
+    },
+    {
+      "w": 1450,
+      "src": "/productions/half-moon-eau-de-parfum/cover-1450.webp"
+    }
+  ],
+  "/productions/l-u-x-proaging/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/l-u-x-proaging/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/l-u-x-proaging/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/l-u-x-proaging/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/l-u-x-proaging/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/l-u-x-proaging/01-1920.webp"
+    }
+  ],
+  "/productions/l-u-x-proaging/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/l-u-x-proaging/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/l-u-x-proaging/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/l-u-x-proaging/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/l-u-x-proaging/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/l-u-x-proaging/cover-1920.webp"
+    }
+  ],
+  "/productions/lulu-acidoactive/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/lulu-acidoactive/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/lulu-acidoactive/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/lulu-acidoactive/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/lulu-acidoactive/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/lulu-acidoactive/01-1920.webp"
+    }
+  ],
+  "/productions/lulu-acidoactive/02.webp": [
+    {
+      "w": 400,
+      "src": "/productions/lulu-acidoactive/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/lulu-acidoactive/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/lulu-acidoactive/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/lulu-acidoactive/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/lulu-acidoactive/02-1920.webp"
+    }
+  ],
+  "/productions/lulu-acidoactive/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/lulu-acidoactive/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/lulu-acidoactive/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/lulu-acidoactive/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/lulu-acidoactive/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/lulu-acidoactive/cover-1920.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/mojo-swoptops/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/mojo-swoptops/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/mojo-swoptops/cover-1920.webp"
+    }
+  ],
+  "/productions/natuargua-collection-844/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/natuargua-collection-844/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/natuargua-collection-844/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/natuargua-collection-844/01-1200.webp"
+    },
+    {
+      "w": 1480,
+      "src": "/productions/natuargua-collection-844/01-1480.webp"
+    }
+  ],
+  "/productions/natuargua-collection-844/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/natuargua-collection-844/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/natuargua-collection-844/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/natuargua-collection-844/cover-1200.webp"
+    },
+    {
+      "w": 1480,
+      "src": "/productions/natuargua-collection-844/cover-1480.webp"
+    }
+  ],
+  "/productions/rambochador/01.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/rambochador/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/rambochador/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/rambochador/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/rambochador/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/rambochador/01-1920.webp"
+    }
+  ],
+  "/productions/rambochador/02.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/rambochador/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/rambochador/02-800.webp"
+    },
+    {
+      "w": 1080,
+      "src": "/productions/rambochador/02-1080.webp"
+    }
+  ],
+  "/productions/rambochador/03.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/rambochador/03-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/rambochador/03-800.webp"
+    },
+    {
+      "w": 1080,
+      "src": "/productions/rambochador/03-1080.webp"
+    }
+  ],
+  "/productions/rambochador/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/rambochador/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/rambochador/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/rambochador/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/rambochador/cover-1600.webp"
+    },
+    {
+      "w": 1674,
+      "src": "/productions/rambochador/cover-1674.webp"
+    }
+  ],
+  "/productions/riesling-luxembourg/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/riesling-luxembourg/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/riesling-luxembourg/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/riesling-luxembourg/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/riesling-luxembourg/01-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/riesling-luxembourg/01-1920.webp"
+    }
+  ],
+  "/productions/riesling-luxembourg/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/riesling-luxembourg/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/riesling-luxembourg/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/riesling-luxembourg/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/riesling-luxembourg/cover-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/riesling-luxembourg/cover-1920.webp"
+    }
+  ],
+  "/productions/vermouth-rosso/01.webp": [
+    {
+      "w": 400,
+      "src": "/productions/vermouth-rosso/01-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/vermouth-rosso/01-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/vermouth-rosso/01-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/vermouth-rosso/01-1600.webp"
+    }
+  ],
+  "/productions/vermouth-rosso/02.webp": [
+    {
+      "w": 400,
+      "src": "/productions/vermouth-rosso/02-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/vermouth-rosso/02-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/vermouth-rosso/02-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/vermouth-rosso/02-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/vermouth-rosso/02-1920.webp"
+    }
+  ],
+  "/productions/vermouth-rosso/03.webp": [
+    {
+      "w": 400,
+      "src": "/productions/vermouth-rosso/03-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/vermouth-rosso/03-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/vermouth-rosso/03-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/vermouth-rosso/03-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/vermouth-rosso/03-1920.webp"
+    }
+  ],
+  "/productions/vermouth-rosso/04.webp": [
+    {
+      "w": 400,
+      "src": "/productions/vermouth-rosso/04-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/vermouth-rosso/04-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/vermouth-rosso/04-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/vermouth-rosso/04-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/vermouth-rosso/04-1920.webp"
+    }
+  ],
+  "/productions/vermouth-rosso/cover.webp": [
+    {
+      "w": 400,
+      "src": "/productions/vermouth-rosso/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/vermouth-rosso/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/vermouth-rosso/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/vermouth-rosso/cover-1600.webp"
+    }
+  ]
+}

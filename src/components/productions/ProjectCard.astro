@@ -1,0 +1,185 @@
+---
+import type { Production } from "../../data/three-d";
+import { srcset } from "../../lib/responsive";
+
+interface Props {
+  project: Production;
+  featured?: boolean;
+}
+
+const { project, featured = false } = Astro.props;
+---
+
+<a
+  href={`/productions/${project.slug}`}
+  class:list={["project-card", featured && "project-card--featured"]}
+  aria-label={project.title}
+>
+  <div class="project-card__media">
+    <img
+      src={project.cover}
+      srcset={srcset(project.cover)}
+      sizes="(min-width: 1024px) 380px, (min-width: 640px) 46vw, 100vw"
+      alt={`${project.title} — Graphic Design & 3D project`}
+      width="1600"
+      height={featured ? "900" : "600"}
+      loading="lazy"
+      decoding="async"
+      class="project-card__img"
+    />
+    <div class="project-card__overlay" aria-hidden="true">
+      {project.viewer && (
+        <span class="project-card__badge">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+            <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/>
+            <path d="M4 3l3 2-3 2V3z" fill="currentColor"/>
+          </svg>
+          Interactive
+        </span>
+      )}
+      <span class="project-card__view">View project →</span>
+    </div>
+  </div>
+
+  <div class="project-card__meta">
+    <div>
+      <h2 class:list={["project-card__title", featured && "project-card__title--lg"]}>
+        {project.title}
+      </h2>
+      {featured && (
+        <p class="project-card__desc">{project.description}</p>
+      )}
+    </div>
+    <div class="project-card__aside">
+      <span class="label">{project.year}</span>
+      {project.tags.slice(0, 2).map((tag) => (
+        <span class="label">{tag}</span>
+      ))}
+    </div>
+  </div>
+</a>
+
+<style>
+  .project-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .project-card__media {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-paper-alt);
+    aspect-ratio: 4 / 3;
+  }
+
+  .project-card--featured .project-card__media {
+    aspect-ratio: 16 / 9;
+  }
+
+  .project-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+    filter: grayscale(20%);
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                filter    0.6s;
+  }
+
+  .project-card:hover .project-card__img {
+    transform: scale(1.0);
+    filter: grayscale(0%);
+  }
+
+  .project-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 9, 8, 0);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 1.25rem;
+    transition: background 0.4s;
+  }
+
+  .project-card:hover .project-card__overlay {
+    background: rgba(10, 9, 8, 0.30);
+  }
+
+  .project-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3rem 0.625rem;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 9999px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.35s, transform 0.35s;
+  }
+
+  .project-card:hover .project-card__badge {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-card__view {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.35s 0.05s, transform 0.35s 0.05s;
+  }
+
+  .project-card:hover .project-card__view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  .project-card__title {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--color-ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .project-card__title--lg {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+  }
+
+  .project-card__desc {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--color-ink-soft);
+    max-width: 55ch;
+    margin-top: 0.5rem;
+  }
+
+  .project-card__aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+</style>

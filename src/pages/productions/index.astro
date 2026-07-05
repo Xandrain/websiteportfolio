@@ -1,0 +1,190 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectCard from "../../components/productions/ProjectCard.astro";
+import SequencePlayer from "../../components/productions/SequencePlayer.astro";
+import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
+import { projects } from "../../data/three-d";
+
+const productionsList = projects.filter((p) => p.category === "productions");
+const [featured, ...rest] = productionsList;
+---
+
+<BaseLayout
+  title="Graphic Design & 3D"
+  description="3D and graphic design work by Alexandre Haineaux — character modeling, rigging, and texturing for animated television, alongside personal studies."
+>
+  <h1 class="sr-only">Graphic Design &amp; 3D</h1>
+
+  <div class="subnav-spacer" aria-hidden="true"></div>
+  <ProductionsSubNav active="productions" />
+
+  <!-- Featured project -->
+  {featured && (
+    <section class="featured-section" aria-label="Featured project">
+      <div class="featured-inner">
+        <div class="featured-grid">
+
+          <!-- Visual panel -->
+          <div class="featured-media">
+            <SequencePlayer
+              cover={featured.cover}
+              alt={`${featured.title} — preview`}
+              sequence={featured.sequence}
+              aspectRatio="16/9"
+            />
+          </div>
+
+          <!-- Info panel -->
+          <div class="featured-info">
+            <div class="featured-info__meta">
+              <span class="label">{featured.year}</span>
+              {featured.tags.map((t) => <span class="label">{t}</span>)}
+            </div>
+            <h2 class="featured-info__title">
+              <a href={`/productions/${featured.slug}`} class="featured-info__link">
+                {featured.title}
+              </a>
+            </h2>
+            <p class="featured-info__desc">{featured.description}</p>
+            <a href={`/productions/${featured.slug}`} class="featured-info__cta">
+              View project →
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Other projects grid -->
+  {rest.length > 0 && (
+    <section class="projects-section" aria-label="More projects">
+      <div class="projects-inner">
+        <h2 class="projects-section__heading">
+          <span class="label">More projects</span>
+        </h2>
+        <div class="projects-grid">
+          {rest.map((project) => (
+            <ProjectCard project={project} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <DisciplineSwitch label="Also explore" href="/photography" name="Photography" />
+</BaseLayout>
+
+<style>
+  .subnav-spacer { height: 5.5rem; }
+
+  /* ── Featured ─────────────────────────────────────────────── */
+  .featured-section {
+    border-bottom: 1px solid var(--color-line);
+    padding-block: 4rem;
+  }
+
+  .featured-inner {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 640px)  { .featured-inner { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .featured-inner { padding-inline: 3rem; } }
+
+  .featured-grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .featured-grid { grid-template-columns: 1fr 1fr; gap: 4rem; }
+  }
+
+  .featured-media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-line);
+  }
+
+  .featured-info__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .featured-info__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 4.5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin-bottom: 1.25rem;
+  }
+
+  .featured-info__link {
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
+
+  .featured-info__link:hover { opacity: 0.7; }
+
+  .featured-info__desc {
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+    max-width: 48ch;
+    margin-bottom: 2rem;
+  }
+
+  .featured-info__cta {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-ink);
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: 0.2rem;
+    transition: border-color 0.25s;
+  }
+
+  .featured-info__cta:hover { border-color: var(--color-ink); }
+
+  /* ── More projects ────────────────────────────────────────── */
+  .projects-section {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 4rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .projects-section { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .projects-section { padding-inline: 3rem; } }
+
+  .projects-inner { width: 100%; }
+
+  .projects-section__heading {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-line);
+    margin-bottom: 2rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+  }
+</style>
