@@ -23,6 +23,8 @@
   --color-accent-soft:  #7FA98A;  /* muted sage companion */
   --color-accent-pale:  #B8C6AE;  /* pale khaki-sage companion */
   --color-accent-deep:  #2E5D46;  /* deep pine companion */
+  /* Translucent emerald wash — the tint filling pills/tabs/buttons on hover. */
+  --color-accent-wash:  oklch(from #16A36A l c h / 0.10);
 
   /* ── Typography ─────────────────────────────────────────────── */
   --font-display: 'Bodoni Moda', Georgia, serif;
@@ -88,6 +90,30 @@
 
 /* ── Reusable component classes ──────────────────────────────── */
 @layer components {
+  /* Keyboard-only "skip to content" link — hidden until focused, then drops
+     in above the fixed nav so keyboard users can bypass it. */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 1.5rem));
+    z-index: 100;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: var(--letter-spacing-label);
+    padding: 0.55rem 1.25rem;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease-out-expo);
+  }
+
+  .skip-link:focus-visible {
+    transform: translate(-50%, 0);
+  }
+
   /* Tiny all-caps meta label */
   .label {
     font-family: var(--font-sans);

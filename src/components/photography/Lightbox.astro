@@ -8,13 +8,17 @@ interface Props {
 }
 
 const { photos, collectionTitle } = Astro.props;
+
+// Enrich each photo with its responsive srcset so the lightbox can serve a
+// right-sized WebP instead of always downloading the full-res original.
+const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
 ---
 
 <!-- Gallery grid -->
 <ul
   class="photo-gallery"
   id="photo-gallery"
-  data-photos={JSON.stringify(photos)}
+  data-photos={JSON.stringify(photosData)}
   data-collection={collectionTitle}
   role="list"
   aria-label={`${collectionTitle} — photo gallery`}
@@ -33,7 +37,8 @@ const { photos, collectionTitle } = Astro.props;
           alt={photo.alt}
           width={photo.width}
           height={photo.height}
-          loading="lazy"
+          loading={i < 3 ? "eager" : "lazy"}
+          fetchpriority={i === 0 ? "high" : undefined}
           decoding="async"
           class="gallery-item__img"
         />
@@ -60,7 +65,7 @@ const { photos, collectionTitle } = Astro.props;
 
     <figure class="lightbox__figure">
       <img id="lb-img" src="" alt="" class="lightbox__img" />
-      <figcaption id="lb-caption" class="lightbox__caption"></figcaption>
+      <figcaption id="lb-caption" class="lightbox__caption" aria-live="polite"></figcaption>
     </figure>
 
     <button class="lightbox__nav lightbox__nav--next" id="lb-next" aria-label="Next photo">
@@ -91,7 +96,7 @@ const { photos, collectionTitle } = Astro.props;
 
   if (!gallery || !dialog) throw new Error("Lightbox: missing DOM elements");
 
-  const photos: Array<{ src: string; alt: string }> =
+  const photos: Array<{ src: string; alt: string; srcset?: string }> =
     JSON.parse(gallery.dataset.photos ?? "[]");
 
   let current = 0;
@@ -99,6 +104,8 @@ const { photos, collectionTitle } = Astro.props;
   function show(index: number) {
     current = (index + photos.length) % photos.length;
     const p = photos[current];
+    lbImg.sizes = "90vw";
+    lbImg.srcset = p.srcset ?? "";
     lbImg.src = p.src;
     lbImg.alt = p.alt;
     lbCap.textContent = p.alt;

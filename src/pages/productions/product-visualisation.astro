@@ -21,8 +21,8 @@ const pv = projects.filter((p) => p.category === "product-visualisation");
   <section class="projects-section" aria-label="Product visualisation projects">
     <div class="projects-inner">
       <div class="projects-grid">
-        {pv.map((project) => (
-          <ProjectCard project={project} />
+        {pv.map((project, i) => (
+          <ProjectCard project={project} eager={i < 3} />
         ))}
       </div>
     </div>

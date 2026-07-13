@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import DisciplineSwitch from "../components/shared/DisciplineSwitch.astro";
-import ProfileBlock from "../components/about/ProfileBlock";
+import ProfileBlock from "../components/about/ProfileBlock.astro";
 import { SITE } from "../consts";
 ---
 
@@ -12,10 +11,8 @@ import { SITE } from "../consts";
   <h1 class="sr-only">About Alexandre Haineaux</h1>
 
   <div class="profile-bg">
-    <ProfileBlock client:visible />
+    <ProfileBlock />
   </div>
-
-  <DisciplineSwitch label="Explore the work" href="/photography" name="Photography" />
 </BaseLayout>
 
 <style>

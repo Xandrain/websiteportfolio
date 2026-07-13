@@ -67,7 +67,10 @@ const tabs: { key: ProductionCategory; label: string; href: string }[] = [
     transition: color 0.2s, background 0.25s;
   }
 
-  .subnav__tab:hover { color: var(--color-ink); }
+  .subnav__tab:hover {
+    color: var(--color-accent-ink);
+    background: var(--color-accent-wash);
+  }
 
   .subnav__tab.is-active {
     color: var(--color-ink);

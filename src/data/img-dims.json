@@ -1,0 +1,294 @@
+{
+  "/photography/ar1.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/ar2.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/ar3.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/ar4.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/ar5.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/ar6.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/arch-cover.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/field-cover.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/fn1.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/fn2.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/fn3.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/fn4.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/fn5.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/fn6.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/nl-cover.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/nl1.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/nl2.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/nl3.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/nl4.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/nl5.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/nl6.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/st1.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/st2.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/st3.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/st4.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/st5.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/photography/st6.jpg": {
+    "w": 1600,
+    "h": 1067
+  },
+  "/photography/studio-cover.jpg": {
+    "w": 1067,
+    "h": 1600
+  },
+  "/productions/91-1-herbal-serum/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/91-1-herbal-serum/cover.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/avocado-lms-bio/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/avocado-lms-bio/02.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/avocado-lms-bio/cover.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/azureus/01.jpg": {
+    "w": 1772,
+    "h": 1907
+  },
+  "/productions/azureus/02.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/azureus/03.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/azureus/cover.jpg": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/carl-fredricksen/01.jpg": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/carl-fredricksen/02.jpg": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/carl-fredricksen/03.jpg": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/carl-fredricksen/cover.jpg": {
+    "w": 720,
+    "h": 405
+  },
+  "/productions/chance-parfume/01.jpg": {
+    "w": 1080,
+    "h": 1280
+  },
+  "/productions/chance-parfume/02.jpg": {
+    "w": 1920,
+    "h": 2276
+  },
+  "/productions/chance-parfume/cover.jpg": {
+    "w": 1920,
+    "h": 2276
+  },
+  "/productions/crown-reinterpretation/01.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/crown-reinterpretation/02.jpg": {
+    "w": 720,
+    "h": 405
+  },
+  "/productions/crown-reinterpretation/03.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/crown-reinterpretation/cover.jpg": {
+    "w": 1249,
+    "h": 1249
+  },
+  "/productions/emperor-orange-lime/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/emperor-orange-lime/02.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/emperor-orange-lime/cover.webp": {
+    "w": 1920,
+    "h": 1919
+  },
+  "/productions/half-moon-eau-de-parfum/01.webp": {
+    "w": 1450,
+    "h": 1920
+  },
+  "/productions/half-moon-eau-de-parfum/02.webp": {
+    "w": 1450,
+    "h": 1920
+  },
+  "/productions/half-moon-eau-de-parfum/cover.webp": {
+    "w": 1450,
+    "h": 1920
+  },
+  "/productions/l-u-x-proaging/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/l-u-x-proaging/cover.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/lulu-acidoactive/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/lulu-acidoactive/02.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/lulu-acidoactive/cover.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/mojo-swoptops/cover.jpg": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/natuargua-collection-844/01.webp": {
+    "w": 1480,
+    "h": 1920
+  },
+  "/productions/natuargua-collection-844/cover.webp": {
+    "w": 1480,
+    "h": 1920
+  },
+  "/productions/rambochador/01.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/rambochador/02.jpg": {
+    "w": 1080,
+    "h": 1080
+  },
+  "/productions/rambochador/03.jpg": {
+    "w": 1080,
+    "h": 1080
+  },
+  "/productions/rambochador/cover.jpg": {
+    "w": 1674,
+    "h": 1674
+  },
+  "/productions/riesling-luxembourg/01.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/riesling-luxembourg/cover.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/vermouth-rosso/01.webp": {
+    "w": 1600,
+    "h": 1600
+  },
+  "/productions/vermouth-rosso/02.webp": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/vermouth-rosso/03.webp": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/vermouth-rosso/04.webp": {
+    "w": 1920,
+    "h": 1920
+  },
+  "/productions/vermouth-rosso/cover.webp": {
+    "w": 1600,
+    "h": 1600
+  }
+}

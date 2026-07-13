@@ -9,28 +9,7 @@ export interface Production {
   tags: string[];
   /** Which sub-section of Graphic Design & 3D this belongs to. */
   category: ProductionCategory;
-  /** Show the "Interactive" badge on the card (has an in-page 3D/scrub viewer). */
-  viewer?: boolean;
-  /**
-   * WebP image sequence for the interactive viewer.
-   *
-   * How to add a sequence
-   * ─────────────────────
-   * 1. Export your frames as WebP: 0001.webp, 0002.webp, … (zero-padded, 4 digits)
-   * 2. Drop the folder into /public/sequences/<slug>/
-   * 3. Fill in the fields below.
-   *
-   * Example folder structure:
-   *   public/sequences/<slug>/0001.webp
-   *   public/sequences/<slug>/0002.webp
-   *   …
-   *   public/sequences/<slug>/0120.webp
-   */
-  sequence?: {
-    basePath: string;   // e.g. "/sequences/<slug>/"
-    frameCount: number; // total number of frames
-    fps?: number;       // playback speed — default 24
-  };
+  /** Local image paths under /public, shown on the project page. */
   images?: string[];
 }
 

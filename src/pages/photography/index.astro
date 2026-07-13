@@ -14,8 +14,8 @@ import { collections } from "../../data/photography";
   <!-- Collections grid -->
   <section class="collections-section" aria-label="Photography collections">
     <div class="collections-grid">
-      {collections.map((collection) => (
-        <CollectionCard collection={collection} />
+      {collections.map((collection, i) => (
+        <CollectionCard collection={collection} eager={i < 2} />
       ))}
     </div>
   </section>

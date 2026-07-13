@@ -1,14 +1,19 @@
 // Generate downscaled WebP variants for the self-hosted raster images and emit
 // a manifest the components read to build responsive <img srcset>. Idempotent:
-// existing variant files are left alone; the manifest is always rewritten to
-// match what's on disk.
+// variants are reused while their source is unchanged, regenerated when the
+// source's bytes change, and leftovers from a replaced source (e.g. a
+// different native width) are deleted. Change detection is by content hash
+// (src/data/img-hashes.json, committed) — not mtime, because Windows Explorer
+// preserves the original file's mtime on copy, so a freshly swapped-in photo
+// can look "older" than its stale variants.
 //
 //   node scripts/gen-responsive.mjs
 //
 // Runs automatically before `npm run build` (see package.json "prebuild").
 // Animated GIFs are skipped (can't be re-encoded without losing animation) and
 // simply fall back to their original <img src> with no srcset.
-import { readdir, readFile, writeFile, stat } from "node:fs/promises";
+import { readdir, readFile, writeFile, stat, unlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import sharp from "sharp";
 
@@ -41,8 +46,16 @@ function toPublicPath(abs) {
 
 async function exists(p) { try { await stat(p); return true; } catch { return false; } }
 
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const HASH_FILE = path.join(ROOT, "src/data/img-hashes.json");
+let prevHashes = {};
+try { prevHashes = JSON.parse(await readFile(HASH_FILE, "utf8")); } catch {}
+
 const manifest = {};
-let made = 0, skipped = 0;
+const dims = {};
+const hashes = {};
+let made = 0, skipped = 0, removed = 0;
 
 for (const r of ROOTS) {
   const sources = await collect(path.join(PUB, r));
@@ -51,6 +64,12 @@ for (const r of ROOTS) {
     const meta = await sharp(buf).metadata();
     const srcW = meta.width ?? 0;
     if (!srcW) continue;
+    const pub = toPublicPath(abs);
+    dims[pub] = { w: srcW, h: meta.height ?? 0 };
+
+    const hash = createHash("sha1").update(buf).digest("hex");
+    const changed = prevHashes[pub] !== hash; // no previous hash counts as changed
+    hashes[pub] = hash;
 
     // widths smaller than the source, plus one at the native width
     const widths = [...new Set([...TARGET_WIDTHS.filter((w) => w < srcW), srcW])].sort((a, b) => a - b);
@@ -60,7 +79,7 @@ for (const r of ROOTS) {
     const entries = [];
     for (const w of widths) {
       const outAbs = path.join(dir, `${base}-${w}.webp`);
-      if (!(await exists(outAbs))) {
+      if (changed || !(await exists(outAbs))) {
         await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 80 }).toFile(outAbs);
         made++;
       } else {
@@ -68,12 +87,29 @@ for (const r of ROOTS) {
       }
       entries.push({ w, src: toPublicPath(outAbs) });
     }
-    manifest[toPublicPath(abs)] = entries;
+    manifest[pub] = entries;
+
+    // drop variants left over from an older version of this source
+    // (e.g. the replacement image has a different native width)
+    const variantRe = new RegExp(`^${escapeRe(base)}-(\\d+)\\.webp$`);
+    for (const name of await readdir(dir)) {
+      const m = name.match(variantRe);
+      if (m && !widths.includes(Number(m[1]))) {
+        await unlink(path.join(dir, name));
+        removed++;
+      }
+    }
   }
 }
 
 const outFile = path.join(ROOT, "src/data/img-manifest.json");
 await writeFile(outFile, JSON.stringify(manifest, null, 2) + "\n", "utf8");
 
-console.log(`variants generated ${made}, reused ${skipped}, sources ${Object.keys(manifest).length}`);
+const dimsFile = path.join(ROOT, "src/data/img-dims.json");
+await writeFile(dimsFile, JSON.stringify(dims, null, 2) + "\n", "utf8");
+
+await writeFile(HASH_FILE, JSON.stringify(hashes, null, 2) + "\n", "utf8");
+
+console.log(`variants generated ${made}, reused ${skipped}, stale removed ${removed}, sources ${Object.keys(manifest).length}`);
 console.log(`manifest → src/data/img-manifest.json`);
+console.log(`dimensions → src/data/img-dims.json`);

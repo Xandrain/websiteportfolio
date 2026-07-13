@@ -8,12 +8,14 @@ plumbing, not this site's content).
 
 ## Stack
 
-Astro 6 (static output) + React islands (`@astrojs/react`) for interactive
-pieces (e.g. `ProfileBlock.tsx`) + Tailwind v4 via `@tailwindcss/vite`. No
-custom YAML build pipeline — content lives either as typed TS data
-(`src/data/*.ts`) or Astro content collections (`src/content/journal/*.md`).
-`npm run build` → static output in `dist/`, deployed by
-`.github/workflows/pages.yml` on push to `main`.
+Astro 6 (static output) + Tailwind v4 via `@tailwindcss/vite`. **Ships zero
+client JS** — no React/islands; the only browser code is a couple of small
+inline `<script>`s (the photography lightbox in `Lightbox.astro`, the home
+gate's cursor aura, and the About copy-email button in `ProfileBlock.astro`),
+which Astro inlines into the HTML. No custom YAML build
+pipeline — content lives as typed TS data (`src/data/*.ts`). `npm run build` →
+static output in `dist/`, deployed by `.github/workflows/pages.yml` on push to
+`main`.
 
 ## Commands
 
@@ -28,21 +30,24 @@ custom YAML build pipeline — content lives either as typed TS data
 ```
 src/
   consts.ts               SITE / NAV / SOCIAL — single source for site-wide copy & nav links
-  content.config.ts       Astro content collection definitions (journal)
-  content/journal/*.md    Journal posts — frontmatter: title, description, date, draft, tags
   data/photography.ts     Photography collections (typed, hand-authored array — not YAML)
   data/three-d.ts         Graphic design / 3D "productions" (same pattern)
-  layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, sitemap link
-  components/Nav.astro    Fixed pill nav, transparent-on-home variant (see below)
+  layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, JSON-LD, sitemap link
+  components/Nav.astro    Fixed pill nav (stacks + swaps to short labels on small screens)
   components/Footer.astro Site footer — index + social links, both driven by consts.ts
-  pages/                  photography/, productions/, journal/, about.astro, index.astro, 404.astro
+  components/about/ProfileBlock.astro  Static About card (glassmorphism, CSS-only reveal)
+  pages/                  photography/, productions/, about.astro, index.astro, 404.astro
 public/
   fonts/*.woff2           Self-hosted Bodoni Moda + Jost (latin subset)
-  sequences/<slug>/       WebP frame sequences for the 3D "productions" viewer
-  models/*.glb            3D model assets
+  og.jpg                  Default Open Graph / Twitter share card (generated)
+  apple-touch-icon.png    iOS home-screen icon (generated)
   _headers                Cloudflare Pages security headers + CSP
   robots.txt / llms.txt   AI-crawler policy (see below)
 ```
+
+Brand rasters (`og.jpg`, `apple-touch-icon.png`) are regenerated from the
+design tokens + fonts by `node scripts/gen-brand-assets.mjs` — swappable
+defaults; edit the script or replace the files for bespoke artwork.
 
 ## Content model rules
 
@@ -57,26 +62,22 @@ public/
   `/productions/product-visualisation` (category `product-visualisation`). The
   sub-nav is sticky and shown on both listing pages and every `[slug]` project
   page (active tab = the project's category; the "back" link is category-aware).
-  Each `Production` optionally has a `sequence` (WebP frame folder under
-  `public/sequences/<slug>/`, zero-padded 4-digit filenames, e.g. `0001.webp`)
-  for the interactive scrub viewer, or a plain `images[]` array. Don't hand-add
-  both unless the component supports it. Real projects (3D modeling/rigging for
+  Each `Production` has a plain `images[]` array shown on its project page.
+  Real projects (3D modeling/rigging for
   TV, character studies, product viz) sourced from
   [artstation.com/xandrain](https://xandrain.artstation.com) — covers/images
   were originally hotlinked from ArtStation's CDN but are now **self-hosted
   copies** under `public/productions/<slug>/` (`cover.*`, `01.*`, `02.*`…).
-- **Journal** (`src/content/journal/*.md`): frontmatter is validated by the
-  Zod schema in `content.config.ts` — `title`, `description`, `date`, `draft`
-  (default `false`), `tags` (default `[]`). A post with `draft: true` should
-  be filtered out at the page level before it ships.
 - Site-wide copy (name, role, tagline, email, nav labels, social links) lives
-  only in `src/consts.ts` — never hardcode it in a component or page.
+  only in `src/consts.ts` — never hardcode it in a component or page. `NAV`
+  items may carry an optional `short` label used by `Nav.astro` on small
+  screens (e.g. "Graphic Design & 3D" → "Design & 3D").
 
 ## Images — all self-hosted (no hotlinks)
 
-Nothing is hotlinked. Every image referenced by `src/data/*.ts` and
-`ProfileBlock.tsx` lives under `public/` and is served from `'self'` (the CSP
-`img-src` is now just `'self' data:`). Layout:
+Nothing is hotlinked. Every image referenced by `src/data/*.ts` and the About
+page lives under `public/` and is served from `'self'` (the CSP `img-src` is
+now just `'self' data:`). Layout:
 
 - `public/photography/<seed>.jpg` — photography covers/photos. **Still
   placeholder _content_** (downloaded from `picsum.photos`, not real
@@ -84,15 +85,23 @@ Nothing is hotlinked. Every image referenced by `src/data/*.ts` and
   responsive pipeline stay the same.
 - `public/productions/<slug>/{cover,01,02,…}.{jpg,webp,gif}` — real ArtStation
   work, self-hosted. Animated GIFs (e.g. Mojo SwopTops) are kept as GIFs.
-- `public/about/avatar.jpg` — profile avatar.
+- `public/about/avatar.webp` — profile avatar.
 
 **Responsive images**: `scripts/gen-responsive.mjs` (runs on `prebuild`, or
 `npm run images`) generates downscaled WebP variants next to each raster source
-(`name-400.webp`, `-800.webp`, …) plus a manifest at `src/data/img-manifest.json`.
-Components build `srcset` via the `srcset()` helper in `src/lib/responsive.ts`,
-which returns `undefined` for GIFs/unknown paths so they fall back to the plain
-`src`. To re-add images: drop the file in `public/…`, reference it in the data,
-and re-run `npm run images` (idempotent — existing variants are reused).
+(`name-400.webp`, `-800.webp`, …) plus a manifest at `src/data/img-manifest.json`
+and a native-dimensions map at `src/data/img-dims.json`. Components build
+`srcset` via the `srcset()` helper in `src/lib/responsive.ts` (returns
+`undefined` for GIFs/unknown paths, so they fall back to the plain `src`); the
+`dims()` helper from the same module returns each source's intrinsic `w`/`h`
+(used by the productions project page to set correct aspect ratios). To add or
+replace images: drop the file in `public/…`, reference it in the data, and
+re-run `npm run images`. Idempotent via content hashes
+(`src/data/img-hashes.json`, committed): unchanged sources keep their variants,
+a replaced source (even same filename) gets its variants regenerated and any
+stale ones deleted. Hashes, not mtimes, because Explorer preserves mtime on
+copy. See `UPDATING.md` for the non-developer walkthrough of routine content
+updates.
 
 The one-shot `scripts/self-host-images.mjs` recorded how the originals were
 pulled down and repointed (kept for reference; not part of the build).
@@ -140,9 +149,11 @@ the default translucent-light pill used everywhere else; toggled by
 
 CSP is `default-src 'self'` with narrow allowances: `style-src`/`script-src`
 include `'unsafe-inline'` (Astro scoped `<style>` + inline `style=""`
-attributes and small inline `<script>`s in `Lightbox.astro` /
-`SequencePlayer.astro` require it — there's no nonce/hash pipeline on static
-Cloudflare Pages output). `img-src` is `'self' data:` (all images are
+attributes, the inlined `<script>`s in `Lightbox.astro` / `index.astro`, and
+the JSON-LD block in `BaseLayout.astro` require it — there's no nonce/hash
+pipeline on static Cloudflare Pages output). The whole `Content-Security-Policy`
+value must stay on **one physical line** (Cloudflare `_headers` does not support
+wrapped values). `img-src` is `'self' data:` (all images are
 self-hosted — see the Images section above). If you add any third-party script,
 font, or analytics, its origin must be added here or it silently fails under CSP —
 there's no dashboard-level CSP config, this file is the only source of truth.

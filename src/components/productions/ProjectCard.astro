@@ -5,9 +5,11 @@ import { srcset } from "../../lib/responsive";
 interface Props {
   project: Production;
   featured?: boolean;
+  /** True for above-the-fold cards: load eagerly so the LCP image isn't lazy. */
+  eager?: boolean;
 }
 
-const { project, featured = false } = Astro.props;
+const { project, featured = false, eager = false } = Astro.props;
 ---
 
 <a
@@ -23,38 +25,18 @@ const { project, featured = false } = Astro.props;
       alt={`${project.title} — Graphic Design & 3D project`}
       width="1600"
       height={featured ? "900" : "600"}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
+      fetchpriority={eager ? "high" : undefined}
       decoding="async"
       class="project-card__img"
     />
-    <div class="project-card__overlay" aria-hidden="true">
-      {project.viewer && (
-        <span class="project-card__badge">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-            <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/>
-            <path d="M4 3l3 2-3 2V3z" fill="currentColor"/>
-          </svg>
-          Interactive
-        </span>
-      )}
-      <span class="project-card__view">View project →</span>
-    </div>
-  </div>
-
-  <div class="project-card__meta">
-    <div>
+    <div class="project-card__overlay">
+      <div class="project-card__meta">
+        {[String(project.year), ...project.tags.slice(0, 1)].join(" · ")}
+      </div>
       <h2 class:list={["project-card__title", featured && "project-card__title--lg"]}>
         {project.title}
       </h2>
-      {featured && (
-        <p class="project-card__desc">{project.description}</p>
-      )}
-    </div>
-    <div class="project-card__aside">
-      <span class="label">{project.year}</span>
-      {project.tags.slice(0, 2).map((tag) => (
-        <span class="label">{tag}</span>
-      ))}
     </div>
   </div>
 </a>
@@ -92,94 +74,72 @@ const { project, featured = false } = Astro.props;
     filter: grayscale(0%);
   }
 
+  /* Scrim only darkens the bottom third — gone by ~72% up so the
+     artwork reads clean; clicks pass through to the <a>. */
   .project-card__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(10, 9, 8, 0);
+    z-index: 2;
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding: 1.25rem;
-    transition: background 0.4s;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.125rem;
+    background: linear-gradient(
+      to top,
+      rgba(10, 9, 8, 0.82) 0%,
+      rgba(10, 9, 8, 0.55) 22%,
+      rgba(10, 9, 8, 0.15) 48%,
+      rgba(10, 9, 8, 0)    72%
+    );
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
   }
 
   .project-card:hover .project-card__overlay {
-    background: rgba(10, 9, 8, 0.30);
-  }
-
-  .project-card__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.3rem 0.625rem;
-    border: 1px solid rgba(255,255,255,0.35);
-    border-radius: 9999px;
-    font-size: 0.6rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.85);
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.35s, transform 0.35s;
-  }
-
-  .project-card:hover .project-card__badge {
     opacity: 1;
-    transform: translateY(0);
-  }
-
-  .project-card__view {
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 0.35s 0.05s, transform 0.35s 0.05s;
-  }
-
-  .project-card:hover .project-card__view {
-    opacity: 1;
-    transform: translateY(0);
   }
 
   .project-card__meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    padding-top: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 0.3rem;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    transform: translateY(7px);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .project-card__title {
     font-family: var(--font-display);
+    font-style: italic;
     font-size: 1.375rem;
     font-weight: 400;
     line-height: 1.15;
-    color: var(--color-ink);
-    margin-bottom: 0.25rem;
+    color: #fff;
+    text-wrap: balance;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+    transform: translateY(7px);
+    /* 30ms stagger: title lands just after the meta line */
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.03s;
   }
 
   .project-card__title--lg {
     font-size: clamp(1.75rem, 3vw, 2.5rem);
   }
 
-  .project-card__desc {
-    font-size: 0.875rem;
-    line-height: 1.65;
-    color: var(--color-ink-soft);
-    max-width: 55ch;
-    margin-top: 0.5rem;
+  .project-card:hover .project-card__meta,
+  .project-card:hover .project-card__title {
+    transform: translateY(0);
   }
 
-  .project-card__aside {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
-    flex-shrink: 0;
+  /* Touch devices have no hover: keep the label permanently visible. */
+  @media (hover: none) {
+    .project-card__overlay { opacity: 1; }
+    .project-card__meta,
+    .project-card__title { transform: none; }
   }
 </style>

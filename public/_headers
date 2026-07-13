@@ -6,10 +6,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none';
-    img-src 'self' data:;
-    style-src 'self' 'unsafe-inline'; font-src 'self';
-    script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'
 
 # Astro fingerprints these assets — cache them forever.
 /_astro/*
@@ -18,3 +15,13 @@
 # Self-hosted font files never change under the same filename.
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Content images are NOT content-hashed (a replaced photo keeps its
+# filename — see gen-responsive.mjs), so no `immutable` here: one day of
+# caching, then revalidate. A swapped image can be stale for at most a day.
+/photography/*
+  Cache-Control: public, max-age=86400
+/productions/*
+  Cache-Control: public, max-age=86400
+/about/*
+  Cache-Control: public, max-age=86400

@@ -4,8 +4,10 @@ import { srcset } from "../../lib/responsive";
 
 interface Props {
   collection: Collection;
+  /** True for above-the-fold cards: load eagerly so the LCP image isn't lazy. */
+  eager?: boolean;
 }
-const { collection } = Astro.props;
+const { collection, eager = false } = Astro.props;
 ---
 
 <a href={`/photography/${collection.slug}`} class="collection-card" aria-label={collection.title}>
@@ -17,23 +19,14 @@ const { collection } = Astro.props;
       alt={`Cover image for ${collection.title}`}
       width="800"
       height="600"
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
+      fetchpriority={eager ? "high" : undefined}
       decoding="async"
       class="collection-card__img"
     />
-    <div class="collection-card__overlay" aria-hidden="true">
-      <span class="collection-card__view">View series →</span>
-    </div>
-  </div>
-
-  <div class="collection-card__meta">
-    <div class="collection-card__info">
+    <div class="collection-card__overlay">
+      <div class="collection-card__meta">{collection.category} · {collection.year}</div>
       <h2 class="collection-card__title">{collection.title}</h2>
-      <p class="collection-card__desc">{collection.description}</p>
-    </div>
-    <div class="collection-card__aside">
-      <span class="label">{collection.category}</span>
-      <span class="label">{collection.year}</span>
     </div>
   </div>
 </a>
@@ -43,7 +36,6 @@ const { collection } = Astro.props;
     display: block;
     text-decoration: none;
     color: inherit;
-    group: true;
   }
 
   .collection-card__media {
@@ -68,73 +60,67 @@ const { collection } = Astro.props;
     filter: grayscale(0%);
   }
 
+  /* Scrim only darkens the bottom third — gone by ~72% up so the
+     photograph reads clean; clicks pass through to the <a>. */
   .collection-card__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(10, 9, 8, 0);
+    z-index: 2;
     display: flex;
-    align-items: flex-end;
-    padding: 1.25rem;
-    transition: background 0.4s;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.125rem;
+    background: linear-gradient(
+      to top,
+      rgba(10, 9, 8, 0.82) 0%,
+      rgba(10, 9, 8, 0.55) 22%,
+      rgba(10, 9, 8, 0.15) 48%,
+      rgba(10, 9, 8, 0)    72%
+    );
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
   }
 
   .collection-card:hover .collection-card__overlay {
-    background: rgba(10, 9, 8, 0.28);
-  }
-
-  .collection-card__view {
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 0.35s, transform 0.35s;
-  }
-
-  .collection-card:hover .collection-card__view {
     opacity: 1;
-    transform: translateY(0);
   }
 
   .collection-card__meta {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-top: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 0.3rem;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    transform: translateY(7px);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .collection-card__title {
     font-family: var(--font-display);
+    font-style: italic;
     font-size: 1.375rem;
     font-weight: 400;
-    color: var(--color-ink);
-    margin-bottom: 0.3rem;
-    line-height: 1.2;
-    transition: color 0.2s;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+    transform: translateY(7px);
+    /* 30ms stagger: title lands just after the meta line */
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.03s;
   }
 
-  .collection-card:hover .collection-card__title { color: var(--color-ink); }
-
-  .collection-card__desc {
-    font-size: 0.8125rem;
-    line-height: 1.6;
-    color: var(--color-ink-muted);
-    max-width: 40ch;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .collection-card:hover .collection-card__meta,
+  .collection-card:hover .collection-card__title {
+    transform: translateY(0);
   }
 
-  .collection-card__aside {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.25rem;
-    flex-shrink: 0;
+  /* Touch devices have no hover: keep the label permanently visible. */
+  @media (hover: none) {
+    .collection-card__overlay { opacity: 1; }
+    .collection-card__meta,
+    .collection-card__title { transform: none; }
   }
 </style>

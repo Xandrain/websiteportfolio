@@ -9,7 +9,6 @@ const about = NAV.find((i) => i.href === "/about");
 ---
 
 <BaseLayout
-  title={`${SITE.name} — ${SITE.role}`}
   description={SITE.description}
   noNav
   noFooter
@@ -27,7 +26,7 @@ const about = NAV.find((i) => i.href === "/about");
       <nav class="gate__routes" aria-label="Enter the portfolio">
         {primary.map((item) => (
           <a href={item.href} class="gate__route">
-            <span class="gate__route-label" set:html={item.label}></span>
+            <span class="gate__route-label">{item.label}</span>
           </a>
         ))}
       </nav>
@@ -76,7 +75,7 @@ const about = NAV.find((i) => i.href === "/about");
     pointer-events: none;
     background: radial-gradient(
       circle 360px at var(--mx, 50%) var(--my, 32%),
-      rgba(255, 255, 255, 0.65) 0%,
+      rgba(255, 255, 255, 0.35) 0%,
       rgba(255, 255, 255, 0) 62%
     );
     opacity: var(--aura, 0);
@@ -160,8 +159,8 @@ const about = NAV.find((i) => i.href === "/about");
 
   .gate__route:hover,
   .gate__route:focus-visible {
-    color: var(--color-ink);
-    background: rgba(26, 25, 23, 0.045);
+    color: var(--color-accent-ink);
+    background: var(--color-accent-wash);
   }
 
   /* ── Secondary — About ─────────────────────────────────────── */
@@ -198,7 +197,7 @@ const about = NAV.find((i) => i.href === "/about");
   }
 
   .gate__about:hover,
-  .gate__about:focus-visible { color: var(--color-ink); }
+  .gate__about:focus-visible { color: var(--color-accent-ink); }
   .gate__about:hover::after,
   .gate__about:focus-visible::after { width: 100%; }
 

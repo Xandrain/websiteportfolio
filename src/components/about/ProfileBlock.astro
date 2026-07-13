@@ -1,0 +1,583 @@
+---
+/**
+ * ProfileBlock — static About card.
+ *
+ * Pure Astro + CSS (no React island, no framer-motion). The glassmorphism
+ * layout and staggered entrance reveal are preserved, but the reveal lives in
+ * a `prefers-reduced-motion: no-preference` block, so the *base* state is fully
+ * visible — no-JS visitors, crawlers, and reduced-motion users all see content
+ * immediately. The only JS is the small inlined copy-email script below; the
+ * email row stays a plain mailto link without it.
+ */
+import { SITE } from "../../consts";
+
+type Highlight = { title: string; description: string };
+type Social = { label: string; handle?: string; href: string; icon: string; copy?: boolean };
+
+const highlights: Highlight[] = [
+  {
+    title: "Photography",
+    description:
+      "Patient, single-light work spanning landscape, portrait, and architecture. Four continents, one consistent restraint.",
+  },
+  {
+    title: "Graphic Design & 3D",
+    description:
+      "3D modeling, rigging, and texturing for animated television — Mojo SwopTops (BlueZoo UK) and AZUREUS (BlackSun Entertainment) — alongside personal character and product studies.",
+  },
+  {
+    title: "Tools",
+    description:
+      "Maya, Blender, ZBrush, Substance 3D Painter, Redshift, Photoshop, DaVinci Resolve.",
+  },
+  {
+    title: "Available for",
+    description:
+      "Full-time, contract, and freelance work. Based in Luxembourg, remote-friendly across EU and global time zones.",
+  },
+];
+
+// Inline line-icons (lucide-style) so nothing loads from JS.
+const iconCamera = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
+const iconBox = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>`;
+const iconMail = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
+const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>`;
+
+const social: Social[] = [
+  { label: "Email", handle: SITE.email, href: `mailto:${SITE.email}`, icon: iconMail, copy: true },
+  { label: "ArtStation", href: "https://xandrain.artstation.com", icon: iconBox },
+  { label: "Instagram", handle: "@haineaux_alexandre", href: "https://www.instagram.com/haineaux_alexandre", icon: iconCamera },
+];
+---
+
+<section class="about" aria-label={`About ${SITE.name}`}>
+  <div class="about__wrap">
+    <div class="about__card">
+      <div class="about__card-tint" aria-hidden="true"></div>
+
+      <div class="about__grid">
+        <!-- ── Left column ─────────────────────────────── -->
+        <div class="about__left">
+          <span class="about__eyebrow">Graphic Designer / 3D Artist / Photographer</span>
+
+          <div class="about__intro">
+            <h2 class="about__name">{SITE.name}</h2>
+            <p class="about__bio">
+              A practice working between the still image and the rendered form.
+              The two disciplines share one sensibility: restraint, attention to
+              light, and a belief that the quietest version of an idea is usually
+              the strongest. On the 3D side, that's taken shape as a props modeler
+              on BBC's Mojo SwopTops and as a rigger / texture artist on the
+              animated series AZUREUS.
+            </p>
+          </div>
+
+          <ul class="about__highlights" role="list">
+            {highlights.map((item) => (
+              <li class="about__highlight">
+                <p class="about__highlight-title">{item.title}</p>
+                <p class="about__highlight-desc">{item.description}</p>
+              </li>
+            ))}
+          </ul>
+
+          <div class="about__ctas">
+            <a class="about__cta" href="/photography">
+              View Photography <span class="about__cta-icon" set:html={arrow} />
+            </a>
+            <a class="about__cta" href="/productions">
+              View Graphic Design &amp; 3D <span class="about__cta-icon" set:html={arrow} />
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Right column — profile card ─────────────── -->
+        <div class="about__right">
+          <div class="about__glow" aria-hidden="true"></div>
+
+          <div class="about__profile">
+            <div class="about__profile-top">
+              <div class="about__avatar-wrap">
+                <div class="about__avatar-halo" aria-hidden="true"></div>
+                <img
+                  class="about__avatar"
+                  src="/about/avatar.webp"
+                  alt={SITE.name}
+                  width="176"
+                  height="176"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+
+              <h3 class="about__profile-name">{SITE.name}</h3>
+              <p class="about__profile-role">Graphic Designer · 3D Artist · Photographer</p>
+              <p class="about__profile-bio">
+                Working between the still image and the rendered form.
+                {" "}{SITE.location}.
+              </p>
+            </div>
+
+            <ul class="about__social" role="list">
+              {social.map((s) =>
+                s.copy ? (
+                  <li>
+                    <div class="about__social-link about__social-link--copy">
+                      <a class="about__social-mail" href={s.href} aria-label={s.label}>
+                        <span class="about__social-icon" set:html={s.icon} />
+                        <span class="about__social-text">
+                          <span class="about__social-handle">{s.handle}</span>
+                        </span>
+                      </a>
+                      <button type="button" class="about__copy-btn" data-copy-email={SITE.email}>
+                        <span data-copy-label>Copy mail</span>
+                        <span data-copy-done hidden>Copied!</span>
+                      </button>
+                    </div>
+                  </li>
+                ) : (
+                  <li>
+                    <a
+                      class="about__social-link"
+                      href={s.href}
+                      target={s.href.startsWith("http") ? "_blank" : undefined}
+                      rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    >
+                      <span class="about__social-icon" set:html={s.icon} />
+                      <span class="about__social-text">
+                        <span class="about__social-label">{s.label}</span>
+                        {s.handle && <span class="about__social-handle">{s.handle}</span>}
+                      </span>
+                      <span class="about__social-arrow" set:html={arrow} />
+                    </a>
+                  </li>
+                )
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    position: relative;
+    padding: 3.5rem 1.5rem 0;
+  }
+
+  .about__wrap {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+  }
+
+  /* ── Main glass card ─────────────────────────────────────── */
+  .about__card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid var(--color-line);
+    background: rgba(250, 250, 248, 0.72);
+    box-shadow: 0 8px 48px rgba(26, 25, 23, 0.05), 0 1px 4px rgba(26, 25, 23, 0.04);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 2rem;
+  }
+
+  @media (min-width: 768px) { .about__card { padding: 3rem; } }
+
+  .about__card-tint {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26, 25, 23, 0.025) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  .about__grid {
+    position: relative;
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 1024px) { .about__grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── Left column ─────────────────────────────────────────── */
+  .about__left {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .about__eyebrow {
+    align-self: flex-start;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-line);
+    background: rgba(250, 250, 248, 0.80);
+    padding: 0.3rem 1rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .about__intro { display: flex; flex-direction: column; gap: 0.875rem; }
+
+  .about__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    color: var(--color-ink);
+  }
+
+  .about__bio {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+    max-width: 52ch;
+  }
+
+  /* ── Highlights ──────────────────────────────────────────── */
+  .about__highlights {
+    display: grid;
+    gap: 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .about__highlight {
+    border-radius: 1rem;
+    border: 1px solid var(--color-line);
+    background: rgba(250, 250, 248, 0.80);
+    padding: 1.125rem 1.25rem;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  }
+
+  .about__highlight:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 12px rgba(26, 25, 23, 0.05);
+    border-color: rgba(26, 25, 23, 0.14);
+  }
+
+  .about__highlight-title {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .about__highlight-desc {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+
+  /* ── CTAs ────────────────────────────────────────────────── */
+  .about__ctas { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+  .about__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 3rem;
+    padding: 0 2rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    text-decoration: none;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: opacity 0.25s;
+  }
+
+  .about__cta:hover { opacity: 0.8; }
+
+  .about__cta-icon { display: inline-flex; }
+  .about__cta-icon :global(svg) { width: 14px; height: 14px; }
+
+  /* ── Right column — profile card ─────────────────────────── */
+  .about__right { position: relative; }
+
+  .about__glow {
+    position: absolute;
+    inset: 0;
+    border-radius: 2rem;
+    background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(26, 25, 23, 0.06) 0%, transparent 70%);
+    filter: blur(24px);
+    pointer-events: none;
+  }
+
+  .about__profile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 1.75rem;
+    border: 1px solid var(--color-line);
+    background: rgba(250, 250, 248, 0.62);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 2rem;
+  }
+
+  .about__profile-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .about__avatar-wrap { position: relative; margin-bottom: 1.5rem; }
+
+  .about__avatar-halo {
+    position: absolute;
+    inset: -0.5rem;
+    border-radius: 50%;
+    background: rgba(26, 25, 23, 0.05);
+    filter: blur(16px);
+  }
+
+  .about__avatar {
+    position: relative;
+    width: 11rem;
+    height: 11rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--color-line);
+    box-shadow: 0 16px 48px rgba(26, 25, 23, 0.10);
+    filter: grayscale(12%);
+  }
+
+  .about__profile-name {
+    font-family: var(--font-display);
+    font-size: 1.625rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin-bottom: 0.3rem;
+  }
+
+  .about__profile-role {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .about__profile-bio {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+    max-width: 32ch;
+  }
+
+  /* ── Social links ────────────────────────────────────────── */
+  .about__social {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .about__social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-line);
+    background: rgba(250, 250, 248, 0.80);
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  }
+
+  .about__social-link:hover {
+    transform: translateY(-2px);
+    border-color: rgba(26, 25, 23, 0.16);
+    box-shadow: 0 2px 12px rgba(26, 25, 23, 0.05);
+  }
+
+  .about__social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-ink-soft);
+    box-shadow: 0 2px 8px rgba(26, 25, 23, 0.06);
+  }
+
+  .about__social-icon :global(svg) { width: 14px; height: 14px; }
+
+  /* Label left, handle pushed right on the same line (screenshot layout);
+     a row with only a handle (Email) naturally sits left. */
+  .about__social-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .about__social-label {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    line-height: 1.3;
+  }
+
+  .about__social-handle {
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .about__social-arrow { display: inline-flex; color: var(--color-ink-muted); flex-shrink: 0; }
+  .about__social-arrow :global(svg) { width: 14px; height: 14px; }
+
+  /* ── Email row — mailto link on the left, copy button on the right ── */
+  .about__social-mail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  .about__copy-btn {
+    flex-shrink: 0;
+    padding: 0.75rem 1.375rem;
+    border: 1px solid var(--color-accent-ink);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-wash);
+    color: var(--color-accent-ink);
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .about__copy-btn:hover {
+    background: var(--color-accent-ink);
+    border-color: var(--color-accent-ink);
+    color: var(--color-paper);
+  }
+
+  @keyframes copy-confirm {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  .about__copy-btn.is-copied {
+    background: var(--color-accent-ink);
+    border-color: var(--color-accent-ink);
+    color: var(--color-paper);
+    animation: copy-confirm 0.22s ease-out;
+  }
+
+  /* ── Entrance reveal — only when motion is welcome. Base state
+       (below) is fully visible, so no-JS / reduced-motion always render. ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .about__card { animation: about-rise 0.65s var(--ease-out-expo) both; }
+
+    .about__eyebrow,
+    .about__intro,
+    .about__highlight,
+    .about__ctas,
+    .about__profile { animation: about-fade 0.5s ease both; opacity: 0; }
+
+    .about__highlight:nth-child(1) { animation-delay: 0.10s; }
+    .about__highlight:nth-child(2) { animation-delay: 0.18s; }
+    .about__highlight:nth-child(3) { animation-delay: 0.26s; }
+    .about__highlight:nth-child(4) { animation-delay: 0.34s; }
+    .about__ctas { animation-delay: 0.30s; }
+    .about__profile { animation-delay: 0.15s; }
+  }
+
+  @keyframes about-rise {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @keyframes about-fade {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+  }
+</style>
+
+<script>
+  // Copy-email button: clipboard API with an execCommand fallback, then a
+  // 2s "Copied!" confirmation. Re-clicks during confirmation restart the timer.
+  const btn = document.querySelector<HTMLButtonElement>("[data-copy-email]");
+  if (btn) {
+    const label = btn.querySelector<HTMLElement>("[data-copy-label]")!;
+    const doneEl = btn.querySelector<HTMLElement>("[data-copy-done]")!;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const done = () => {
+      btn.classList.add("is-copied");
+      label.hidden = true;
+      doneEl.hidden = false;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        label.hidden = false;
+        doneEl.hidden = true;
+        btn.classList.remove("is-copied");
+      }, 2000);
+    };
+
+    btn.addEventListener("click", () => {
+      const addr = btn.dataset.copyEmail ?? "";
+
+      const fallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = addr;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          done();
+        } catch {
+          /* leave the button as-is if the copy failed */
+        }
+        ta.remove();
+      };
+
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(addr).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
+    });
+  }
+</script>
