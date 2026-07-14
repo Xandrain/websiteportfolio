@@ -8,18 +8,12 @@ interface Props {
 }
 
 const { photos, collectionTitle } = Astro.props;
-
-// Enrich each photo with its responsive srcset so the lightbox can serve a
-// right-sized WebP instead of always downloading the full-res original.
-const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
 ---
 
 <!-- Gallery grid -->
 <ul
   class="photo-gallery"
   id="photo-gallery"
-  data-photos={JSON.stringify(photosData)}
-  data-collection={collectionTitle}
   role="list"
   aria-label={`${collectionTitle} — photo gallery`}
 >
@@ -88,6 +82,9 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
 <script>
   const gallery = document.getElementById("photo-gallery") as HTMLElement;
   const dialog  = document.getElementById("lightbox") as HTMLDialogElement;
+
+  if (!gallery || !dialog) throw new Error("Lightbox: missing DOM elements");
+
   const inner   = dialog.querySelector(".lightbox__inner") as HTMLElement;
   const lbImg   = document.getElementById("lb-img") as HTMLImageElement;
   const lbCap   = document.getElementById("lb-caption") as HTMLElement;
@@ -97,10 +94,14 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
   const btnPrev  = document.getElementById("lb-prev")  as HTMLButtonElement;
   const btnNext  = document.getElementById("lb-next")  as HTMLButtonElement;
 
-  if (!gallery || !dialog) throw new Error("Lightbox: missing DOM elements");
-
-  const photos: Array<{ src: string; alt: string; srcset?: string }> =
-    JSON.parse(gallery.dataset.photos ?? "[]");
+  // The rendered gallery <img>s already carry src / srcset / alt — read them
+  // from the DOM instead of shipping a second copy of the list as JSON.
+  const photos = [...gallery.querySelectorAll<HTMLImageElement>(".gallery-item__img")]
+    .map((img) => ({
+      src: img.getAttribute("src") ?? "",
+      srcset: img.getAttribute("srcset") ?? "",
+      alt: img.alt,
+    }));
 
   let current = 0;
 

@@ -13,8 +13,10 @@ const { label, href, name } = Astro.props;
     <div class="discipline-switch__rule" aria-hidden="true"></div>
     <a href={href} class="discipline-switch__link">
       <span class="discipline-switch__label">{label}</span>
-      <span class="discipline-switch__name">{name}</span>
-      <span class="discipline-switch__arrow" aria-hidden="true">→</span>
+      <span class="discipline-switch__main">
+        <span class="discipline-switch__name">{name}</span>
+        <span class="discipline-switch__arrow" aria-hidden="true">→</span>
+      </span>
     </a>
     <div class="discipline-switch__rule" aria-hidden="true"></div>
   </div>
@@ -48,6 +50,12 @@ const { label, href, name } = Astro.props;
     gap: 0.875rem;
     text-decoration: none;
     flex-shrink: 0;
+  }
+
+  .discipline-switch__main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.875rem;
   }
 
   .discipline-switch__label {
@@ -85,5 +93,17 @@ const { label, href, name } = Astro.props;
   .discipline-switch__link:hover .discipline-switch__arrow {
     transform: translateX(5px);
     color: var(--color-ink);
+  }
+
+  /* Phones: the row form ("ALSO EXPLORE  Graphic Design & 3D  →" between two
+     rules) is wider than the viewport for long section names, pushing the page
+     into horizontal scroll. Stack the label above the name instead. */
+  @media (max-width: 560px) {
+    .discipline-switch__link {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .discipline-switch__name { font-size: 1.25rem; }
   }
 </style>

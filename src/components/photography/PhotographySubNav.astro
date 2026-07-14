@@ -1,9 +1,10 @@
 ---
 /**
- * Secondary nav for the Photography section.
- * Two persistent, sticky tabs: Collections · Gallery.
- * Sits just below the fixed main nav pill and stays on screen while scrolling.
+ * Secondary nav for the Photography section: Collections · Gallery.
+ * Markup/behaviour live in the shared SubNav component.
  */
+import SubNav from "../shared/SubNav.astro";
+
 export type PhotographyView = "collections" | "gallery";
 
 interface Props {
@@ -12,105 +13,10 @@ interface Props {
 
 const { active } = Astro.props;
 
-const tabs: { key: PhotographyView; label: string; href: string }[] = [
+const tabs = [
   { key: "collections", label: "Collections", href: "/photography" },
   { key: "gallery", label: "Gallery", href: "/photography/gallery" },
 ];
 ---
 
-<nav class="subnav" aria-label="Photography views">
-  <div class="subnav__inner">
-    {tabs.map((t) => (
-      <a
-        href={t.href}
-        class:list={["subnav__tab", active === t.key && "is-active"]}
-        aria-current={active === t.key ? "page" : undefined}
-      >
-        {t.label}
-      </a>
-    ))}
-  </div>
-</nav>
-
-<script is:inline>
-  // Entrance animation only when arriving from outside this section. If the
-  // previous page (same-origin referrer) shares the first path segment, the
-  // pill was already on screen there — skip the reveal. Runs synchronously
-  // during parse, before the animation delay elapses.
-  (() => {
-    try {
-      if (!document.referrer) return;
-      const ref = new URL(document.referrer);
-      if (
-        ref.origin === location.origin &&
-        ref.pathname.split("/")[1] === location.pathname.split("/")[1]
-      ) {
-        document.querySelector(".subnav__inner")?.classList.add("subnav__inner--still");
-      }
-    } catch {}
-  })();
-</script>
-
-<style>
-  .subnav {
-    position: sticky;
-    top: 4.75rem; /* clear the fixed main-nav pill */
-    z-index: 40;
-    display: flex;
-    justify-content: center;
-    padding-inline: 1rem;
-    pointer-events: none;
-  }
-
-  .subnav__inner {
-    pointer-events: auto;
-    display: inline-flex;
-    gap: 0.3rem;
-    padding: 0.4rem;
-    border-radius: var(--radius-pill);
-    background: rgba(250, 250, 248, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06), inset 0 0 0 1px rgba(26, 25, 23, 0.09);
-  }
-
-  /* Entrance reveal — only when motion is welcome; base state stays visible. */
-  @media (prefers-reduced-motion: no-preference) {
-    .subnav__inner { animation: subnav-in 0.275s var(--ease-out-expo) 0.25s both; }
-    /* Same-section navigation (class set by the inline script): the pill
-       persisted from the previous page, so no re-entrance. */
-    .subnav__inner.subnav__inner--still { animation: none; }
-  }
-
-  @keyframes subnav-in {
-    from { opacity: 0; transform: translateY(-10px) scale(0.96); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  .subnav__tab {
-    padding: 0.6rem 1.5rem;
-    border-radius: var(--radius-pill);
-    font-family: var(--font-sans);
-    font-size: 0.9375rem;
-    letter-spacing: 0.02em;
-    color: var(--color-ink-soft);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color 0.2s, background 0.25s;
-  }
-
-  .subnav__tab:hover {
-    color: var(--color-accent-ink);
-    background: var(--color-accent-wash);
-  }
-
-  .subnav__tab.is-active {
-    color: var(--color-ink);
-    font-weight: 500;
-    background: oklch(from #1A1917 l c h / 0.06);
-  }
-
-  @media (max-width: 480px) {
-    .subnav__tab { padding: 0.5rem 1rem; font-size: 0.8125rem; }
-  }
-</style>
+<SubNav label="Photography views" tabs={tabs} active={active} />

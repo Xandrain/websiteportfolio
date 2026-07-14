@@ -4,10 +4,11 @@ import ProjectCard from "../../components/productions/ProjectCard.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
 import { projects } from "../../data/three-d";
-import { srcset } from "../../lib/responsive";
+import { srcset, dims } from "../../lib/responsive";
 
 const productionsList = projects.filter((p) => p.category === "productions");
 const [featured, ...rest] = productionsList;
+const featuredDims = featured ? dims(featured.cover) : undefined;
 ---
 
 <BaseLayout
@@ -32,8 +33,8 @@ const [featured, ...rest] = productionsList;
               srcset={srcset(featured.cover)}
               sizes="(min-width: 900px) 50vw, 100vw"
               alt={`${featured.title} — Graphic Design & 3D project`}
-              width="1600"
-              height="900"
+              width={featuredDims?.w ?? 1600}
+              height={featuredDims?.h ?? 900}
               loading="eager"
               fetchpriority="high"
               decoding="async"

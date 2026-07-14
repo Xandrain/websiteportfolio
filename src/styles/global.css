@@ -14,15 +14,11 @@
   --color-overlay:    oklch(from #1A1917 l c h / 0.48);
 
   /* ── Accent — a single emerald hue (~155°) carried across the site ──
-     Impact = the vivid "pop" for dots & marks; ink = the deep, AA-legible
-     (6.3:1 on paper) variant used for text, links and underlines. The soft/
-     pale/deep tones are the muted companions used only for the scattered
-     dot motif, giving a tonal spread within one green family. */
-  --color-accent:       #16A36A;  /* impact emerald — dots, decorative marks */
+     Impact = the vivid "pop" for small decorative marks (eyebrow/footer dots);
+     ink = the deep, AA-legible (6.3:1 on paper) variant used for text, links
+     and underlines. */
+  --color-accent:       #16A36A;  /* impact emerald — decorative marks */
   --color-accent-ink:   #0C6B43;  /* deep pine — links/underlines (AA on paper) */
-  --color-accent-soft:  #7FA98A;  /* muted sage companion */
-  --color-accent-pale:  #B8C6AE;  /* pale khaki-sage companion */
-  --color-accent-deep:  #2E5D46;  /* deep pine companion */
   /* Translucent emerald wash — the tint filling pills/tabs/buttons on hover. */
   --color-accent-wash:  oklch(from #16A36A l c h / 0.10);
 
@@ -37,9 +33,6 @@
   /* ── Detail tokens ───────────────────────────────────────────── */
   --letter-spacing-label:  0.10em;
   --letter-spacing-caps:   0.16em;
-  --shadow-lift:    0 1px 3px rgba(26,25,23,0.06), 0 4px 16px rgba(26,25,23,0.05);
-  --shadow-modal:   0 24px 80px rgba(26,25,23,0.22);
-  --radius-card:    0.25rem;
   --radius-pill:    9999px;
 
   /* ── Timing ──────────────────────────────────────────────────── */
@@ -148,7 +141,4 @@
     background: var(--color-accent);
     flex: none;
   }
-
-  /* Horizontal rule */
-  .rule { border-color: var(--color-line); }
 }

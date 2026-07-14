@@ -16,8 +16,9 @@ inline `<script>`s (the photography lightbox in `Lightbox.astro`, the home
 gate's cursor aura, the About copy-email button in `ProfileBlock.astro`, the
 video pause/reduced-motion control in `pages/productions/[slug].astro`,
 the click-to-load YouTube facade in `YouTubeEmbed.astro`, and the sub-nav
-same-section animation skip in `ProductionsSubNav.astro` /
-`PhotographySubNav.astro` — the sticky pill tabs only play their entrance
+same-section animation skip in `components/shared/SubNav.astro` (shared by
+the thin `ProductionsSubNav.astro` / `PhotographySubNav.astro` wrappers,
+which only supply tabs + aria-label) — the sticky pill tabs only play their entrance
 reveal when arriving from outside the section, detected via same-origin
 `document.referrer` path prefix),
 which Astro inlines into the HTML. No custom YAML build
@@ -160,10 +161,10 @@ Fonts `<link>`.
 ## Nav / Footer
 
 Both are driven entirely by `NAV`/`SOCIAL` in `src/consts.ts` — add or
-reorder nav items there, not in the component markup. `Nav.astro` has a
-`site-header--home` variant (transparent dark overlay, used only on `/`) vs.
-the default translucent-light pill used everywhere else; toggled by
-`Astro.url.pathname === "/"`, not a prop.
+reorder nav items there, not in the component markup. The home page (`/`)
+renders no `Nav` at all (`noNav` on `BaseLayout`) — its full-screen gate
+supplies its own navigation; every other page gets the translucent-light
+pill.
 
 ## AI-crawler / SEO policy
 
