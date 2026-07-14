@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Dots from "../components/Dots.astro";
 import { SITE, NAV } from "../consts";
 
 // Primary routes (the traffic split) vs. secondary. Driven by consts.
@@ -15,7 +14,6 @@ const about = NAV.find((i) => i.href === "/about");
 >
   <section class="gate">
     <div class="gate__aura" aria-hidden="true"></div>
-    <Dots />
     <div class="gate__inner">
       <p class="gate__role">{SITE.role}</p>
 
@@ -123,8 +121,9 @@ const about = NAV.find((i) => i.href === "/about");
     align-self: stretch;
     margin-top: 2.75rem;
     display: flex;
+    flex-direction: column;
     align-items: stretch;
-    border-radius: 9999px;
+    border-radius: 1.75rem;
     background: rgba(250, 250, 248, 0.80);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -152,9 +151,10 @@ const about = NAV.find((i) => i.href === "/about");
     transition: color 0.25s, background 0.3s;
   }
 
-  /* Hairline divider between the two segments (crisp under the rounded clip). */
+  /* Hairline divider between the two segments (crisp under the rounded clip).
+     Stacked on mobile → horizontal rule; side-by-side on desktop → vertical. */
   .gate__route + .gate__route {
-    box-shadow: inset 1px 0 0 rgba(26, 25, 23, 0.09);
+    box-shadow: inset 0 1px 0 rgba(26, 25, 23, 0.09);
   }
 
   .gate__route:hover,
@@ -202,8 +202,15 @@ const about = NAV.find((i) => i.href === "/about");
   .gate__about:focus-visible::after { width: 100%; }
 
   @media (min-width: 640px) {
-    .gate__routes { margin-top: 3.25rem; }
+    .gate__routes {
+      margin-top: 3.25rem;
+      flex-direction: row;
+      border-radius: 9999px;
+    }
     .gate__route { padding: 0.95rem 1.25rem; }
+    .gate__route + .gate__route {
+      box-shadow: inset 1px 0 0 rgba(26, 25, 23, 0.09);
+    }
   }
 </style>
 
