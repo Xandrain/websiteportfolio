@@ -62,12 +62,6 @@ const tabs: { key: PhotographyView; label: string; href: string }[] = [
     pointer-events: none;
   }
 
-  /* Below the nav's stack breakpoint the pill is two rows tall (bottom edge
-     ~112px), so the sticky offset must drop further to stay visible below it. */
-  @media (max-width: 560px) {
-    .subnav { top: 7.75rem; }
-  }
-
   .subnav__inner {
     pointer-events: auto;
     display: inline-flex;
