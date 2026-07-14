@@ -1,0 +1,53 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Lightbox from "../../components/photography/Lightbox.astro";
+import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import PhotographySubNav from "../../components/photography/PhotographySubNav.astro";
+import { collections } from "../../data/photography";
+
+// Every photo from every collection, in collection order.
+const photos = collections.flatMap((c) => c.photos);
+---
+
+<BaseLayout
+  title="Gallery"
+  description="Every photograph from all collections by Alexandre Haineaux — landscape, portrait, architecture, and documentary — in one continuous gallery."
+>
+  <h1 class="sr-only">Gallery</h1>
+
+  <div class="subnav-spacer" aria-hidden="true"></div>
+  <PhotographySubNav active="gallery" />
+
+  <!-- All photos, one masonry with lightbox -->
+  <section class="gallery-section" aria-label="All photographs">
+    <div class="gallery-wrapper">
+      <Lightbox photos={photos} collectionTitle="Gallery" />
+    </div>
+  </section>
+
+  <DisciplineSwitch
+    label="Also explore"
+    href="/productions"
+    name="Graphic Design & 3D"
+  />
+</BaseLayout>
+
+<style>
+  .subnav-spacer { height: 5.5rem; }
+
+  /* Taller stacked nav on small screens needs a deeper rest position. */
+  @media (max-width: 560px) {
+    .subnav-spacer { height: 8.5rem; }
+  }
+
+  .gallery-section {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 3rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .gallery-section { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .gallery-section { padding-inline: 3rem; } }
+
+  .gallery-wrapper { width: 100%; }
+</style>

@@ -4,14 +4,22 @@ Portfolio site for **Alexandre Haineaux** — photographer & graphic designer.
 Deployed at `https://haineaux.com` via Cloudflare Pages. See
 [WORKFLOW-HANDOUT.md](WORKFLOW-HANDOUT.md) for the general reusable
 tooling/deploy pattern this project was bootstrapped from (that file is about
-plumbing, not this site's content).
+plumbing, not this site's content). [NEW-FEATURES.md](NEW-FEATURES.md)
+documents the July 2026 media/authoring upgrade (auto-derived galleries,
+video turnarounds, YouTube facades) in user-facing terms.
 
 ## Stack
 
 Astro 6 (static output) + Tailwind v4 via `@tailwindcss/vite`. **Ships zero
-client JS** — no React/islands; the only browser code is a couple of small
+client JS** — no React/islands; the only browser code is a handful of small
 inline `<script>`s (the photography lightbox in `Lightbox.astro`, the home
-gate's cursor aura, and the About copy-email button in `ProfileBlock.astro`),
+gate's cursor aura, the About copy-email button in `ProfileBlock.astro`, the
+video pause/reduced-motion control in `pages/productions/[slug].astro`,
+the click-to-load YouTube facade in `YouTubeEmbed.astro`, and the sub-nav
+same-section animation skip in `ProductionsSubNav.astro` /
+`PhotographySubNav.astro` — the sticky pill tabs only play their entrance
+reveal when arriving from outside the section, detected via same-origin
+`document.referrer` path prefix),
 which Astro inlines into the HTML. No custom YAML build
 pipeline — content lives as typed TS data (`src/data/*.ts`). `npm run build` →
 static output in `dist/`, deployed by `.github/workflows/pages.yml` on push to
@@ -31,12 +39,19 @@ static output in `dist/`, deployed by `.github/workflows/pages.yml` on push to
 src/
   consts.ts               SITE / NAV / SOCIAL — single source for site-wide copy & nav links
   data/photography.ts     Photography collections (typed, hand-authored array — not YAML)
-  data/three-d.ts         Graphic design / 3D "productions" (same pattern)
+  data/three-d.ts         Graphic design / 3D "productions" (same pattern; galleries auto-derived)
+  lib/media.ts            Build-time folder scan → ordered production galleries (images + videos)
+  lib/responsive.ts       srcset()/dims() helpers over the generated img manifests
   layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, JSON-LD, sitemap link
   components/Nav.astro    Fixed pill nav (stacks + swaps to short labels on small screens)
   components/Footer.astro Site footer — index + social links, both driven by consts.ts
   components/about/ProfileBlock.astro  Static About card (glassmorphism, CSS-only reveal)
+  components/productions/YouTubeEmbed.astro  Click-to-load YouTube facade (self-hosted poster)
   pages/                  photography/, productions/, about.astro, index.astro, 404.astro
+scripts/
+  gen-responsive.mjs      Prebuild: WebP variants + img-manifest/img-dims/img-hashes
+  gen-video.mjs           GIF/capture → .webm + .mp4 + -poster.jpg (ffmpeg-static)
+  fetch-yt-poster.mjs     Download a YouTube thumbnail to yt-<id>.jpg (self-hosted facade poster)
 public/
   fonts/*.woff2           Self-hosted Bodoni Moda + Jost (latin subset)
   og.jpg                  Default Open Graph / Twitter share card (generated)
@@ -54,7 +69,10 @@ defaults; edit the script or replace the files for bespoke artwork.
 - **Photography** (`src/data/photography.ts`): each `Collection` needs
   `slug`, `title`, `description`, `cover`, `category`, `year`, `photos[]`.
   Local images go in `public/photography/<file>` and are referenced as
-  `/photography/<file>`.
+  `/photography/<file>`. Each `Photo` is just `src` + `alt` — pixel dimensions
+  are read from the generated `img-dims.json` via `dims()`, never hand-typed.
+  The collection gallery is a ratio-preserving CSS-columns masonry (no crop,
+  no JS).
 - **Productions** (`src/data/three-d.ts`): each `Production` has a required
   `category` — `"productions"` or `"product-visualisation"` — which drives the
   two-tab sub-nav (`components/productions/ProductionsSubNav.astro`) and splits
@@ -62,7 +80,18 @@ defaults; edit the script or replace the files for bespoke artwork.
   `/productions/product-visualisation` (category `product-visualisation`). The
   sub-nav is sticky and shown on both listing pages and every `[slug]` project
   page (active tab = the project's category; the "back" link is category-aware).
-  Each `Production` has a plain `images[]` array shown on its project page.
+  **Galleries are derived at build time** by `src/lib/media.ts`: every
+  numbered file (`01.*`, `02.*`, …) in `public/productions/<slug>/` becomes a
+  gallery item in name order — images and videos alike (a video is the trio
+  `NN.webm` + `NN.mp4` + `NN-poster.jpg`, produced by `scripts/gen-video.mjs`).
+  Adding/removing project media = dropping/deleting files, no data edit.
+  Optional `Production` fields: `coverInGallery: true` prepends the cover as
+  the first item (the product-viz convention); `images[]` forces an explicit
+  order (rarely needed); `youtube: [{ id, title }]` renders click-to-load
+  YouTube facades after the gallery (poster self-hosted as `yt-<id>.jpg` via
+  `scripts/fetch-yt-poster.mjs`). The project page lays items out by aspect
+  ratio: landscape media span the full editorial width, squarish/portrait flow
+  two-up (odd runs promote a leading squarish item to full width).
   Real projects (3D modeling/rigging for
   TV, character studies, product viz) sourced from
   [artstation.com/xandrain](https://xandrain.artstation.com) — covers/images
@@ -83,8 +112,13 @@ now just `'self' data:`). Layout:
   placeholder _content_** (downloaded from `picsum.photos`, not real
   photography) — swap these files for real work before launch; the paths and
   responsive pipeline stay the same.
-- `public/productions/<slug>/{cover,01,02,…}.{jpg,webp,gif}` — real ArtStation
-  work, self-hosted. Animated GIFs (e.g. Mojo SwopTops) are kept as GIFs.
+- `public/productions/<slug>/{cover,01,02,…}.{jpg,webp}` — real ArtStation
+  work, self-hosted. **Animation ships as video, not GIF**: the former Mojo
+  SwopTops GIFs are now `NN.webm` (VP9) + `NN.mp4` (H.264 fallback) +
+  `NN-poster.jpg`, ~93% smaller, rendered as muted looping `<video>` with a
+  click/keyboard pause control and a `prefers-reduced-motion` fallback.
+  Convert new animations with `node scripts/gen-video.mjs <file.gif>`
+  (ffmpeg-static devDependency; delete the source GIF after).
 - `public/about/avatar.webp` — profile avatar.
 
 **Responsive images**: `scripts/gen-responsive.mjs` (runs on `prebuild`, or
@@ -154,7 +188,12 @@ the JSON-LD block in `BaseLayout.astro` require it — there's no nonce/hash
 pipeline on static Cloudflare Pages output). The whole `Content-Security-Policy`
 value must stay on **one physical line** (Cloudflare `_headers` does not support
 wrapped values). `img-src` is `'self' data:` (all images are
-self-hosted — see the Images section above). If you add any third-party script,
+self-hosted — see the Images section above). `frame-src` allows exactly
+`https://www.youtube-nocookie.com` for the click-to-load YouTube facade
+(`YouTubeEmbed.astro`); nothing from YouTube is requested until the visitor
+presses play, and facade posters are self-hosted so `img-src` stays `'self'`.
+Self-hosted `<video>` needs no CSP entry (`media-src` falls back to
+`default-src 'self'`). If you add any third-party script,
 font, or analytics, its origin must be added here or it silently fails under CSP —
 there's no dashboard-level CSP config, this file is the only source of truth.
 

@@ -1,0 +1,47 @@
+---
+/**
+ * Floating "Contact" pill — bottom-right corner, same translucent-light
+ * glass treatment as the default site nav. Rendered by BaseLayout on the
+ * photography and productions sections only; links to the About page.
+ */
+---
+
+<a href="/about" class="contact-fab">Contact</a>
+
+<style>
+  .contact-fab {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 50;
+    display: inline-block;
+    border-radius: 9999px;
+    background: rgba(250, 250, 248, 0.80);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 1px 2px rgba(26,25,23,0.06), inset 0 0 0 1px rgba(26,25,23,0.09);
+    padding: 1.125rem 2.25rem;
+    font-size: 1.0625rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    color: var(--color-ink-soft);
+    transition: color 0.2s, box-shadow 0.3s;
+  }
+
+  .contact-fab:hover {
+    color: var(--color-accent-ink);
+    box-shadow: 0 2px 8px rgba(26,25,23,0.10), inset 0 0 0 1px rgba(26,25,23,0.14);
+  }
+
+  /* Compact pill on phones — the full-size one covers card captions
+     on narrow screens. */
+  @media (max-width: 560px) {
+    .contact-fab {
+      right: 1rem;
+      bottom: 1rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9375rem;
+    }
+  }
+</style>

@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import CollectionCard from "../../components/photography/CollectionCard.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
+import PhotographySubNav from "../../components/photography/PhotographySubNav.astro";
 import { collections } from "../../data/photography";
 ---
 
@@ -10,6 +11,9 @@ import { collections } from "../../data/photography";
   description="Photography collections by Alexandre Haineaux — landscape, portrait, architecture, and documentary."
 >
   <h1 class="sr-only">Photography</h1>
+
+  <div class="subnav-spacer" aria-hidden="true"></div>
+  <PhotographySubNav active="collections" />
 
   <!-- Collections grid -->
   <section class="collections-section" aria-label="Photography collections">
@@ -28,10 +32,17 @@ import { collections } from "../../data/photography";
 </BaseLayout>
 
 <style>
+  .subnav-spacer { height: 5.5rem; }
+
+  /* Taller stacked nav on small screens needs a deeper rest position. */
+  @media (max-width: 560px) {
+    .subnav-spacer { height: 8.5rem; }
+  }
+
   .collections-section {
     max-width: var(--max-width-editorial);
     margin-inline: auto;
-    padding: 7rem 1.5rem 0;
+    padding: 3rem 1.5rem 0;
   }
 
   @media (min-width: 640px)  { .collections-section { padding-inline: 2rem; } }

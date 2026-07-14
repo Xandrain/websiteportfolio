@@ -2,8 +2,10 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
+import YouTubeEmbed from "../../components/productions/YouTubeEmbed.astro";
 import { projects } from "../../data/three-d";
-import { srcset, dims } from "../../lib/responsive";
+import { srcset } from "../../lib/responsive";
+import { gallery, type GalleryItem } from "../../lib/media";
 
 export function getStaticPaths() {
   return projects.map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
@@ -14,6 +16,29 @@ const { project } = Astro.props;
 const isPV = project.category === "product-visualisation";
 const backHref = isPV ? "/productions/product-visualisation" : "/productions";
 const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
+
+const items = gallery(project);
+
+// Layout driven by each item's aspect ratio: landscape media span the full
+// editorial width, squarish/portrait media flow two-up. When a run of two-up
+// items has odd length, its first item is promoted to full width so no row is
+// left half-empty — unless it's a portrait, which would grow far too tall.
+const ratio = (it: GalleryItem) => (it.w && it.h ? it.w / it.h : 1);
+const spans = items.map((it) => (ratio(it) >= 1.25 ? 2 : 1));
+let runStart = -1;
+for (let i = 0; i <= spans.length; i++) {
+  if (i < spans.length && spans[i] === 1) {
+    if (runStart < 0) runStart = i;
+    continue;
+  }
+  if (runStart >= 0) {
+    if ((i - runStart) % 2 === 1 && ratio(items[runStart]) >= 0.9) spans[runStart] = 2;
+    runStart = -1;
+  }
+}
+
+const SIZES_FULL = "(min-width: 1280px) 1104px, 100vw";
+const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 ---
 
 <BaseLayout title={project.title} description={project.description} image={project.cover}>
@@ -42,32 +67,60 @@ const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
 
   <ProductionsSubNav active={project.category} />
 
-  <!-- Static images -->
-  {project.images && project.images.length > 0 && (
-    <section class="project-images" aria-label="Project images">
-      <div class="project-images__inner">
-        <div class="project-images__grid">
-          {project.images.map((src, i) => {
-            const d = dims(src);
-            return (
-              <div class="project-image-wrap" style={d ? `aspect-ratio:${d.w}/${d.h}` : undefined}>
+  <!-- Gallery: images + self-hosted video loops, derived from the project folder -->
+  {items.length > 0 && (
+    <section class="project-images" aria-label="Project media">
+      <div class="project-images__grid">
+        {items.map((item, i) => {
+          const span2 = spans[i] === 2;
+          const ar = item.w && item.h ? `aspect-ratio:${item.w}/${item.h}` : undefined;
+          return (
+            <div class:list={["project-image-wrap", span2 && "span-2"]} style={ar}>
+              {item.kind === "video" ? (
+                <video
+                  class="project-video"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                  poster={item.poster}
+                  width={item.w}
+                  height={item.h}
+                  tabindex="0"
+                  aria-label={`${project.title} — animation ${i + 1}. Click or press Enter to pause.`}
+                >
+                  {item.webm && <source src={item.webm} type="video/webm" />}
+                  {item.mp4 && <source src={item.mp4} type="video/mp4" />}
+                </video>
+              ) : (
                 <img
-                  src={src}
-                  srcset={srcset(src)}
-                  sizes="(min-width: 640px) 50vw, 100vw"
+                  src={item.src}
+                  srcset={srcset(item.src)}
+                  sizes={span2 ? SIZES_FULL : SIZES_HALF}
                   alt={`${project.title} — view ${i + 1}`}
-                  width={d?.w ?? 1600}
-                  height={d?.h ?? 900}
+                  width={item.w ?? 1600}
+                  height={item.h ?? 900}
                   loading={i < 2 ? "eager" : "lazy"}
                   fetchpriority={i === 0 ? "high" : undefined}
                   decoding="async"
                   class="project-image"
                 />
-              </div>
-            );
-          })}
-        </div>
+              )}
+            </div>
+          );
+        })}
       </div>
+    </section>
+  )}
+
+  <!-- YouTube (turnarounds, breakdowns) — click-to-load facade, nothing
+       third-party is requested until the visitor presses play -->
+  {project.youtube && project.youtube.length > 0 && (
+    <section class="project-yt" aria-label="Project videos">
+      {project.youtube.map((v) => (
+        <YouTubeEmbed slug={project.slug} id={v.id} title={v.title} />
+      ))}
     </section>
   )}
 
@@ -81,11 +134,40 @@ const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
   <DisciplineSwitch label="Also explore" href="/photography" name="Photography" />
 </BaseLayout>
 
+<script>
+  // Looping videos: honour prefers-reduced-motion (start paused, show native
+  // controls) and give everyone a pause control — click or Enter/Space toggles
+  // playback (WCAG 2.2.2).
+  const videos = document.querySelectorAll<HTMLVideoElement>(".project-video");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  videos.forEach((v) => {
+    if (reduce) {
+      v.removeAttribute("autoplay");
+      v.pause();
+      v.controls = true;
+      return;
+    }
+    const toggle = () => (v.paused ? v.play() : v.pause());
+    v.addEventListener("click", toggle);
+    v.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+</script>
+
 <style>
   .project-header {
     padding-top: 6.5rem;
     padding-bottom: 3rem;
     border-bottom: 1px solid var(--color-line);
+  }
+
+  /* Clear the taller stacked nav on small screens (back-link sits first). */
+  @media (max-width: 560px) {
+    .project-header { padding-top: 8.5rem; }
   }
 
   .project-header__inner {
@@ -137,7 +219,7 @@ const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
     color: var(--color-ink-soft);
   }
 
-  /* ── Images ──────────────────────────────────────────────── */
+  /* ── Gallery ─────────────────────────────────────────────── */
   .project-images {
     max-width: var(--max-width-editorial);
     margin-inline: auto;
@@ -156,7 +238,7 @@ const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
 
   @media (min-width: 640px) {
     .project-images__grid { grid-template-columns: repeat(2, 1fr); }
-    .project-images__grid > :first-child:nth-last-child(odd) { grid-column: span 2; }
+    .project-image-wrap.span-2 { grid-column: span 2; }
   }
 
   .project-image-wrap { overflow: hidden; background: var(--color-paper-alt); }
@@ -171,6 +253,31 @@ const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
   }
 
   .project-image:hover { filter: grayscale(0%); }
+
+  .project-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+
+  .project-video:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* ── YouTube ─────────────────────────────────────────────── */
+  .project-yt {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 1rem 1.5rem 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px)  { .project-yt { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .project-yt { padding-inline: 3rem; } }
 
   /* ── Footer ──────────────────────────────────────────────── */
   .project-footer {

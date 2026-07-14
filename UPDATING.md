@@ -5,6 +5,10 @@ This guide explains how to change the words and pictures on
 the recipes. Read the first two sections once; after that you'll only
 ever come back for the recipe you need.
 
+> ✨ New here? [NEW-FEATURES.md](NEW-FEATURES.md) explains the newer
+> capabilities (self-building galleries, turnaround videos, YouTube
+> embeds) and when to use which.
+
 ---
 
 ## 1. The two big ideas
@@ -93,12 +97,10 @@ Say you want to swap a placeholder photo for a real one.
    ```
 
    This makes the small fast-loading copies of your photo
-   (the `nl1-400.webp`, `nl1-800.webp`… files — see section 10).
-4. If the new photo has a different shape than the old one (e.g.
-   vertical instead of horizontal), also update its `width` and
-   `height` numbers in `src/data/photography.ts` — see the tip in
-   section 6.
-5. Check the preview, then publish.
+   (the `nl1-400.webp`, `nl1-800.webp`… files — see section 10) and
+   measures its size automatically — a photo can never show up
+   stretched or squashed, even if the new one is a different shape.
+4. Check the preview, then publish.
 
 ---
 
@@ -111,15 +113,15 @@ Say you want to swap a placeholder photo for a real one.
    it:
 
    ```ts
-   { src: "/photography/nl7.jpg", alt: "Fog rolling over the fjord at dawn", width: 1600, height: 1067 },
+   { src: "/photography/nl7.jpg", alt: "Fog rolling over the fjord at dawn" },
    ```
 
    - `src` — `/photography/` + your filename.
    - `alt` — one short sentence describing the photo. It's read aloud
      to blind visitors and read by Google. Just say what's in the picture.
-   - `width` / `height` — the photo's size in pixels. **To find it:**
-     right-click the photo file → **Properties** → **Details** tab →
-     "Dimensions". First number is width, second is height.
+
+   (That's all — the photo's pixel size is measured automatically by
+   the next step.)
 3. Run `npm run images` in the terminal.
 4. Check the preview, then publish.
 
@@ -144,16 +146,70 @@ edit everything:
 - `photos` — the list of photos (recipe 6 for each line).
 
 **New design / 3D project** — same game in `src/data/three-d.ts`: copy
-an existing project block and edit it. Two extras:
+an existing project block and edit it. Three things to know:
 
 - `category` must be exactly `"productions"` or
   `"product-visualisation"` — it decides which of the two tabs the
   project appears under.
 - Its images live in their own folder:
   `public/productions/your-slug/` with the files named `cover.jpg`,
-  `01.jpg`, `02.jpg`, …
+  `01.jpg`, `02.jpg`, … **You never list them in the text file** — the
+  project page finds every numbered file in the folder by itself, in
+  number order. Adding or removing a picture later = adding or deleting
+  a file in that folder (then `npm run images`).
+- If you want the cover picture to also appear as the first image on
+  the project page (the product-visualisation projects do this), add
+  the line `coverInGallery: true,` to the project block.
 
 Then as always: `npm run images` → preview → publish.
+
+---
+
+## 7b. Recipe: add a turnaround video (animation) to a project
+
+Short looping animations (3D turnarounds, GIF-style clips) are shown as
+real videos — they autoplay silently, loop, and are ~10× smaller than a
+GIF. To add one to a project:
+
+1. In the terminal, run (with your own file path):
+
+   ```
+   node scripts/gen-video.mjs public/productions/your-slug/04.gif
+   ```
+
+   This creates `04.webm`, `04.mp4` and `04-poster.jpg` next to it.
+   (It accepts GIFs and most video files — name the input with the
+   number you want it to have in the page order.)
+2. Delete the original `04.gif` — the whole point is not to ship it.
+3. Run `npm run images`, check the preview, publish. Nothing to edit in
+   the text files — the numbered files are found automatically.
+
+---
+
+## 7c. Recipe: add a YouTube video to a project
+
+For longer pieces (showreels, breakdowns) hosted on your YouTube
+channel:
+
+1. Grab the video's ID — the part after `watch?v=` in its address,
+   e.g. `https://www.youtube.com/watch?v=`**`AbCd1234xyz`**.
+2. In the terminal, run (with your project's slug and the ID):
+
+   ```
+   node scripts/fetch-yt-poster.mjs your-slug AbCd1234xyz
+   npm run images
+   ```
+
+   This saves the video's preview picture into the project folder, so
+   your page stays fast and private — YouTube is only contacted if a
+   visitor actually presses play.
+3. In `src/data/three-d.ts`, add one line to the project block:
+
+   ```ts
+   youtube: [{ id: "AbCd1234xyz", title: "360° turnaround" }],
+   ```
+
+4. Preview, then publish.
 
 ---
 
@@ -191,8 +247,9 @@ site and puts it online. Open haineaux.com and press **Ctrl + F5**
   ```
 
   ⚠️ Only run it when you truly want to abandon everything unsaved.
-- **A new photo looks stretched or squashed** → its `width`/`height`
-  numbers don't match the real file. Redo the Properties → Details check.
+- **A picture I added isn't showing** → you probably forgot
+  `npm run images`, or the filename has spaces/capitals. Rename it
+  simple-and-lowercase, run the command, check again.
 - **The live site doesn't show my change** → wait 2 minutes, then
   Ctrl + F5. Still nothing? The publish robot may have failed — ask for
   help (below).

@@ -1,24 +1,24 @@
 ---
 /**
- * Secondary nav for the Graphic Design & 3D section.
- * Two persistent, sticky tabs: Productions · Product Visualisation.
+ * Secondary nav for the Photography section.
+ * Two persistent, sticky tabs: Collections · Gallery.
  * Sits just below the fixed main nav pill and stays on screen while scrolling.
  */
-import type { ProductionCategory } from "../../data/three-d";
+export type PhotographyView = "collections" | "gallery";
 
 interface Props {
-  active: ProductionCategory;
+  active: PhotographyView;
 }
 
 const { active } = Astro.props;
 
-const tabs: { key: ProductionCategory; label: string; href: string }[] = [
-  { key: "productions", label: "Productions", href: "/productions" },
-  { key: "product-visualisation", label: "Product Visualisation", href: "/productions/product-visualisation" },
+const tabs: { key: PhotographyView; label: string; href: string }[] = [
+  { key: "collections", label: "Collections", href: "/photography" },
+  { key: "gallery", label: "Gallery", href: "/photography/gallery" },
 ];
 ---
 
-<nav class="subnav" aria-label="Graphic Design & 3D categories">
+<nav class="subnav" aria-label="Photography views">
   <div class="subnav__inner">
     {tabs.map((t) => (
       <a

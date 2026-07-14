@@ -2,7 +2,9 @@
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
+import ContactFab from "../components/ContactFab.astro";
 import { SITE, SOCIAL } from "../consts";
+import { dims } from "../lib/responsive";
 
 interface Props {
   title?: string;
@@ -21,6 +23,14 @@ const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE
 const origin = Astro.site ?? Astro.url.origin;
 const canonical = new URL(Astro.url.pathname, origin);
 const ogImage = new URL(image, origin);
+// Content covers are in the generated dims map; the default /og.jpg is a
+// fixed 1200×630 produced by scripts/gen-brand-assets.mjs.
+const ogDims = dims(image) ?? { w: 1200, h: 630 };
+
+// Floating "Contact" pill (→ /about) on the two work sections only.
+const showContactFab = ["/photography", "/productions"].some((p) =>
+  Astro.url.pathname.startsWith(p),
+);
 
 // Structured data — a single Person entity for the whole site, so search
 // engines can attach the name, role, location and profiles to Alexandre.
@@ -57,6 +67,8 @@ const personLd = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content={String(ogDims.w)} />
+    <meta property="og:image:height" content={String(ogDims.h)} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -85,5 +97,6 @@ const personLd = {
       <slot />
     </main>
     {!noFooter && <Footer />}
+    {showContactFab && <ContactFab />}
   </body>
 </html>

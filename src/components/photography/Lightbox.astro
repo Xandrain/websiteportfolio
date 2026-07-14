@@ -1,6 +1,6 @@
 ---
 import type { Photo } from "../../data/photography";
-import { srcset } from "../../lib/responsive";
+import { srcset, dims } from "../../lib/responsive";
 
 interface Props {
   photos: Photo[];
@@ -23,28 +23,31 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
   role="list"
   aria-label={`${collectionTitle} — photo gallery`}
 >
-  {photos.map((photo, i) => (
-    <li class="gallery-cell">
-      <button
-        class="gallery-item"
-        data-index={i}
-        aria-label={`Open photo ${i + 1}: ${photo.alt}`}
-      >
-        <img
-          src={photo.src}
-          srcset={srcset(photo.src)}
-          sizes="(min-width: 1280px) 380px, (min-width: 769px) 32vw, (min-width: 481px) 50vw, 100vw"
-          alt={photo.alt}
-          width={photo.width}
-          height={photo.height}
-          loading={i < 3 ? "eager" : "lazy"}
-          fetchpriority={i === 0 ? "high" : undefined}
-          decoding="async"
-          class="gallery-item__img"
-        />
-      </button>
-    </li>
-  ))}
+  {photos.map((photo, i) => {
+    const d = dims(photo.src);
+    return (
+      <li class="gallery-cell">
+        <button
+          class="gallery-item"
+          data-index={i}
+          aria-label={`Open photo ${i + 1}: ${photo.alt}`}
+        >
+          <img
+            src={photo.src}
+            srcset={srcset(photo.src)}
+            sizes="(min-width: 1280px) 380px, (min-width: 769px) 32vw, (min-width: 481px) 50vw, 100vw"
+            alt={photo.alt}
+            width={d?.w ?? 1600}
+            height={d?.h ?? 1067}
+            loading={i < 3 ? "eager" : "lazy"}
+            fetchpriority={i === 0 ? "high" : undefined}
+            decoding="async"
+            class="gallery-item__img"
+          />
+        </button>
+      </li>
+    );
+  })}
 </ul>
 
 <!-- Lightbox dialog -->
@@ -101,6 +104,18 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
 
   let current = 0;
 
+  // Warm the browser cache for a neighbouring photo so prev/next feels
+  // instant instead of waiting on the network.
+  function preload(index: number) {
+    const p = photos[(index + photos.length) % photos.length];
+    const img = new Image();
+    if (p.srcset) {
+      img.sizes = "90vw";
+      img.srcset = p.srcset;
+    }
+    img.src = p.src;
+  }
+
   function show(index: number) {
     current = (index + photos.length) % photos.length;
     const p = photos[current];
@@ -113,6 +128,8 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
     lbTotal.textContent = String(photos.length);
     btnPrev.disabled = photos.length <= 1;
     btnNext.disabled = photos.length <= 1;
+    preload(current + 1);
+    preload(current - 1);
   }
 
   function open(index: number) {
@@ -158,20 +175,26 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
 </script>
 
 <style>
-  /* ── Gallery grid ───────────────────────────────────────────── */
+  /* ── Gallery — ratio-preserving masonry (CSS columns, zero JS) ─
+     Each photo keeps its native aspect ratio instead of being cropped
+     square; the width/height attributes reserve the space, so the
+     column layout doesn't shift as images load. */
   .photo-gallery {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    columns: 3;
+    column-gap: 0.5rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  @media (max-width: 768px)  { .photo-gallery { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 480px)  { .photo-gallery { grid-template-columns: 1fr; } }
+  @media (max-width: 768px)  { .photo-gallery { columns: 2; } }
+  @media (max-width: 480px)  { .photo-gallery { columns: 1; } }
 
-  .gallery-cell { display: block; }
+  .gallery-cell {
+    display: block;
+    break-inside: avoid;
+    margin-bottom: 0.5rem;
+  }
 
   .gallery-item {
     all: unset;
@@ -180,13 +203,13 @@ const photosData = photos.map((p) => ({ ...p, srcset: srcset(p.src) ?? "" }));
     cursor: zoom-in;
     overflow: hidden;
     background: var(--color-paper-alt);
-    aspect-ratio: 1;
+    width: 100%;
   }
 
   .gallery-item__img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    display: block;
     transform: scale(1.03);
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                 filter    0.4s;

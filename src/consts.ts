@@ -12,8 +12,8 @@ export const SITE = {
 };
 
 export const NAV: { href: string; label: string; short?: string }[] = [
-  { href: "/photography", label: "Photography" },
   { href: "/productions", label: "Graphic Design & 3D", short: "Design & 3D" },
+  { href: "/photography", label: "Photography" },
   { href: "/about", label: "About" },
 ];
 

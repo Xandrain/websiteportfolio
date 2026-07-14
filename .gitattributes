@@ -1,0 +1,15 @@
+# Normalize line endings: LF in the repo, auto-convert on checkout.
+# Critical on Windows so rebuilds don't show hundreds of phantom-modified files.
+* text=auto eol=lf
+
+# Binary assets — never touch line endings.
+*.woff2 binary
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.mp4   binary
+*.webm  binary
+*.pdf   binary
