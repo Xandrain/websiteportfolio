@@ -1,10 +1,44 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE, NAV } from "../consts";
+import { collections } from "../data/photography";
+import { projects } from "../data/three-d";
+import { srcset, dims } from "../lib/responsive";
 
 // Primary routes (the traffic split) vs. secondary. Driven by consts.
 const primary = NAV.filter((i) => i.href !== "/about");
 const about = NAV.find((i) => i.href === "/about");
+
+// Curated highlight reel below the gate — a 1-2-1-2 editorial rhythm
+// (full-width row, two-up pair, repeated) mixing both disciplines. Each tile
+// links to its collection/project page; covers come from the data files so a
+// swapped cover updates here too. `full` marks the wide rows; `pos` nudges
+// object-position when the wide crop needs reframing.
+const photo = (slug: string) => {
+  const c = collections.find((c) => c.slug === slug);
+  if (!c) throw new Error(`Home featured: unknown collection "${slug}"`);
+  return { href: `/photography/${slug}`, src: c.cover, label: c.title };
+};
+const production = (slug: string) => {
+  const p = projects.find((p) => p.slug === slug);
+  if (!p) throw new Error(`Home featured: unknown production "${slug}"`);
+  return { href: `/productions/${slug}`, src: p.cover, label: p.title };
+};
+
+const featured: {
+  href: string;
+  src: string;
+  label: string;
+  full?: boolean;
+  pos?: string;
+}[] = [
+  { ...photo("northern-light"), full: true },
+  { ...production("mojo-swoptops") },
+  { ...photo("in-the-studio") },
+  { ...production("crown-reinterpretation"), full: true, pos: "50% 62%" },
+  { ...production("half-moon-eau-de-parfum") },
+  { ...photo("concrete-and-glass") },
+];
 ---
 
 <BaseLayout
@@ -34,6 +68,39 @@ const about = NAV.find((i) => i.href === "/about");
           {about.label}
         </a>
       )}
+    </div>
+
+    <a href="#work" class="gate__scroll">
+      <span class="gate__scroll-label">Scroll</span>
+      <span class="gate__scroll-line" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <section id="work" class="work">
+    <h2 class="sr-only">Selected work</h2>
+    <div class="work__grid">
+      {featured.map((f) => {
+        const d = dims(f.src);
+        return (
+          <a
+            href={f.href}
+            class:list={["work__item", { "work__item--full": f.full }]}
+          >
+            <img
+              src={f.src}
+              srcset={srcset(f.src)}
+              sizes={f.full ? "100vw" : "50vw"}
+              alt={f.label}
+              width={d?.w ?? 1600}
+              height={d?.h ?? 1067}
+              loading="lazy"
+              decoding="async"
+              class="work__img"
+              style={f.pos ? `object-position: ${f.pos}` : undefined}
+            />
+          </a>
+        );
+      })}
     </div>
   </section>
 </BaseLayout>
@@ -211,6 +278,114 @@ const about = NAV.find((i) => i.href === "/about");
     .gate__route + .gate__route {
       box-shadow: inset 1px 0 0 rgba(26, 25, 23, 0.09);
     }
+  }
+
+  /* ── Scroll cue — hints at the work section below the fold ──── */
+  .gate__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.25rem;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.9rem 0;
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: color 0.2s;
+  }
+
+  .gate__scroll:hover,
+  .gate__scroll:focus-visible { color: var(--color-accent-ink); }
+
+  .gate__scroll-line {
+    position: relative;
+    width: 1px;
+    height: 2.5rem;
+    background: currentColor;
+    opacity: 0.35;
+    overflow: hidden;
+  }
+
+  /* A short bright segment sweeps down the hairline; the static line above
+     is the reduced-motion (and resting) presentation. */
+  @media (prefers-reduced-motion: no-preference) {
+    .gate__scroll-line::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 40%;
+      background: var(--color-ink);
+      animation: gate-scroll-sweep 2.4s cubic-bezier(0.4, 0, 0.4, 1) infinite;
+    }
+    @keyframes gate-scroll-sweep {
+      0%        { transform: translateY(-110%); }
+      55%, 100% { transform: translateY(260%); }
+    }
+  }
+
+  /* ── Selected work — 1-2-1-2 editorial rhythm ────────────────── */
+  /* Frameless mosaic: full-bleed, zero gutters, flush against the gate —
+     the tiles read as one stitched block. */
+  .work__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .work__item {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--color-paper-alt);
+  }
+
+  /* Soft vignette running from each tile's edges toward its centre — frames
+     every image without drawing a border line, so the mosaic stays seamless. */
+  .work__item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 1.25rem rgba(26, 25, 23, 0.10),
+      inset 0 0 3.5rem rgba(26, 25, 23, 0.20);
+  }
+
+  .work__item--full { grid-column: 1 / -1; }
+
+  .work__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transform: scale(1.04);
+    filter: grayscale(15%);
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                filter    0.6s;
+  }
+
+  /* Full rows read as wide editorial banners; on phones they relax to 4:3
+     so they don't shrink to a letterbox strip. */
+  .work__item--full .work__img { aspect-ratio: 4 / 3; }
+
+  .work__item:hover .work__img,
+  .work__item:focus-visible .work__img {
+    transform: scale(1);
+    filter: grayscale(0%);
+  }
+
+  @media (min-width: 640px) {
+    .work__item--full .work__img { aspect-ratio: 16 / 9; }
   }
 </style>
 
