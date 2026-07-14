@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
-import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
 import YouTubeEmbed from "../../components/productions/YouTubeEmbed.astro";
 import { projects } from "../../data/three-d";
 import { srcset } from "../../lib/responsive";
@@ -64,8 +63,6 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
       </div>
     </div>
   </section>
-
-  <ProductionsSubNav active={project.category} />
 
   <!-- Gallery: images + self-hosted video loops, derived from the project folder -->
   {items.length > 0 && (

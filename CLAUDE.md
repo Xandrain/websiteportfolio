@@ -78,8 +78,9 @@ defaults; edit the script or replace the files for bespoke artwork.
   two-tab sub-nav (`components/productions/ProductionsSubNav.astro`) and splits
   the section into two pages: `/productions` (category `productions`) and
   `/productions/product-visualisation` (category `product-visualisation`). The
-  sub-nav is sticky and shown on both listing pages and every `[slug]` project
-  page (active tab = the project's category; the "back" link is category-aware).
+  sub-nav is sticky and shown on the two listing pages only; individual
+  `[slug]` project pages omit it (the category tabs are redundant there — the
+  project header carries a category-aware "back" link instead).
   **Galleries are derived at build time** by `src/lib/media.ts`: every
   numbered file (`01.*`, `02.*`, …) in `public/productions/<slug>/` becomes a
   gallery item in name order — images and videos alike (a video is the trio
