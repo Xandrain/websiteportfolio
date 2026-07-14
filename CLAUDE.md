@@ -199,10 +199,19 @@ there's no dashboard-level CSP config, this file is the only source of truth.
 
 ## Deployment
 
-`.github/workflows/pages.yml` runs on push to `main`: `npm ci` → `npm run
-build` → `npx wrangler pages deploy dist`. Requires three GitHub repo secrets
-(`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_PROJECT_NAME`) —
-not yet configured as of this writing; the Cloudflare Pages project itself
-also still needs to be created (dashboard or `wrangler pages project
-create`) before the first CI deploy will succeed. Custom domain attachment
-happens in the Cloudflare dashboard, not in this repo.
+**Live and wired up** (since 2026-07-14). The repo is
+`github.com/Xandrain/websiteportfolio`; `.github/workflows/pages.yml` runs on
+push to `main` (or manual `workflow_dispatch`): `npm ci` → `npm run build` →
+`npx wrangler pages deploy dist --project-name=… --branch=main`. The three
+GitHub Actions secrets are set (`CLOUDFLARE_API_TOKEN` — a least-privilege
+_Cloudflare Pages · Edit_ token, `CLOUDFLARE_ACCOUNT_ID`,
+`CLOUDFLARE_PROJECT_NAME=websiteportfolio`). The Cloudflare Pages project
+`websiteportfolio` is **Direct Upload** (NOT Git-connected — Actions drives the
+deploy) with `main` as its production branch, live at
+`https://websiteportfolio-4ht.pages.dev`. Every push to `main` publishes a
+production deploy. Custom-domain attachment (`haineaux.com`) still happens in
+the Cloudflare dashboard, not in this repo — not yet attached.
+
+Gotcha for setting secrets from Windows PowerShell: pipe-to-`gh` (`"val" | gh
+secret set`) prepends a UTF-8 BOM that wrangler rejects (`U+FEFF` in the auth
+header) — always use `gh secret set NAME --body "val"` instead.
