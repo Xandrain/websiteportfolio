@@ -1,0 +1,207 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE } from "../consts";
+---
+
+<BaseLayout
+  title="Legal Notice"
+  description={`Legal notice for haineaux.com — copyright, licensing, AI-training policy, privacy, and site information for the work of ${SITE.name}.`}
+>
+  <article class="legal">
+    <header class="legal__head">
+      <p class="eyebrow">Legal</p>
+      <h1>Legal Notice</h1>
+      <p class="legal__updated">Last updated: 14 July 2026</p>
+    </header>
+
+    <section aria-labelledby="publisher">
+      <h2 id="publisher">Publisher</h2>
+      <p>
+        This website, <strong>haineaux.com</strong>, is published by
+        {SITE.name}, {SITE.role.toLowerCase()}, based in Luxembourg and working
+        worldwide. Contact:
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+    </section>
+
+    <section aria-labelledby="copyright">
+      <h2 id="copyright">Copyright &amp; intellectual property</h2>
+      <p>
+        All content on this site — photographs, graphic design work, 3D models
+        and renders, animations, videos, texts, and the site's visual identity —
+        is, unless expressly stated otherwise, the exclusive property of
+        {SITE.name} and is protected by Luxembourg, European Union, and
+        international copyright law, including the Berne Convention.
+        <strong>All rights reserved.</strong>
+      </p>
+      <p>
+        No part of this site may be reproduced, copied, distributed, modified,
+        adapted, publicly displayed, stored in a retrieval system, sold, or
+        otherwise exploited, in whole or in part, in any form or by any means,
+        without the prior written permission of {SITE.name}. Viewing the site
+        in a web browser for personal, non-commercial reference is the only use
+        granted.
+      </p>
+    </section>
+
+    <section aria-labelledby="client-work">
+      <h2 id="client-work">Commissioned &amp; client work</h2>
+      <p>
+        Some projects shown here were produced for clients, studios, or
+        broadcasters and are presented solely as a record of work performed.
+        Third-party trademarks, characters, and brand assets remain the
+        property of their respective owners; their appearance on this site does
+        not imply endorsement or any transfer of rights.
+      </p>
+    </section>
+
+    <section aria-labelledby="ai-policy">
+      <h2 id="ai-policy">AI training &amp; text-and-data mining</h2>
+      <p>
+        {SITE.name} <strong>expressly reserves all rights</strong> to the
+        content of this site for text-and-data-mining purposes within the
+        meaning of Article 4(3) of Directive (EU) 2019/790 on copyright in the
+        Digital Single Market, and under equivalent provisions in other
+        jurisdictions.
+      </p>
+      <p>
+        Scraping, harvesting, crawling, mining, or otherwise using any content
+        from this site — in particular the images and videos — to train,
+        fine-tune, ground, or evaluate machine-learning systems or generative
+        AI models is <strong>prohibited</strong> without prior written consent.
+        This reservation is also declared in machine-readable form: in
+        <code>robots.txt</code>, via the TDM Reservation Protocol
+        (<code>/.well-known/tdmrep.json</code> and the
+        <code>tdm-reservation</code> HTTP header), and through
+        <code>noai</code>/<code>noimageai</code> directives.
+      </p>
+      <p>
+        Any use in breach of this reservation constitutes copyright
+        infringement and may give rise to civil and criminal liability.
+      </p>
+    </section>
+
+    <section aria-labelledby="licensing">
+      <h2 id="licensing">Licensing &amp; permissions</h2>
+      <p>
+        Licensing enquiries — editorial or commercial use, exhibitions, prints,
+        or any other reuse — are welcome. Write to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> describing the
+        intended use, medium, territory, and duration.
+      </p>
+    </section>
+
+    <section aria-labelledby="liability">
+      <h2 id="liability">Liability</h2>
+      <p>
+        This site and its content are provided "as is". While prepared with
+        reasonable care, no warranty is given as to their accuracy,
+        completeness, or availability. Links to external websites are provided
+        for convenience only; {SITE.name} has no control over, and accepts no
+        responsibility for, their content.
+      </p>
+    </section>
+
+    <section aria-labelledby="hosting">
+      <h2 id="hosting">Hosting</h2>
+      <p>
+        This site is hosted on Cloudflare Pages, a service of Cloudflare,
+        Inc., 101 Townsend Street, San Francisco, CA 94107, USA, delivered
+        through Cloudflare's global network including points of presence in the
+        European Union.
+      </p>
+    </section>
+
+    <section aria-labelledby="privacy">
+      <h2 id="privacy">Privacy</h2>
+      <p>
+        This site sets no cookies, runs no analytics, and embeds no trackers.
+        It collects no personal data by itself. Cloudflare, as the hosting
+        provider, may process technical data (such as IP addresses) in server
+        logs for security and delivery purposes.
+      </p>
+      <p>
+        Embedded YouTube videos load nothing from YouTube until you press play;
+        from that moment, YouTube's own privacy policy applies
+        (videos are served via <code>youtube-nocookie.com</code>).
+      </p>
+      <p>
+        If you contact {SITE.name} by email, your address and message are used
+        only to respond to you. You may exercise your rights under the GDPR
+        (access, rectification, erasure) by writing to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+    </section>
+
+    <section aria-labelledby="law">
+      <h2 id="law">Governing law</h2>
+      <p>
+        This notice and any dispute arising from the use of this site are
+        governed by the laws of the Grand Duchy of Luxembourg. The courts of
+        Luxembourg City have exclusive jurisdiction, without prejudice to
+        mandatory consumer-protection rules.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 42rem;
+    margin-inline: auto;
+    padding: 9rem 1.5rem 4rem; /* top compensates for the fixed nav */
+  }
+
+  @media (min-width: 640px) { .legal { padding-inline: 2rem; } }
+
+  .legal__head { margin-bottom: 3rem; }
+
+  .legal h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    letter-spacing: 0.01em;
+    color: var(--color-ink);
+    margin-top: 1rem;
+  }
+
+  .legal__updated {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink-muted);
+  }
+
+  .legal section { margin-top: 2.75rem; }
+
+  .legal h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.25rem;
+    color: var(--color-ink);
+    margin-bottom: 0.875rem;
+  }
+
+  .legal p {
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+  }
+
+  .legal p + p { margin-top: 0.875rem; }
+
+  .legal strong { color: var(--color-ink); font-weight: 500; }
+
+  .legal a {
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .legal code {
+    font-size: 0.85em;
+    background: rgba(26, 25, 23, 0.05);
+    border-radius: 0.25rem;
+    padding: 0.1em 0.35em;
+  }
+</style>

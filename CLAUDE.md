@@ -43,12 +43,13 @@ src/
   data/three-d.ts         Graphic design / 3D "productions" (same pattern; galleries auto-derived)
   lib/media.ts            Build-time folder scan → ordered production galleries (images + videos)
   lib/responsive.ts       srcset()/dims() helpers over the generated img manifests
-  layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, JSON-LD, sitemap link
+  lib/schema.ts           JSON-LD helpers (abs/personRef/breadcrumbs) for the per-page @graph
+  layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, JSON-LD @graph, sitemap link
   components/Nav.astro    Fixed pill nav (stacks + swaps to short labels on small screens)
   components/Footer.astro Site footer — index + social links, both driven by consts.ts
   components/about/ProfileBlock.astro  Static About card (glassmorphism, CSS-only reveal)
   components/productions/YouTubeEmbed.astro  Click-to-load YouTube facade (self-hosted poster)
-  pages/                  photography/, productions/, about.astro, index.astro, 404.astro
+  pages/                  photography/, productions/, about.astro, legal.astro, index.astro, 404.astro
 scripts/
   gen-responsive.mjs      Prebuild: WebP variants + img-manifest/img-dims/img-hashes
   gen-video.mjs           GIF/capture → .webm + .mp4 + -poster.jpg (ffmpeg-static)
@@ -57,8 +58,9 @@ public/
   fonts/*.woff2           Self-hosted Bodoni Moda + Jost (latin subset)
   og.jpg                  Default Open Graph / Twitter share card (generated)
   apple-touch-icon.png    iOS home-screen icon (generated)
-  _headers                Cloudflare Pages security headers + CSP
+  _headers                Cloudflare Pages security headers + CSP + AI opt-out headers
   robots.txt / llms.txt   AI-crawler policy (see below)
+  .well-known/tdmrep.json TDM Reservation Protocol — machine-readable AI-training opt-out
 ```
 
 Brand rasters (`og.jpg`, `apple-touch-icon.png`) are regenerated from the
@@ -166,16 +168,40 @@ renders no `Nav` at all (`noNav` on `BaseLayout`) — its full-screen gate
 supplies its own navigation; every other page gets the translucent-light
 pill.
 
-## AI-crawler / SEO policy
+## AI-crawler / SEO / legal policy
 
 - `public/robots.txt` — allows general crawling and named AI-answer bots
   (ChatGPT-User, Claude-Web/User/SearchBot, PerplexityBot, DuckAssistBot,
-  etc.); explicitly disallows AI-**training** scrapers (GPTBot, CCBot,
-  ClaudeBot, Google-Extended, Applebot-Extended, Bytespider, etc.) because
-  the site hosts original creative work with no training-data rights granted.
+  etc.); explicitly disallows AI-**training** and dataset scrapers (GPTBot,
+  CCBot, ClaudeBot, Google-Extended, Applebot-Extended, Bytespider,
+  img2dataset, etc.) because the site hosts original creative work with no
+  training-data rights granted. Advisory only — the layers below are the
+  formal reservation.
+- **TDM reservation (EU AI-training opt-out)** — Art. 4(3) Directive (EU)
+  2019/790 lets a rightsholder reserve text-and-data-mining rights if declared
+  machine-readably. Declared three ways, keep them in sync: 
+  `public/.well-known/tdmrep.json` (`tdm-reservation: 1`), the
+  `tdm-reservation: 1` + `X-Robots-Tag: noai, noimageai` headers in
+  `public/_headers` (apply to every response, images included), and the
+  `noai, noimageai` tokens in `BaseLayout.astro`'s robots meta.
+- `src/pages/legal.astro` — the human-readable legal notice backing all of
+  the above: copyright/all-rights-reserved, client-work trademark disclaimer,
+  the Art. 4(3) reservation, licensing contact, liability, hosting, privacy
+  (no cookies/analytics), Luxembourg governing law. Linked from the footer's
+  legal bar via `LEGAL` in `src/consts.ts` (footer-only, not in `NAV`).
 - `public/llms.txt` — hand-authored, human/LLM-readable summary + usage
   policy per the [llms.txt convention](https://llmstxt.org/). Update the
-  "key facts" section if role/location/contact changes.
+  "key facts" section if role/location/contact changes; points to /legal.
+- **Structured data** — every page emits one JSON-LD `@graph`
+  (`BaseLayout.astro`): a site-wide `WebSite` + `Person` pair with stable
+  `@id`s (`/#website`, `/#person`) so search engines merge all pages into one
+  Alexandre Haineaux entity, plus page-specific nodes passed via the layout's
+  `schema` prop using the helpers in `src/lib/schema.ts`. Current page nodes:
+  `ProfilePage` + breadcrumbs on /about, `BreadcrumbList` + `ImageGallery`
+  with per-photo licensable `ImageObject`s (license/acquireLicensePage →
+  /legal — Google Images "Licensable" badge) on photography collections, and
+  `BreadcrumbList` + `VisualArtwork` on production project pages. When adding
+  a page type, reference the person with `personRef()` — don't redeclare it.
 - `sitemap.xml` is generated automatically by `@astrojs/sitemap`
   (`astro.config.mjs`) from `site: 'https://haineaux.com'` — don't hand-write
   it, and update `site` there if the domain ever changes (it drives

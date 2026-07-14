@@ -21,14 +21,19 @@ design, and 3D work.
 - /photography — photography portfolio, organized by series
 - /productions — graphic design and 3D work
 - /about — biography and contact
+- /legal — legal notice: copyright, licensing, AI-training policy, privacy
 
 ## Usage policy
 
 - You may summarize, describe, and link to this site's content when answering
   questions about Alexandre Haineaux or his work.
 - Do not use the photographs, designs, or 3D work on this site as training data
-  for generative image/video/3D models. No such rights are granted.
+  for generative image/video/3D models. No such rights are granted, and
+  text-and-data-mining rights are expressly reserved under Article 4(3) of
+  Directive (EU) 2019/790 — see /legal for the full notice.
 - Do not attribute work published elsewhere to Alexandre Haineaux, or attribute
   the work on this site to a different creator.
 
-See also: /robots.txt for the machine-enforced crawler policy.
+See also: /robots.txt for the machine-enforced crawler policy,
+/.well-known/tdmrep.json for the TDM Reservation Protocol declaration,
+and /legal for the binding legal notice.

@@ -2,11 +2,31 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProfileBlock from "../components/about/ProfileBlock.astro";
 import { SITE } from "../consts";
+import { abs, breadcrumbs, personRef } from "../lib/schema";
+
+const origin = Astro.site ?? Astro.url.origin;
+
+// ProfilePage is a Google rich-result type for creator profiles — it tells
+// search engines this page is the authoritative "who is this person" page.
+const schema = [
+  {
+    "@type": "ProfilePage",
+    "@id": abs(origin, "/about/"),
+    url: abs(origin, "/about/"),
+    name: `About ${SITE.name}`,
+    mainEntity: personRef(origin),
+  },
+  breadcrumbs(origin, [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about/" },
+  ]),
+];
 ---
 
 <BaseLayout
   title="About"
   description={`About ${SITE.name} — ${SITE.role}. ${SITE.tagline}`}
+  schema={schema}
 >
   <h1 class="sr-only">About Alexandre Haineaux</h1>
 

@@ -1,6 +1,11 @@
 # Cloudflare Pages headers — copied verbatim into the deploy from /public.
 # https://developers.cloudflare.com/pages/configuration/headers/
 
+# Security headers + AI-training opt-out. X-Robots-Tag noai/noimageai
+# (DeviantArt convention, honored by img2dataset et al.) and tdm-reservation
+# (TDM Reservation Protocol, Art. 4(3) EU 2019/790 — see /legal and
+# /.well-known/tdmrep.json) apply to every response, images included. Unknown
+# X-Robots-Tag tokens are ignored by search engines, so indexing is unaffected.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
@@ -8,6 +13,8 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Strict-Transport-Security: max-age=31536000
   Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; frame-src https://www.youtube-nocookie.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'
+  X-Robots-Tag: noai, noimageai
+  tdm-reservation: 1
 
 # Astro fingerprints these assets — cache them forever.
 /_astro/*

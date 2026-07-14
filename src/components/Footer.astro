@@ -1,5 +1,5 @@
 ---
-import { SITE, NAV, SOCIAL } from "../consts";
+import { SITE, NAV, SOCIAL, LEGAL } from "../consts";
 const year = new Date().getFullYear();
 ---
 
@@ -42,6 +42,7 @@ const year = new Date().getFullYear();
 
   <div class="site-footer__legal">
     <p>© {year} {SITE.name}. All rights reserved.</p>
+    <a href={LEGAL.href} class="site-footer__legal-link">{LEGAL.label}</a>
     <p>{SITE.location}</p>
   </div>
 </footer>
@@ -148,4 +149,12 @@ const year = new Date().getFullYear();
   @media (min-width: 1024px) {
     .site-footer__legal { padding-inline: 3rem; }
   }
+
+  .site-footer__legal-link {
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .site-footer__legal-link:hover { color: var(--color-accent-ink); }
 </style>

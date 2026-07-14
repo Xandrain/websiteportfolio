@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import ContactFab from "../components/ContactFab.astro";
 import { SITE, SOCIAL } from "../consts";
 import { dims } from "../lib/responsive";
+import { abs, personId, personRef } from "../lib/schema";
 
 interface Props {
   title?: string;
@@ -15,9 +16,18 @@ interface Props {
   noFooter?: boolean;
   /** Omit nav (used on full-screen gateway pages that supply their own navigation) */
   noNav?: boolean;
+  /** Extra JSON-LD nodes merged into the page's @graph (see src/lib/schema.ts) */
+  schema?: Record<string, unknown>[];
 }
 
-const { title, description = SITE.description, image = "/og.jpg", noFooter, noNav } = Astro.props;
+const {
+  title,
+  description = SITE.description,
+  image = "/og.jpg",
+  noFooter,
+  noNav,
+  schema = [],
+} = Astro.props;
 
 const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.role}`;
 const origin = Astro.site ?? Astro.url.origin;
@@ -32,18 +42,47 @@ const showContactFab = ["/photography", "/productions"].some((p) =>
   Astro.url.pathname.startsWith(p),
 );
 
-// Structured data — a single Person entity for the whole site, so search
-// engines can attach the name, role, location and profiles to Alexandre.
-const personLd = {
+// Structured data — one @graph per page: the site-wide WebSite + Person
+// entities (stable @ids, so search engines merge every page's signals into a
+// single "Alexandre Haineaux" entity) plus any page-specific nodes passed via
+// the `schema` prop (breadcrumbs, galleries, artworks — see src/lib/schema.ts).
+const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  name: SITE.name,
-  jobTitle: SITE.role,
-  email: SITE.email,
-  url: origin.toString(),
-  image: ogImage.toString(),
-  address: { "@type": "PostalAddress", addressLocality: SITE.location.split("·")[0].trim() },
-  sameAs: SOCIAL.filter((s) => s.href.startsWith("http")).map((s) => s.href),
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": abs(origin, "/#website"),
+      url: origin.toString(),
+      name: SITE.name,
+      description: SITE.description,
+      inLanguage: "en",
+      publisher: personRef(origin),
+    },
+    {
+      "@type": "Person",
+      "@id": personId(origin),
+      name: SITE.name,
+      jobTitle: SITE.role,
+      description: SITE.description,
+      email: SITE.email,
+      url: origin.toString(),
+      image: abs(origin, "/about/avatar.webp"),
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: SITE.location.split("·")[0].trim(),
+        addressCountry: "LU",
+      },
+      knowsAbout: [
+        "Photography",
+        "Graphic design",
+        "3D modeling",
+        "Character rigging",
+        "Product visualisation",
+      ],
+      sameAs: SOCIAL.filter((s) => s.href.startsWith("http")).map((s) => s.href),
+    },
+    ...schema,
+  ],
 };
 ---
 
@@ -57,7 +96,9 @@ const personLd = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="robots" content="index, follow" />
+    <!-- max-image-preview:large lets Google show full-size image previews;
+         noai/noimageai are AI-training opt-out tokens (ignored by search engines) -->
+    <meta name="robots" content="index, follow, max-image-preview:large, noai, noimageai" />
     <meta name="theme-color" content="#FAFAF8" />
 
     <!-- Open Graph -->
@@ -90,7 +131,7 @@ const personLd = {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(personLd)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   </head>
   <body class="flex min-h-[100dvh] flex-col bg-paper text-ink antialiased">
     <a href="#main" class="skip-link">Skip to content</a>

@@ -2,6 +2,11 @@
 # Portfolio site for original photography, graphic design and 3D work.
 # Search and AI-answer engines are welcome; AI-training scrapers are not —
 # this site hosts original creative work with no training-data license granted.
+#
+# robots.txt is advisory. The binding reservation of rights lives in
+# /legal (Art. 4(3) Directive (EU) 2019/790), and is also declared
+# machine-readably via /.well-known/tdmrep.json, the tdm-reservation
+# HTTP header, and noai/noimageai directives (see public/_headers).
 
 User-agent: *
 Allow: /
@@ -32,6 +37,12 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
 User-agent: DuckAssistBot
 Allow: /
 
@@ -51,6 +62,18 @@ Disallow: /
 User-agent: Google-Extended
 Disallow: /
 
+User-agent: GoogleOther
+Disallow: /
+
+User-agent: GoogleOther-Image
+Disallow: /
+
+User-agent: GoogleOther-Video
+Disallow: /
+
+User-agent: Google-CloudVertexBot
+Disallow: /
+
 User-agent: Applebot-Extended
 Disallow: /
 
@@ -63,10 +86,47 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
+User-agent: TikTokSpider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+User-agent: PanguBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: VelenPublicWebCrawler
+Disallow: /
+
 User-agent: Diffbot
 Disallow: /
 
 User-agent: Omgilibot
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+User-agent: Webzio-Extended
+Disallow: /
+
+# Image-dataset scrapers (LAION-style) — especially unwelcome on an image portfolio
+User-agent: img2dataset
 Disallow: /
 
 User-agent: ImagesiftBot

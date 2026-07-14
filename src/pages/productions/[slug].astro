@@ -5,6 +5,7 @@ import YouTubeEmbed from "../../components/productions/YouTubeEmbed.astro";
 import { projects } from "../../data/three-d";
 import { srcset } from "../../lib/responsive";
 import { gallery, type GalleryItem } from "../../lib/media";
+import { abs, breadcrumbs, personRef } from "../../lib/schema";
 
 export function getStaticPaths() {
   return projects.map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
@@ -15,6 +16,32 @@ const { project } = Astro.props;
 const isPV = project.category === "product-visualisation";
 const backHref = isPV ? "/productions/product-visualisation" : "/productions";
 const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
+
+const origin = Astro.site ?? Astro.url.origin;
+const pageUrl = abs(origin, `/productions/${project.slug}/`);
+
+const schema = [
+  breadcrumbs(origin, [
+    { name: "Home", path: "/" },
+    { name: "Graphic Design & 3D", path: "/productions/" },
+    ...(isPV
+      ? [{ name: "Product Visualisation", path: "/productions/product-visualisation/" }]
+      : []),
+    { name: project.title, path: `/productions/${project.slug}/` },
+  ]),
+  {
+    "@type": "VisualArtwork",
+    "@id": `${pageUrl}#artwork`,
+    url: pageUrl,
+    name: project.title,
+    description: project.description,
+    image: abs(origin, project.cover),
+    dateCreated: String(project.year),
+    keywords: project.tags.join(", "),
+    artMedium: "Digital",
+    creator: personRef(origin),
+  },
+];
 
 const items = gallery(project);
 
@@ -40,7 +67,7 @@ const SIZES_FULL = "(min-width: 1280px) 1104px, 100vw";
 const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 ---
 
-<BaseLayout title={project.title} description={project.description} image={project.cover}>
+<BaseLayout title={project.title} description={project.description} image={project.cover} schema={schema}>
 
   <!-- Header -->
   <section class="project-header">

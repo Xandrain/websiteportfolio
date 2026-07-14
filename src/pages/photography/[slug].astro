@@ -4,18 +4,60 @@ import Lightbox from "../../components/photography/Lightbox.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import PhotographySubNav from "../../components/photography/PhotographySubNav.astro";
 import { collections } from "../../data/photography";
+import { SITE } from "../../consts";
+import { dims } from "../../lib/responsive";
+import { abs, breadcrumbs, personRef } from "../../lib/schema";
 
 export function getStaticPaths() {
   return collections.map((c) => ({ params: { slug: c.slug }, props: { collection: c } }));
 }
 
 const { collection } = Astro.props;
+
+const origin = Astro.site ?? Astro.url.origin;
+const pageUrl = abs(origin, `/photography/${collection.slug}/`);
+const legalUrl = abs(origin, "/legal/");
+
+// ImageGallery with per-photo license/acquireLicensePage/creditText — the
+// fields behind Google Images' "Licensable" badge. Every photo carries the
+// copyright notice and points buyers (and strays) back to /legal#licensing.
+const schema = [
+  breadcrumbs(origin, [
+    { name: "Home", path: "/" },
+    { name: "Photography", path: "/photography/" },
+    { name: collection.title, path: `/photography/${collection.slug}/` },
+  ]),
+  {
+    "@type": "ImageGallery",
+    "@id": `${pageUrl}#gallery`,
+    url: pageUrl,
+    name: collection.title,
+    description: collection.description,
+    dateCreated: String(collection.year),
+    author: personRef(origin),
+    associatedMedia: collection.photos.map((photo) => {
+      const d = dims(photo.src);
+      return {
+        "@type": "ImageObject",
+        contentUrl: abs(origin, photo.src),
+        caption: photo.alt,
+        ...(d ? { width: d.w, height: d.h } : {}),
+        creator: { "@type": "Person", name: SITE.name },
+        creditText: SITE.name,
+        copyrightNotice: `© ${collection.year} ${SITE.name}`,
+        license: legalUrl,
+        acquireLicensePage: `${legalUrl}#licensing`,
+      };
+    }),
+  },
+];
 ---
 
 <BaseLayout
   title={collection.title}
   description={collection.description}
   image={collection.cover}
+  schema={schema}
 >
   <!-- Back link + header -->
   <section class="collection-header">
