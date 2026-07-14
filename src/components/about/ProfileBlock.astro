@@ -207,6 +207,7 @@ const social: Social[] = [
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    min-width: 0; /* let the grid track shrink instead of blowing past the card */
   }
 
   .about__eyebrow {
@@ -304,7 +305,7 @@ const social: Social[] = [
   .about__cta-icon :global(svg) { width: 14px; height: 14px; }
 
   /* ── Right column — profile card ─────────────────────────── */
-  .about__right { position: relative; }
+  .about__right { position: relative; min-width: 0; }
 
   .about__glow {
     position: absolute;
@@ -501,6 +502,45 @@ const social: Social[] = [
     border-color: var(--color-accent-ink);
     color: var(--color-paper);
     animation: copy-confirm 0.22s ease-out;
+  }
+
+  /* ── Mobile layout hardening (phones) ────────────────────────
+     Tighter gutters, full-width stacked CTAs, softened letter-spacing,
+     and an email row whose copy button wraps onto its own line so the
+     address never gets squeezed off-screen. Paired with min-width:0 on
+     the grid columns (above), this keeps everything inside the card. */
+  @media (max-width: 640px) {
+    .about { padding: 2.5rem 1rem 0; }
+    .about__card { padding: 1.5rem 1.25rem; border-radius: 1.25rem; }
+    .about__grid { gap: 2rem; }
+    .about__left { gap: 1.5rem; }
+
+    .about__eyebrow {
+      letter-spacing: 0.16em;
+      padding: 0.3rem 0.75rem;
+      line-height: 1.5;
+    }
+
+    /* CTAs stack into a clean, full-width tappable column. */
+    .about__ctas { flex-direction: column; }
+    .about__cta {
+      width: 100%;
+      justify-content: center;
+      padding: 0 1.25rem;
+      letter-spacing: 0.12em;
+    }
+
+    .about__profile { padding: 1.5rem 1.25rem; }
+    .about__profile-role { letter-spacing: 0.14em; }
+
+    /* Email row: copy button drops to its own full-width line. */
+    .about__social-link--copy { flex-wrap: wrap; }
+    .about__social-mail { flex: 1 1 100%; }
+    .about__copy-btn {
+      flex: 1 1 100%;
+      margin-top: 0.625rem;
+      text-align: center;
+    }
   }
 
   /* ── Entrance reveal — only when motion is welcome. Base state
