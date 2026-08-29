@@ -33,7 +33,7 @@ const d = dims(project.cover);
     />
     <div class="project-card__overlay">
       <div class="project-card__meta">
-        {[String(project.year), ...project.tags.slice(0, 1)].join(" · ")}
+        {project.tags.slice(0, 2).join(" · ")}
       </div>
       <h2 class:list={["project-card__title", featured && "project-card__title--lg"]}>
         {project.title}

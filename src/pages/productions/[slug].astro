@@ -36,7 +36,6 @@ const schema = [
     name: project.title,
     description: project.description,
     image: abs(origin, project.cover),
-    dateCreated: String(project.year),
     keywords: project.tags.join(", "),
     artMedium: "Digital",
     creator: personRef(origin),
@@ -82,7 +81,6 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
       <div>
         <div class="project-header__meta">
-          <span class="label">{project.year}</span>
           {project.tags.map((t) => <span class="label">{t}</span>)}
         </div>
         <h1 class="project-header__title">{project.title}</h1>

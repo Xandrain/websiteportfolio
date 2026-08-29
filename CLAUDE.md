@@ -30,9 +30,9 @@ static output in `dist/`, deployed by `.github/workflows/pages.yml` on push to
 
 | Command | Action |
 |---|---|
-| `npm run dev` | Local dev server, `localhost:4321` |
+| `npm run dev` | Local dev server, `localhost:3100` |
 | `npm run build` | Production build to `dist/` |
-| `npm run preview` | Preview the built `dist/` output |
+| `npm run preview` | Preview the built `dist/` output, `localhost:4321` |
 
 ## File map
 
@@ -70,7 +70,9 @@ defaults; edit the script or replace the files for bespoke artwork.
 ## Content model rules
 
 - **Photography** (`src/data/photography.ts`): each `Collection` needs
-  `slug`, `title`, `description`, `cover`, `category`, `year`, `photos[]`.
+  `slug`, `title`, `description`, `cover`, `category`, `photos[]`. Projects
+  carry no year/date field — the site deliberately shows no dates anywhere
+  except the footer copyright and the legal notice.
   Local images go in `public/photography/<file>` and are referenced as
   `/photography/<file>`. Each `Photo` is just `src` + `alt` — pixel dimensions
   are read from the generated `img-dims.json` via `dims()`, never hand-typed.

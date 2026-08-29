@@ -1135,6 +1135,104 @@
       "src": "/productions/mojo-swoptops/03-poster-1024.webp"
     }
   ],
+  "/productions/mojo-swoptops/04-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/04-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/04-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/04-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/05-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/05-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/05-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/05-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/06-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/06-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/06-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/06-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/07-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/07-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/07-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/07-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/08-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/08-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/08-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/08-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/09-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/09-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/09-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/09-poster-1024.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/10-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/10-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/10-poster-800.webp"
+    },
+    {
+      "w": 1024,
+      "src": "/productions/mojo-swoptops/10-poster-1024.webp"
+    }
+  ],
   "/productions/mojo-swoptops/cover.jpg": [
     {
       "w": 400,

@@ -33,7 +33,6 @@ const schema = [
     url: pageUrl,
     name: collection.title,
     description: collection.description,
-    dateCreated: String(collection.year),
     author: personRef(origin),
     associatedMedia: collection.photos.map((photo) => {
       const d = dims(photo.src);
@@ -44,7 +43,7 @@ const schema = [
         ...(d ? { width: d.w, height: d.h } : {}),
         creator: { "@type": "Person", name: SITE.name },
         creditText: SITE.name,
-        copyrightNotice: `© ${collection.year} ${SITE.name}`,
+        copyrightNotice: `© ${SITE.name}`,
         license: legalUrl,
         acquireLicensePage: `${legalUrl}#licensing`,
       };
@@ -72,7 +71,6 @@ const schema = [
       <div>
         <div class="collection-header__meta">
           <span class="label">{collection.category}</span>
-          <span class="label">{collection.year}</span>
           <span class="label">{collection.photos.length} images</span>
         </div>
         <h1 class="collection-header__title">{collection.title}</h1>

@@ -47,7 +47,7 @@ In the terminal, run:
 npm run dev
 ```
 
-Then open **http://localhost:4321** in your browser. This is a private
+Then open **http://localhost:3100** in your browser. This is a private
 preview of the site that only you can see. Keep it open while you work —
 every time you save a file, the page updates by itself.
 
@@ -141,7 +141,8 @@ edit everything:
 - `slug` — the web address part: `"morning-fog"` becomes
   `haineaux.com/photography/morning-fog`. Lowercase, dashes instead of
   spaces, no accents.
-- `title`, `description`, `category`, `year` — self-explanatory.
+- `title`, `description`, `category` — self-explanatory. (There is no year
+  field: the site shows no dates on projects.)
 - `cover` — the image shown on the overview page.
 - `photos` — the list of photos (recipe 6 for each line).
 

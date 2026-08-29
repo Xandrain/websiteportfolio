@@ -189,7 +189,7 @@ Nothing to configure — it reads each file's real dimensions.
 | Add/replace any picture | drop the file, then `npm run images` |
 | Turn a GIF/capture into a web video | `node scripts/gen-video.mjs <file>` |
 | Get a YouTube preview picture | `node scripts/fetch-yt-poster.mjs <slug> <id>` |
-| See it before publishing | `npm run dev` → http://localhost:4321 |
+| See it before publishing | `npm run dev` → http://localhost:3100 |
 
 Everything else (publishing, fixing mistakes) is unchanged — see
 [UPDATING.md](UPDATING.md) sections 8–9.

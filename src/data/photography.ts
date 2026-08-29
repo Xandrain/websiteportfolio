@@ -9,7 +9,6 @@ export interface Collection {
   description: string;
   cover: string;
   category: string;
-  year: number;
   photos: Photo[];
 }
 
@@ -28,7 +27,6 @@ export const collections: Collection[] = [
       "A study in winter light and open horizon. Landscapes from Iceland and northern Norway, made during the blue hour and the long silences that follow.",
     cover: "/photography/nl-cover.jpg",
     category: "Landscape",
-    year: 2024,
     photos: [
       { src: "/photography/nl1.jpg", alt: "Vast snow plain under pale winter sky" },
       { src: "/photography/nl2.jpg", alt: "Frozen lake edge at dusk, soft blue light" },
@@ -45,7 +43,6 @@ export const collections: Collection[] = [
       "Single-light portrait work made slowly, in quiet. Each sitting a collaboration — restraint as the shared language.",
     cover: "/photography/studio-cover.jpg",
     category: "Portrait",
-    year: 2024,
     photos: [
       { src: "/photography/st1.jpg", alt: "Portrait lit from a single window" },
       { src: "/photography/st2.jpg", alt: "Subject in profile, soft side light" },
@@ -62,7 +59,6 @@ export const collections: Collection[] = [
       "Architecture as light trap. Buildings photographed for the geometry they make of the sky — angles, voids, and the slow passage of shadows.",
     cover: "/photography/arch-cover.jpg",
     category: "Architecture",
-    year: 2023,
     photos: [
       { src: "/photography/ar1.jpg", alt: "Looking up through a concrete atrium" },
       { src: "/photography/ar2.jpg", alt: "Glazed facade reflecting an overcast sky" },
@@ -79,7 +75,6 @@ export const collections: Collection[] = [
       "Documents made in transit. Not destinations but the moments between them — peripheral light, unglamorous subjects, quiet hours.",
     cover: "/photography/field-cover.jpg",
     category: "Documentary",
-    year: 2023,
     photos: [
       { src: "/photography/fn1.jpg", alt: "Early morning platform, no passengers" },
       { src: "/photography/fn2.jpg", alt: "Café window condensation, street beyond" },

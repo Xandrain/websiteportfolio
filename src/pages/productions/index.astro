@@ -45,7 +45,6 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
           <!-- Info panel -->
           <div class="featured-info">
             <div class="featured-info__meta">
-              <span class="label">{featured.year}</span>
               {featured.tags.map((t) => <span class="label">{t}</span>)}
             </div>
             <h2 class="featured-info__title">
