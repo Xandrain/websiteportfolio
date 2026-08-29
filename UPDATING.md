@@ -166,21 +166,46 @@ Then as always: `npm run images` → preview → publish.
 
 ---
 
-## 7b. Recipe: add a turnaround video (animation) to a project
+## 7b. Recipe: add an animation (turnaround, loop) to a project
 
-Short looping animations (3D turnarounds, GIF-style clips) are shown as
-real videos — they autoplay silently, loop, and are ~10× smaller than a
-GIF. To add one to a project:
+Short looping animations play by themselves on the project page, silently
+and forever, with a click to pause. Never put a `.gif` on the site — one
+of the two commands below always replaces it.
 
-1. In the terminal, run (with your own file path):
+**Which command depends on one thing: does the animation have a
+see-through background?** Turnarounds exported from a 3D app usually do
+(the model floats, with no white card behind it). If you are unsure, run
+this and read the answer:
 
-   ```
-   node scripts/gen-video.mjs public/productions/your-slug/04.gif
-   ```
+```
+node -e "require('sharp')('public/productions/your-slug/04.gif').stats().then(s=>console.log(s.isOpaque?'opaque':'transparent'))"
+```
 
-   This creates `04.webm`, `04.mp4` and `04-poster.jpg` next to it.
-   (It accepts GIFs and most video files — name the input with the
-   number you want it to have in the page order.)
+**Transparent** — keep the see-through background:
+
+```
+node scripts/gen-anim.mjs public/productions/your-slug/04.gif
+```
+
+Creates `04.webp` (the animation) and `04-poster.webp` (its still). It
+throws nothing away — the result is usually smaller than the GIF anyway —
+and it keeps any long "hold" at the end of the loop. Video cannot do
+either of those things, which is why transparent clips do not go through
+the command below.
+
+**Opaque** — a screen capture, or footage with a real background:
+
+```
+node scripts/gen-video.mjs public/productions/your-slug/04.gif
+```
+
+Creates `04.webm`, `04.mp4` and `04-poster.jpg`. Add
+`--webm-crf=18 --mp4-crf=16` if the result looks blotchy on large flat
+areas (3D renders often do).
+
+Then, either way:
+
+1. Name the input with the number you want it to have in the page order.
 2. Delete the original `04.gif` — the whole point is not to ship it.
 3. Run `npm run images`, check the preview, publish. Nothing to edit in
    the text files — the numbered files are found automatically.
