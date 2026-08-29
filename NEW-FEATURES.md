@@ -189,6 +189,7 @@ Nothing to configure — it reads each file's real dimensions.
 | Add/replace any picture | drop the file, then `npm run images` |
 | Turn a GIF/capture into a web video | `node scripts/gen-video.mjs <file>` |
 | Same, but keep every pixel of a 3D turnaround | `node scripts/gen-video.mjs --webm-crf=18 --mp4-crf=16 <file>` |
+| Turn a **transparent** animation into a web file | `node scripts/gen-anim.mjs <file>` (lossless WebP — keeps the see-through background) |
 | Get a YouTube preview picture | `node scripts/fetch-yt-poster.mjs <slug> <id>` |
 | See it before publishing | `npm run dev` → http://localhost:3100 |
 

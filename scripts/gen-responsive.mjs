@@ -10,8 +10,9 @@
 //   node scripts/gen-responsive.mjs
 //
 // Runs automatically before `npm run build` (see package.json "prebuild").
-// Animated GIFs are skipped (can't be re-encoded without losing animation) and
-// simply fall back to their original <img src> with no srcset.
+// Animated files are skipped (can't be re-encoded without losing animation) and
+// simply fall back to their original <img src> with no srcset: GIFs never enter
+// the scan at all, and animated WebPs are detected by page count below.
 import { readdir, readFile, writeFile, stat, unlink } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -65,6 +66,18 @@ for (const r of ROOTS) {
     const srcW = meta.width ?? 0;
     if (!srcW) continue;
     const pub = toPublicPath(abs);
+
+    // Animated WebP — the transparent turnarounds from scripts/gen-anim.mjs.
+    // Record the frame size so the layout still reserves the right box, but
+    // generate no variants: a plain sharp().resize() keeps only page 1, so a
+    // srcset would quietly serve a still image at every width but the largest.
+    // `height` on an animated source is every frame stacked; pageHeight is one.
+    if ((meta.pages ?? 1) > 1) {
+      dims[pub] = { w: srcW, h: meta.pageHeight ?? meta.height ?? 0 };
+      hashes[pub] = createHash("sha1").update(buf).digest("hex");
+      continue;
+    }
+
     dims[pub] = { w: srcW, h: meta.height ?? 0 };
 
     const hash = createHash("sha1").update(buf).digest("hex");

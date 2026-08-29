@@ -115,6 +115,21 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
                   {item.webm && <source src={item.webm} type="video/webm" />}
                   {item.mp4 && <source src={item.mp4} type="video/mp4" />}
                 </video>
+              ) : item.kind === "animation" ? (
+                <img
+                  class="project-anim"
+                  src={item.src}
+                  data-still={item.poster}
+                  data-anim={item.src}
+                  alt={`${project.title} — animation ${i + 1}`}
+                  width={item.w ?? 1024}
+                  height={item.h ?? 1024}
+                  loading={i < 2 ? "eager" : "lazy"}
+                  fetchpriority={i === 0 ? "high" : undefined}
+                  decoding="async"
+                  tabindex="0"
+                  aria-label={`${project.title} — animation ${i + 1}. Click or press Enter to pause.`}
+                />
               ) : (
                 <img
                   src={item.src}
@@ -172,6 +187,27 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     const toggle = () => (v.paused ? v.play() : v.pause());
     v.addEventListener("click", toggle);
     v.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+
+  // Animated WebP turnarounds (transparent, and holding their last frame —
+  // see scripts/gen-anim.mjs). An animated image exposes no playback API, so
+  // "pause" means swapping in the still first frame and back. The markup ships
+  // the animation, so it plays with no JS at all; this only adds the control.
+  const anims = document.querySelectorAll<HTMLImageElement>(".project-anim");
+  anims.forEach((img) => {
+    const anim = img.dataset.anim;
+    const still = img.dataset.still;
+    if (!anim || !still) return;
+    const paused = () => img.getAttribute("src") === still;
+    const toggle = () => img.setAttribute("src", paused() ? anim : still);
+    if (reduce) img.setAttribute("src", still); // start paused, as videos do
+    img.addEventListener("click", toggle);
+    img.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         toggle();
@@ -280,9 +316,22 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     cursor: pointer;
   }
 
-  .project-video:focus-visible {
+  .project-video:focus-visible,
+  .project-anim:focus-visible {
     outline: 2px solid var(--color-ink);
     outline-offset: 2px;
+  }
+
+  /* Transparent turnarounds: contain, not cover — a cropped 3D turnaround
+     loses the model's extremities as it spins — and no grayscale wash, which
+     would fight the renders' own colour. The wrap's paper-alt shows through
+     the alpha. */
+  .project-anim {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    cursor: pointer;
   }
 
   /* ── YouTube ─────────────────────────────────────────────── */

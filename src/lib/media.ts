@@ -10,6 +10,7 @@ import type { Production } from "../data/three-d";
  */
 export type GalleryItem =
   | { kind: "image"; src: string; w?: number; h?: number }
+  | { kind: "animation"; src: string; poster: string; w?: number; h?: number }
   | { kind: "video"; webm?: string; mp4?: string; poster?: string; w?: number; h?: number };
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif)$/i;
@@ -58,6 +59,15 @@ function toItem(parts: Parts): GalleryItem {
   if (parts.webm || parts.mp4) {
     const d = parts.poster ? dims(parts.poster) : undefined;
     return { kind: "video", webm: parts.webm, mp4: parts.mp4, poster: parts.poster, ...d };
+  }
+  // An image with a sibling poster is an animated WebP (scripts/gen-anim.mjs):
+  // transparent turnarounds, whose per-frame timing video cannot carry. The
+  // poster is its paused/reduced-motion still, and — since gen-responsive
+  // deliberately makes no variants for an animated source — the fallback the
+  // dimensions can be read from.
+  if (parts.image && parts.poster) {
+    const d = dims(parts.image) ?? dims(parts.poster);
+    return { kind: "animation", src: parts.image, poster: parts.poster, ...d };
   }
   const d = parts.image ? dims(parts.image) : undefined;
   return { kind: "image", src: parts.image ?? "", ...d };

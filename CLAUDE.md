@@ -53,6 +53,7 @@ src/
 scripts/
   gen-responsive.mjs      Prebuild: WebP variants + img-manifest/img-dims/img-hashes
   gen-video.mjs           GIF/capture → .webm + .mp4 + -poster.jpg (ffmpeg-static)
+  gen-anim.mjs            transparent GIF → lossless animated .webp + -poster.webp (sharp)
   fetch-yt-poster.mjs     Download a YouTube thumbnail to yt-<id>.jpg (self-hosted facade poster)
 public/
   fonts/*.woff2           Self-hosted Bodoni Moda + Jost (latin subset)
@@ -119,18 +120,36 @@ now just `'self' data:`). Layout:
   photography) — swap these files for real work before launch; the paths and
   responsive pipeline stay the same.
 - `public/productions/<slug>/{cover,01,02,…}.{jpg,webp}` — real ArtStation
-  work, self-hosted. **Animation ships as video, not GIF**: the Mojo
-  SwopTops turntables are `NN.webm` (VP9) + `NN.mp4` (H.264 fallback) +
-  `NN-poster.jpg`, rendered as muted looping `<video>` (no audio track at all —
-  the encoder is called with `-an`) with a click/keyboard pause control and a
-  `prefers-reduced-motion` fallback.
-  Convert new animations with `node scripts/gen-video.mjs <file.gif>`
-  (ffmpeg-static devDependency; delete the source GIF after). The default
-  quality (VP9 crf 42 / H.264 crf 24) is ~93% smaller than the GIF but bands
-  visibly on flat-shaded 3D turntables, so the mojo-swoptops set is encoded
-  near-lossless — `--webm-crf=18 --mp4-crf=16`, ~49 dB PSNR against the source,
-  still ~60% under the GIF. Match those flags when replacing a turntable, or
-  the new file will look softer than its neighbours.
+  work, self-hosted. **Animation never ships as GIF** — two targets, pick by
+  whether the source has an alpha channel:
+
+  - **Transparent** (the Mojo SwopTops turnarounds): lossless **animated
+    WebP**, `node scripts/gen-anim.mjs <file.gif>` → `NN.webp` +
+    `NN-poster.webp`. Video is not an option for these, for two reasons worth
+    remembering before "optimising" them back into a `<video>`: ffmpeg accepts
+    `-pix_fmt yuva420p` for VP8/VP9 and then **silently drops the alpha
+    plane** (the output decodes as `yuv420p`, so the render lands as a white
+    square on the paper), and constant-frame-rate video cannot express the
+    ~1500 ms hold these turnarounds end on against 150 ms elsewhere. Lossless
+    WebP keeps both and still comes in ~30% under the source GIF, whose
+    256-colour palette is the real size cost. Note the masters are 1-bit alpha
+    and 253 colours, so silhouettes are aliased and gradients banded at the
+    source — re-export from the 3D app (PNG sequence / ProRes 4444) is the only
+    thing that fixes that, not a codec change.
+  - **Opaque** (screen captures, footage): the `NN.webm` (VP9) + `NN.mp4`
+    (H.264) + `NN-poster.jpg` trio from `node scripts/gen-video.mjs
+    <file.gif>`, no audio track at all (the encoder is called with `-an`).
+    Defaults (VP9 crf 42 / H.264 crf 24) are ~93% smaller than a GIF but band
+    on flat-shaded 3D; `--webm-crf=18 --mp4-crf=16` is the near-lossless
+    setting, and `--alpha` exists but only mattes the mp4 — see above.
+
+  Both are ffmpeg-static/sharp devDependencies; delete the source GIF after.
+  `src/lib/media.ts` tells the two apart by convention: a numbered image with
+  a sibling `NN-poster.*` is an animation (rendered as `<img class=
+  "project-anim">` with a click/Enter pause that swaps in the still, and the
+  still served directly under `prefers-reduced-motion`); a numbered image
+  without one is a plain still. `gen-responsive.mjs` skips animated sources
+  (page count > 1) so no srcset can quietly serve a one-frame variant.
 - `public/about/avatar.webp` — profile avatar.
 
 **Responsive images**: `scripts/gen-responsive.mjs` (runs on `prebuild`, or

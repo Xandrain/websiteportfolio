@@ -9,14 +9,23 @@
 //   <name>-poster.jpg  first frame — <video poster>, also gives the layout
 //                      its intrinsic dimensions via gen-responsive's dims map
 //
-// Quality is the default web trade-off (VP9 crf 42 / H.264 crf 24). For source
-// material that must survive the encode untouched — flat-shaded 3D turntables,
-// where banding and mosquito noise on large even areas are obvious — override
-// per run:
+// Flags
+// -----
+//   --webm-crf=N  --mp4-crf=N
+//       Quality. Defaults are the web trade-off (VP9 42 / H.264 24); lower =
+//       better = bigger, 0 is lossless. Flat-shaded 3D turntables band badly
+//       at the defaults — the mojo-swoptops set uses 18/16.
 //
-//   node scripts/gen-video.mjs --webm-crf=18 --mp4-crf=16 <file…>
-//
-// Lower crf = higher quality = bigger file (0 is lossless in both encoders).
+//   --alpha [--matte=RRGGBB]
+//       Keep the source's transparency. The webm becomes VP9 + alpha
+//       (yuva420p), which Chrome/Edge/Firefox honour, and the poster becomes
+//       `<name>-poster.webp` (JPEG cannot carry alpha) instead of a .jpg.
+//       H.264 has no alpha channel anywhere it matters, so the mp4 — what
+//       Safari and iOS get — is composited onto `--matte`, which must be the
+//       colour actually behind the video on the page (the project pages use
+//       --color-paper-alt, #F2F0EA, which is the default here). Switching a
+//       clip to --alpha leaves its old -poster.jpg behind: delete it, or the
+//       folder scan will pick the stale one.
 //
 // The original file is left in place — delete it yourself once happy (GIFs
 // especially: the whole point is to stop shipping them). Uses the ffmpeg
@@ -29,23 +38,35 @@ import ffmpeg from "ffmpeg-static";
 
 const DEFAULTS = { webm: "42", mp4: "24" };
 const crf = { ...DEFAULTS };
+let alpha = false;
+let matte = "F2F0EA"; // --color-paper-alt: what sits behind .project-video
 const inputs = [];
+
 for (const arg of process.argv.slice(2)) {
-  const flag = /^--(webm|mp4)-crf=(\d+)$/.exec(arg);
-  if (flag) crf[flag[1]] = flag[2];
+  const crfFlag = /^--(webm|mp4)-crf=(\d+)$/.exec(arg);
+  const matteFlag = /^--matte=#?([0-9a-f]{6})$/i.exec(arg);
+  if (crfFlag) crf[crfFlag[1]] = crfFlag[2];
+  else if (arg === "--alpha") alpha = true;
+  else if (matteFlag) matte = matteFlag[1];
   else inputs.push(arg);
 }
 
 if (inputs.length === 0) {
-  console.error("usage: node scripts/gen-video.mjs [--webm-crf=N] [--mp4-crf=N] <file.gif> [more files…]");
+  console.error(
+    "usage: node scripts/gen-video.mjs [--webm-crf=N] [--mp4-crf=N] [--alpha] [--matte=RRGGBB] <file.gif> [more files…]",
+  );
   process.exit(1);
 }
-if (crf.webm !== DEFAULTS.webm || crf.mp4 !== DEFAULTS.mp4) {
-  console.log(`quality: vp9 crf ${crf.webm} / h.264 crf ${crf.mp4}`);
-}
+console.log(
+  `quality: vp9 crf ${crf.webm} / h.264 crf ${crf.mp4}` +
+    (alpha ? ` · alpha kept (mp4 matted on #${matte})` : ""),
+);
 
 // Video encoders need even pixel dimensions; GIFs can be odd-sized.
 const EVEN = "scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos";
+// Lay the clip over a solid card the size of the source: scale2ref sizes the
+// colour generator from the input, so nothing needs to know the dimensions.
+const MATTE = `color=c=0x${matte}:s=2x2[c];[c][0:v]scale2ref[bg][fg];[bg][fg]overlay=shortest=1,${EVEN},format=yuv420p`;
 
 function run(args) {
   execFileSync(ffmpeg, ["-y", "-hide_banner", "-loglevel", "error", ...args], {
@@ -63,10 +84,26 @@ for (const input of inputs) {
   const out = (suffix) => path.join(dir, name + suffix);
 
   console.log(`→ ${input}`);
+
+  // VP9. With --alpha, yuva420p carries the alpha plane; alt-ref frames are
+  // incompatible with it, hence -auto-alt-ref 0.
   run(["-i", input, "-vf", EVEN, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", crf.webm,
-       "-row-mt", "1", "-pix_fmt", "yuv420p", "-an", out(".webm")]);
-  run(["-i", input, "-vf", EVEN, "-c:v", "libx264", "-crf", crf.mp4, "-preset", "slow",
-       "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", out(".mp4")]);
-  run(["-i", input, "-vf", EVEN, "-frames:v", "1", "-q:v", "3", out("-poster.jpg")]);
-  console.log(`  ✓ ${name}.webm / ${name}.mp4 / ${name}-poster.jpg`);
+       "-row-mt", "1", "-pix_fmt", alpha ? "yuva420p" : "yuv420p",
+       ...(alpha ? ["-auto-alt-ref", "0"] : []), "-an", out(".webm")]);
+
+  // H.264: no alpha channel, so composite onto the matte instead of letting
+  // the transparent pixels flatten to whatever the decoder happens to use.
+  run([...(alpha ? ["-i", input, "-filter_complex", MATTE] : ["-i", input, "-vf", EVEN]),
+       "-c:v", "libx264", "-crf", crf.mp4, "-preset", "slow",
+       ...(alpha ? [] : ["-pix_fmt", "yuv420p"]),
+       "-movflags", "+faststart", "-an", out(".mp4")]);
+
+  // Poster: WebP when transparency has to survive, JPEG otherwise.
+  const poster = alpha ? "-poster.webp" : "-poster.jpg";
+  run(alpha
+    ? ["-i", input, "-vf", EVEN, "-frames:v", "1", "-c:v", "libwebp",
+       "-pix_fmt", "yuva420p", "-q:v", "90", "-compression_level", "6", out(poster)]
+    : ["-i", input, "-vf", EVEN, "-frames:v", "1", "-q:v", "3", out(poster)]);
+
+  console.log(`  ✓ ${name}.webm / ${name}.mp4 / ${name}${poster}`);
 }
