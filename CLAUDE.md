@@ -119,12 +119,18 @@ now just `'self' data:`). Layout:
   photography) — swap these files for real work before launch; the paths and
   responsive pipeline stay the same.
 - `public/productions/<slug>/{cover,01,02,…}.{jpg,webp}` — real ArtStation
-  work, self-hosted. **Animation ships as video, not GIF**: the former Mojo
-  SwopTops GIFs are now `NN.webm` (VP9) + `NN.mp4` (H.264 fallback) +
-  `NN-poster.jpg`, ~93% smaller, rendered as muted looping `<video>` with a
-  click/keyboard pause control and a `prefers-reduced-motion` fallback.
+  work, self-hosted. **Animation ships as video, not GIF**: the Mojo
+  SwopTops turntables are `NN.webm` (VP9) + `NN.mp4` (H.264 fallback) +
+  `NN-poster.jpg`, rendered as muted looping `<video>` (no audio track at all —
+  the encoder is called with `-an`) with a click/keyboard pause control and a
+  `prefers-reduced-motion` fallback.
   Convert new animations with `node scripts/gen-video.mjs <file.gif>`
-  (ffmpeg-static devDependency; delete the source GIF after).
+  (ffmpeg-static devDependency; delete the source GIF after). The default
+  quality (VP9 crf 42 / H.264 crf 24) is ~93% smaller than the GIF but bands
+  visibly on flat-shaded 3D turntables, so the mojo-swoptops set is encoded
+  near-lossless — `--webm-crf=18 --mp4-crf=16`, ~49 dB PSNR against the source,
+  still ~60% under the GIF. Match those flags when replacing a turntable, or
+  the new file will look softer than its neighbours.
 - `public/about/avatar.webp` — profile avatar.
 
 **Responsive images**: `scripts/gen-responsive.mjs` (runs on `prebuild`, or
