@@ -1,0 +1,181 @@
+---
+/**
+ * Click-to-play facade for a project's self-hosted showreel — the same
+ * pattern as YouTubeEmbed.astro, but the player it swaps in is a local
+ * <video> rather than a third-party iframe.
+ *
+ * Why a facade and not the gallery's autoplaying <video>: a reel is an edited
+ * piece with a soundtrack, often a minute long. The numbered gallery clips are
+ * short silent loops, so autoplay suits them; a reel autoplaying would both
+ * lose its audio and cost every visitor megabytes they never asked for.
+ * Here nothing but the poster is fetched until the play button is pressed
+ * (preload="none" is implicit — the <video> element does not exist yet).
+ *
+ * File convention: public/productions/<slug>/reel.webm + reel.mp4 +
+ * reel-poster.jpg, produced by
+ *   node scripts/gen-video.mjs --audio <file>
+ * then renamed to `reel.*`. src/lib/media.ts keeps `reel` out of the numbered
+ * gallery and exposes it via reel().
+ */
+import { srcset, dims } from "../../lib/responsive";
+
+interface Props {
+  title: string;
+  webm?: string;
+  mp4?: string;
+  poster?: string;
+  w?: number;
+  h?: number;
+  /** Small uppercase label above the player. */
+  caption?: string;
+}
+
+const { title, webm, mp4, poster, w, h, caption = "Showreel" } = Astro.props;
+const d = poster ? dims(poster) : undefined;
+const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 / 9";
+---
+
+{caption && <p class="label reel__label">{caption}</p>}
+
+<div
+  class="reel"
+  style={`aspect-ratio:${ratio}`}
+  data-webm={webm}
+  data-mp4={mp4}
+  data-poster={poster}
+  data-title={title}
+>
+  <button type="button" class="reel__btn" aria-label={`Play the ${title} showreel`}>
+    {poster && d && (
+      <img
+        src={poster}
+        srcset={srcset(poster)}
+        sizes="(min-width: 1280px) 1104px, 100vw"
+        alt=""
+        width={d.w}
+        height={d.h}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="reel__poster"
+      />
+    )}
+    <span class="reel__play" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 22 22" fill="none">
+        <polygon points="8,5 17,11 8,17" fill="currentColor"/>
+      </svg>
+    </span>
+  </button>
+</div>
+
+<script>
+  // Build the real player on demand. The click is the user gesture that lets
+  // it start with sound; without one, browsers would force it muted.
+  document.querySelectorAll<HTMLElement>(".reel").forEach((el) => {
+    el.querySelector("button")?.addEventListener("click", () => {
+      const video = document.createElement("video");
+      video.className = "reel__video";
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      if (el.dataset.poster) video.poster = el.dataset.poster;
+      video.setAttribute("aria-label", `${el.dataset.title ?? "Project"} showreel`);
+
+      for (const [src, type] of [
+        [el.dataset.webm, "video/webm"],
+        [el.dataset.mp4, "video/mp4"],
+      ] as const) {
+        if (!src) continue;
+        const source = document.createElement("source");
+        source.src = src;
+        source.type = type;
+        video.appendChild(source);
+      }
+
+      el.replaceChildren(video);
+      video.focus(); // keyboard users land on the controls they just summoned
+      video.play().catch(() => {
+        /* blocked or unsupported: the controls are there to press */
+      });
+    });
+  });
+</script>
+
+<style>
+  .reel {
+    background: #0c0b0a;
+    overflow: hidden;
+  }
+
+  .reel__btn {
+    all: unset;
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .reel__btn:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .reel__poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(12%);
+    transition: filter 0.4s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .reel__btn:hover .reel__poster {
+    filter: grayscale(0%);
+    transform: scale(1.02);
+  }
+
+  /* Larger than the YouTube facade's button on desktop — this is the page's
+     hero — but it has to scale down or it swallows the 16:9 box on a phone. */
+  .reel__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(3.25rem, 6vw, 4.75rem);
+    height: clamp(3.25rem, 6vw, 4.75rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(12, 11, 10, 0.72);
+    color: #fff;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .reel__btn:hover .reel__play {
+    background: rgba(12, 11, 10, 0.9);
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  /* Above the player rather than over it: reel posters tend to carry burned-in
+     credits in their lower corners, and real text beats text-on-image anyway. */
+  .reel__label {
+    margin-bottom: 0.75rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reel__poster,
+    .reel__play { transition: none; }
+    .reel__btn:hover .reel__poster { transform: none; }
+    .reel__btn:hover .reel__play { transform: translate(-50%, -50%); }
+  }
+
+  .reel :global(.reel__video) {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #0c0b0a;
+  }
+</style>

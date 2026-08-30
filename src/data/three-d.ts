@@ -24,6 +24,12 @@ export interface Production {
    * Example: youtube: [{ id: "dQw4w9WgXcQ", title: "360° turnaround" }],
    */
   youtube?: { id: string; title: string }[];
+  /**
+   * Caption over the showreel's poster, when the folder has a `reel.*` trio
+   * (see src/lib/media.ts). Defaults to "Showreel"; override when the piece
+   * needs naming more precisely — e.g. a reel that covers several projects.
+   */
+  reelCaption?: string;
 }
 
 export const projects: Production[] = [

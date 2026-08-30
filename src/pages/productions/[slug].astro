@@ -2,9 +2,10 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import YouTubeEmbed from "../../components/productions/YouTubeEmbed.astro";
+import ProjectReel from "../../components/productions/ProjectReel.astro";
 import { projects } from "../../data/three-d";
 import { srcset } from "../../lib/responsive";
-import { gallery, type GalleryItem } from "../../lib/media";
+import { gallery, reel, type GalleryItem } from "../../lib/media";
 import { abs, breadcrumbs, personRef } from "../../lib/schema";
 
 export function getStaticPaths() {
@@ -43,6 +44,7 @@ const schema = [
 ];
 
 const items = gallery(project);
+const showreel = reel(project);
 
 // Layout driven by each item's aspect ratio: landscape media span the full
 // editorial width, squarish/portrait media flow two-up. When a run of two-up
@@ -61,6 +63,11 @@ for (let i = 0; i <= spans.length; i++) {
     runStart = -1;
   }
 }
+
+// A reel is a 16:9 hero under an already-tall header, so it pushes the whole
+// grid below the fold: the poster becomes the LCP candidate and nothing in the
+// gallery is worth eager-loading (these turnarounds run ~1 MB each).
+const galleryEager = showreel ? 0 : 2;
 
 const SIZES_FULL = "(min-width: 1280px) 1104px, 100vw";
 const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
@@ -89,6 +96,22 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     </div>
   </section>
 
+  <!-- Showreel: the project's edited piece, click-to-play so its soundtrack
+       survives and nothing but the poster is fetched up front -->
+  {showreel && (
+    <section class="project-reel" aria-label={`${project.title} showreel`}>
+      <ProjectReel
+        title={project.title}
+        webm={showreel.webm}
+        mp4={showreel.mp4}
+        poster={showreel.poster}
+        w={showreel.w}
+        h={showreel.h}
+        caption={project.reelCaption ?? "Showreel"}
+      />
+    </section>
+  )}
+
   <!-- Gallery: images + self-hosted video loops, derived from the project folder -->
   {items.length > 0 && (
     <section class="project-images" aria-label="Project media">
@@ -97,7 +120,7 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
           const span2 = spans[i] === 2;
           const ar = item.w && item.h ? `aspect-ratio:${item.w}/${item.h}` : undefined;
           return (
-            <div class:list={["project-image-wrap", span2 && "span-2"]} style={ar}>
+            <div class:list={["project-image-wrap", span2 && "span-2", item.kind === "animation" && "is-alpha"]} style={ar}>
               {item.kind === "video" ? (
                 <video
                   class="project-video"
@@ -121,11 +144,12 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
                   src={item.src}
                   data-still={item.poster}
                   data-anim={item.src}
+                  data-loop={item.loopMs}
                   alt={`${project.title} — animation ${i + 1}`}
                   width={item.w ?? 1024}
                   height={item.h ?? 1024}
-                  loading={i < 2 ? "eager" : "lazy"}
-                  fetchpriority={i === 0 ? "high" : undefined}
+                  loading={i < galleryEager ? "eager" : "lazy"}
+                  fetchpriority={i === 0 && !showreel ? "high" : undefined}
                   decoding="async"
                   tabindex="0"
                   aria-label={`${project.title} — animation ${i + 1}. Click or press Enter to pause.`}
@@ -138,8 +162,8 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
                   alt={`${project.title} — view ${i + 1}`}
                   width={item.w ?? 1600}
                   height={item.h ?? 900}
-                  loading={i < 2 ? "eager" : "lazy"}
-                  fetchpriority={i === 0 ? "high" : undefined}
+                  loading={i < galleryEager ? "eager" : "lazy"}
+                  fetchpriority={i === 0 && !showreel ? "high" : undefined}
                   decoding="async"
                   class="project-image"
                 />
@@ -172,48 +196,231 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 </BaseLayout>
 
 <script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /** Click, Enter or Space on an element the markup has made focusable. */
+  function onActivate(el: HTMLElement, fn: () => void) {
+    el.addEventListener("click", fn);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fn();
+      }
+    });
+  }
+
   // Looping videos: honour prefers-reduced-motion (start paused, show native
   // controls) and give everyone a pause control — click or Enter/Space toggles
   // playback (WCAG 2.2.2).
-  const videos = document.querySelectorAll<HTMLVideoElement>(".project-video");
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  videos.forEach((v) => {
+  for (const v of document.querySelectorAll<HTMLVideoElement>(".project-video")) {
     if (reduce) {
       v.removeAttribute("autoplay");
       v.pause();
       v.controls = true;
+    } else {
+      onActivate(v, () => (v.paused ? v.play() : v.pause()));
+    }
+  }
+
+  // ── Animated WebP turnarounds ────────────────────────────────────────
+  // Transparent, and holding their last frame — see scripts/gen-anim.mjs.
+  // Two things follow from an animated image having no playback API. "Pause"
+  // can only mean swapping in the still first frame and back, which is the
+  // control at the end of this block. And a loop starts whenever the browser
+  // first paints that particular image, so a grid of turnarounds spins in as
+  // many phases as it had decode times: encoding the set to one clock
+  // (gen-anim.mjs --cadence/--total-ms) made every lap the same length but
+  // left the offsets between them exactly where they were.
+  //
+  // The one moment the page does control is when a loop *begins* — assigning
+  // a src whose bytes are already in memory starts that animation at frame 1,
+  // now. So the page runs a metronome per loop length and lets an animation
+  // in only on a beat. Everything admitted on any beat shares a phase from
+  // then on, for as long as the page lives.
+  //
+  // Three things it depends on, each measured across the three engines rather
+  // than assumed:
+  //   • Admit from a Blob, as a freshly minted object URL. Re-assigning a URL
+  //     the engine has already loaded restarts the loop in Chromium and
+  //     WebKit, but rejoins it mid-lap in Firefox — which is the spec, not a
+  //     bug: animated images sharing an absolute URL are "rendered
+  //     synchronized to the same timeline as a group", and a later one "jumps
+  //     to the point in the animation cycle that is currently being
+  //     displayed" (HTML Standard, Rendering § Images). A URL the engine has
+  //     never seen has no group to join, so it starts at frame 1 everywhere.
+  //     Hence neither of the two usual tricks: clearing and re-setting src is
+  //     the Firefox case above (bugzilla 210001, 594771), and adding
+  //     `?` + Math.random() buys the restart by re-downloading a megabyte.
+  //   • Admit only what is on screen. Assigning to an off-screen image does
+  //     not start its loop — that happens at the first paint — so it would
+  //     begin whenever the visitor scrolled to it, in nobody's phase.
+  //   • Waiting for a beat costs nothing to look at. These turnarounds spend
+  //     the last ~1.8s of every lap held on the front pose, which is exactly
+  //     the still they show while queued, so one waiting to join is
+  //     indistinguishable from one holding.
+  //
+  // After that an animation is left alone: every engine keeps its clock
+  // running while it is scrolled past (Blink catches the frame up on the way
+  // back), so phase survives scrolling without any help. With JS off, the
+  // markup's own animated src plays, unsynchronised.
+  //
+  // To re-verify after touching any of this: drive the page with Playwright,
+  // screenshot each turnaround every ~100ms, and cross-correlate the tiles'
+  // frame-to-frame difference signals — in phase they peak at lag 0, which is
+  // what Chromium and Firefox both measure. Playwright's headless WebKit
+  // renders these loops too irregularly to measure (its per-tile share of
+  // moving samples scatters where Chromium's is uniform) and it is not
+  // Safari, so do not read a phase offset from it.
+  type Turn = {
+    img: HTMLImageElement;
+    anim: string;
+    still: string;
+    loop: number;
+    blob: Blob | null;
+    url: string | null;
+    ready: boolean;
+    onScreen: boolean;
+    playing: boolean;
+    paused: boolean;
+  };
+  type Clock = { epoch: number | null; timer: number; queued: number; waiting: Set<Turn> };
+
+  // How long a clock with nothing running yet waits for the rest of the
+  // on-screen turnarounds to arrive before starting the ones it has.
+  const GATHER_MS = 1200;
+
+  const turns = new Map<Element, Turn>();
+  const clocks = new Map<number, Clock>();
+
+  for (const img of document.querySelectorAll<HTMLImageElement>(".project-anim")) {
+    const { anim, still } = img.dataset;
+    if (!anim || !still) continue;
+    turns.set(img, {
+      img,
+      anim,
+      still,
+      loop: Number(img.dataset.loop) || 0,
+      blob: null,
+      url: null,
+      ready: false,
+      onScreen: false,
+      playing: false,
+      paused: false,
+    });
+    img.src = still; // park it — nothing animates until a beat admits it
+  }
+
+  const clockFor = (loop: number) => {
+    let c = clocks.get(loop);
+    if (!c) clocks.set(loop, (c = { epoch: null, timer: 0, queued: 0, waiting: new Set() }));
+    return c;
+  };
+
+  function start(t: Turn) {
+    if (t.url) URL.revokeObjectURL(t.url); // that image is loaded; its URL is spent
+    t.url = t.blob ? URL.createObjectURL(t.blob) : null;
+    t.img.src = t.url ?? t.anim; // no blob (the fetch failed): the file itself
+    t.playing = true;
+  }
+
+  function beat(c: Clock) {
+    c.timer = 0;
+    if (c.epoch === null) c.epoch = performance.now();
+    for (const t of c.waiting) start(t);
+    c.waiting.clear();
+  }
+
+  /** Put a turnaround in line for the next beat of its clock, if it is idle,
+   *  on screen and holding its bytes. */
+  function enqueue(t: Turn) {
+    if (t.playing || t.paused || !t.ready || !t.onScreen) return;
+    const c = clockFor(t.loop);
+    c.waiting.add(t);
+
+    if (!t.loop) return beat(c); // no readable loop length: nothing to sync to
+
+    if (c.epoch === null) {
+      // Nothing is running on this clock yet, so the first beat is ours to
+      // place: hold it until every turnaround already on screen has its bytes
+      // — but no longer than GATHER_MS, so one slow fetch cannot keep the
+      // whole page still.
+      const pending = [...turns.values()].some(
+        (o) => o.loop === t.loop && o.onScreen && !o.ready && !o.paused,
+      );
+      if (!c.queued) c.queued = performance.now();
+      clearTimeout(c.timer);
+      const wait = pending ? Math.max(0, c.queued + GATHER_MS - performance.now()) : 0;
+      c.timer = window.setTimeout(() => beat(c), wait);
       return;
     }
-    const toggle = () => (v.paused ? v.play() : v.pause());
-    v.addEventListener("click", toggle);
-    v.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggle();
-      }
-    });
-  });
 
-  // Animated WebP turnarounds (transparent, and holding their last frame —
-  // see scripts/gen-anim.mjs). An animated image exposes no playback API, so
-  // "pause" means swapping in the still first frame and back. The markup ships
-  // the animation, so it plays with no JS at all; this only adds the control.
-  const anims = document.querySelectorAll<HTMLImageElement>(".project-anim");
-  anims.forEach((img) => {
-    const anim = img.dataset.anim;
-    const still = img.dataset.still;
-    if (!anim || !still) return;
-    const paused = () => img.getAttribute("src") === still;
-    const toggle = () => img.setAttribute("src", paused() ? anim : still);
-    if (reduce) img.setAttribute("src", still); // start paused, as videos do
-    img.addEventListener("click", toggle);
-    img.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggle();
+    if (c.timer) return; // a beat is already booked; it will take this one too
+    const into = (performance.now() - c.epoch) % t.loop;
+    c.timer = window.setTimeout(() => beat(c), t.loop - into);
+  }
+
+  if (!reduce && turns.size > 0) {
+    // Fetch on approach. This is the moment loading="lazy" would have picked,
+    // moved into script because the src the browser now lazy-loads is the
+    // still: the animation is fetched here and admitted later, on a beat.
+    const approaching = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          approaching.unobserve(e.target);
+          const t = turns.get(e.target);
+          if (!t) continue;
+          fetch(t.anim)
+            .then((r) => (r.ok ? r.blob() : null))
+            .catch(() => null)
+            .then((blob) => {
+              t.blob = blob; // null: it gets admitted from its own URL instead
+              t.ready = true;
+              enqueue(t);
+            });
+        }
+      },
+      { rootMargin: "200% 0px" },
+    );
+
+    const onScreen = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const t = turns.get(e.target);
+        if (!t) continue;
+        t.onScreen = e.isIntersecting;
+        if (t.onScreen) enqueue(t);
       }
     });
-  });
+
+    for (const t of turns.values()) {
+      approaching.observe(t.img);
+      onScreen.observe(t.img);
+    }
+  }
+
+  // The pause control (WCAG 2.2.2). Pausing parks the turnaround back on its
+  // still; playing again asks for the next beat, so one that is resumed comes
+  // back in step with the rest rather than on its own.
+  for (const t of turns.values()) {
+    onActivate(t.img, () => {
+      if (reduce) {
+        // Nothing is synchronised under reduced motion — the set starts
+        // parked, and playing one is a deliberate act.
+        t.playing = !t.playing;
+        t.img.src = t.playing ? t.anim : t.still;
+        return;
+      }
+      if (!t.paused && !t.playing) return; // still loading; nothing to toggle yet
+      t.paused = !t.paused;
+      if (t.paused) {
+        clockFor(t.loop).waiting.delete(t);
+        t.img.src = t.still;
+        t.playing = false;
+      } else {
+        enqueue(t);
+      }
+    });
+  }
 </script>
 
 <style>
@@ -273,6 +480,20 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     color: var(--color-ink-soft);
   }
 
+  /* ── Showreel ────────────────────────────────────────────── */
+  /* Same container as the gallery, so the reel spans the full editorial
+     width above it. Its padding-bottom stays 0: the gallery's own 3rem top
+     padding is what separates the two, which keeps this working whether or
+     not the project has gallery items. */
+  .project-reel {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding: 3rem 1.5rem 0;
+  }
+
+  @media (min-width: 640px)  { .project-reel { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .project-reel { padding-inline: 3rem; } }
+
   /* ── Gallery ─────────────────────────────────────────────── */
   .project-images {
     max-width: var(--max-width-editorial);
@@ -296,6 +517,11 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   }
 
   .project-image-wrap { overflow: hidden; background: var(--color-paper-alt); }
+
+  /* Transparent media (the animated-WebP turnarounds) get no tint of their
+     own — the page's own background is what should show through the alpha, so
+     this keeps working if the palette ever changes. */
+  .project-image-wrap.is-alpha { background: transparent; }
 
   .project-image {
     width: 100%;
@@ -324,8 +550,8 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
   /* Transparent turnarounds: contain, not cover — a cropped 3D turnaround
      loses the model's extremities as it spins — and no grayscale wash, which
-     would fight the renders' own colour. The wrap's paper-alt shows through
-     the alpha. */
+     would fight the renders' own colour. Nothing is painted behind them
+     (.is-alpha on the wrap), so the page background shows through the alpha. */
   .project-anim {
     width: 100%;
     height: 100%;

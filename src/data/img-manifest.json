@@ -1093,146 +1093,6 @@
       "src": "/productions/lulu-acidoactive/cover-1920.webp"
     }
   ],
-  "/productions/mojo-swoptops/01-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/01-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/01-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/01-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/02-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/02-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/02-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/02-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/03-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/03-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/03-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/03-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/04-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/04-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/04-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/04-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/05-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/05-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/05-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/05-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/06-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/06-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/06-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/06-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/07-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/07-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/07-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/07-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/08-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/08-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/08-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/08-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/09-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/09-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/09-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/09-poster-1024.webp"
-    }
-  ],
-  "/productions/mojo-swoptops/10-poster.webp": [
-    {
-      "w": 400,
-      "src": "/productions/mojo-swoptops/10-poster-400.webp"
-    },
-    {
-      "w": 800,
-      "src": "/productions/mojo-swoptops/10-poster-800.webp"
-    },
-    {
-      "w": 1024,
-      "src": "/productions/mojo-swoptops/10-poster-1024.webp"
-    }
-  ],
   "/productions/mojo-swoptops/cover.jpg": [
     {
       "w": 400,
@@ -1253,6 +1113,28 @@
     {
       "w": 1920,
       "src": "/productions/mojo-swoptops/cover-1920.webp"
+    }
+  ],
+  "/productions/mojo-swoptops/reel-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/mojo-swoptops/reel-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/mojo-swoptops/reel-poster-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/productions/mojo-swoptops/reel-poster-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/productions/mojo-swoptops/reel-poster-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/productions/mojo-swoptops/reel-poster-1920.webp"
     }
   ],
   "/productions/natuargua-collection-844/01.webp": [

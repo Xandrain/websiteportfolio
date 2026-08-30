@@ -78,6 +78,19 @@ for (const r of ROOTS) {
       continue;
     }
 
+    // Animation poster stills (`NN-poster.webp`, from scripts/gen-anim.mjs).
+    // The only consumer is the `project-anim` <img>, which swaps them in via
+    // `data-still` — a bare src with no srcset — so downscaled variants are
+    // fetched by nobody and were shipping ~611 KiB of dead weight. Record the
+    // dimensions (the layout still reserves the box) and generate nothing.
+    // Note `reel-poster.jpg` is deliberately NOT caught here: it IS served
+    // with a srcset, and it is a .jpg.
+    if (/-poster\.webp$/i.test(pub)) {
+      dims[pub] = { w: srcW, h: meta.height ?? 0 };
+      hashes[pub] = createHash("sha1").update(buf).digest("hex");
+      continue;
+    }
+
     dims[pub] = { w: srcW, h: meta.height ?? 0 };
 
     const hash = createHash("sha1").update(buf).digest("hex");
