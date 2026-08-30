@@ -23,6 +23,11 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# claude code working files — local only, never pushed: they reference machine
-# paths and local tooling, which have no business on a public remote
+# AI coding-agent tooling — local only, never pushed: it references machine
+# paths and local tooling, which have no business on a public remote.
+# .agents/ + skills-lock.json were tracked by mistake (305 files, 9.1 MB, 17%
+# of the repo) even though WORKFLOW-HANDOUT.md always claimed they were not.
+# Nothing in the build, CI, or npm lifecycle ever referenced them.
 .claude/
+.agents/
+skills-lock.json
