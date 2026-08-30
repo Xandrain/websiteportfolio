@@ -78,6 +78,19 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
       video.controls = true;
       video.playsInline = true;
       video.preload = "auto";
+
+      // Drop Chrome's "more options" (⋮) overflow menu. Nothing in it belongs
+      // on a portfolio piece: Download hands out the master, and Playback
+      // speed / Picture-in-picture / Cast are noise on a one-minute reel.
+      // Chrome only removes the button once every item it would hold is gone,
+      // so all four have to be suppressed together — controlsList covers
+      // download, playback rate and remote playback; PiP and Cast each need
+      // their own property. Volume is deliberately not among them, and this
+      // does not affect it. Firefox and Safari ignore controlsList and draw no
+      // such menu anyway, so nothing changes there.
+      video.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
+      video.disablePictureInPicture = true;
+      video.disableRemotePlayback = true;
       if (el.dataset.poster) video.poster = el.dataset.poster;
       video.setAttribute("aria-label", `${el.dataset.title ?? "Project"} showreel`);
 
