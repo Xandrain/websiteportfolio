@@ -4,7 +4,13 @@ import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://haineaux.com',
+  // The site serves from pages.dev: haineaux.com is NOT attached to the Pages
+  // project — it 403s via an old redirect to xandrain.artstation.com. `site:`
+  // drives every canonical, og:url and sitemap entry, so pointing it at the
+  // real host keeps that metadata truthful instead of naming a dead domain.
+  // ON LAUNCH: attach haineaux.com, drop the redirect, and restore
+  // 'https://haineaux.com' here in the same commit.
+  site: 'https://websiteportfolio-4ht.pages.dev',
   integrations: [sitemap()],
   // Dev on 3100, preview on 4321 — distinct ports so a running `astro preview`
   // (which serves the built dist/, i.e. possibly stale) can never be mistaken
