@@ -6,30 +6,56 @@
 # (TDM Reservation Protocol, Art. 4(3) EU 2019/790 — see /legal and
 # /.well-known/tdmrep.json) apply to every response, images included. Unknown
 # X-Robots-Tag tokens are ignored by search engines, so indexing is unaffected.
+#
+# img-src allows blob: because the project pages admit each animated-WebP
+# turnaround as a freshly created object URL — that is what starts its loop
+# at frame 1, and so lets a set of them spin in phase. Without it they fall
+# back to loading from their own URLs and the sync degrades to the old drift.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Strict-Transport-Security: max-age=31536000
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; frame-src https://www.youtube-nocookie.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'none'; frame-src https://www.youtube-nocookie.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'
   X-Robots-Tag: noai, noimageai
   tdm-reservation: 1
-
-# Astro fingerprints these assets — cache them forever.
-/_astro/*
-  Cache-Control: public, max-age=31536000, immutable
 
 # Self-hosted font files never change under the same filename.
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Content images are NOT content-hashed (a replaced photo keeps its
-# filename — see gen-responsive.mjs), so no `immutable` here: one day of
-# caching, then revalidate. A swapped image can be stale for at most a day.
-/photography/*
+# Brand rasters at the site root: stable filenames, rarely replaced, and
+# previously matched by no rule at all — so they were revalidated on every
+# single page load.
+/og.jpg
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+/favicon.ico
+  Cache-Control: public, max-age=604800
+
+# Content media is NOT content-hashed (a replaced photo keeps its filename —
+# see gen-responsive.mjs), so no `immutable` here: one day of caching, then
+# revalidate. A swapped image can be stale for at most a day.
+#
+# These are scoped BY EXTENSION on purpose. A bare `/productions/*` also
+# matches the HTML pages living under the same prefix, which cached project
+# and collection pages for 24h — so a published fix could stay invisible to a
+# returning visitor for a day, and the Ctrl+F5 in UPDATING.md is precisely
+# what hides that from the person doing the checking. HTML now falls through
+# to Cloudflare's default (max-age=0, must-revalidate).
+/photography/*.jpg
   Cache-Control: public, max-age=86400
-/productions/*
+/photography/*.webp
   Cache-Control: public, max-age=86400
-/about/*
+/productions/*.jpg
+  Cache-Control: public, max-age=86400
+/productions/*.webp
+  Cache-Control: public, max-age=86400
+/productions/*.mp4
+  Cache-Control: public, max-age=86400
+/productions/*.webm
+  Cache-Control: public, max-age=86400
+/about/*.webp
   Cache-Control: public, max-age=86400
