@@ -1,13 +1,14 @@
 # How to update your website (the simple guide)
 
-This guide explains how to change the words and pictures on
-**haineaux.com** yourself. No programming knowledge needed — just follow
-the recipes. Read the first two sections once; after that you'll only
-ever come back for the recipe you need.
+This guide explains how to change the words and pictures on your website
+yourself. No programming knowledge needed — just follow the recipes. Read the
+first two sections once; after that you'll only ever come back for the recipe
+you need.
 
-> ✨ New here? [NEW-FEATURES.md](NEW-FEATURES.md) explains the newer
-> capabilities (self-building galleries, turnaround videos, YouTube
-> embeds) and when to use which.
+> **Where the site actually is:** https://websiteportfolio-4ht.pages.dev
+> `haineaux.com` is not attached yet — it still redirects to ArtStation. Check
+> your published changes at the pages.dev address, not at haineaux.com.
+> (Your email, `contact@haineaux.com`, works normally — it is unaffected.)
 
 ---
 
@@ -187,11 +188,33 @@ node -e "require('sharp')('public/productions/your-slug/04.gif').stats().then(s=
 node scripts/gen-anim.mjs public/productions/your-slug/04.gif
 ```
 
-Creates `04.webp` (the animation) and `04-poster.webp` (its still). It
-throws nothing away — the result is usually smaller than the GIF anyway —
-and it keeps any long "hold" at the end of the loop. Video cannot do
-either of those things, which is why transparent clips do not go through
-the command below.
+Creates `04.webp` (the animation) and `04-poster.webp` (its still). It throws
+nothing away — the result is usually smaller than the GIF anyway — and it keeps
+the see-through background.
+
+**Several turnarounds in one project?** Put them all on the same clock, or
+they will spin out of step with each other:
+
+```
+node scripts/gen-anim.mjs --cadence=150 --total-ms=3300 public/productions/your-slug/01.webp public/productions/your-slug/02.webp
+```
+
+The project page starts every turnaround on a shared beat, so a grid of them
+holds and spins together instead of each doing its own thing. It can only do
+that for animations whose laps are the same length — so give the whole set one
+`--total-ms`. Re-running this on files already on the clock changes nothing.
+To see what you have (swap in your slug):
+
+```
+node -e "const s=require('sharp'),f=require('fs'),d='public/productions/your-slug';for(const n of f.readdirSync(d).filter(n=>/^\d+\.webp$/.test(n)).sort())s(d+'/'+n,{animated:true}).metadata().then(m=>console.log(n,(m.delay||[]).reduce((a,b)=>a+b,0)+'ms'))"
+```
+
+Every line must print the same number of ms.
+
+**The see-through background is the whole reason.** Video cannot carry it: the
+encoder accepts the setting and then silently drops it, so the render arrives on
+the page as a white box. (A long "hold" at the end of a loop is *not* a reason —
+video reproduces that fine. Only transparency forces this choice.)
 
 **Opaque** — a screen capture, or footage with a real background:
 
@@ -237,12 +260,73 @@ channel:
 
 4. Preview, then publish.
 
+## 7d. Recipe: add a showreel to a project
+
+A showreel is different from the little looping animations: it is an
+edited piece, usually with music or voice, and it should **not** start
+by itself. Yours plays only when a visitor presses the play button, so
+nobody downloads a minute of video just for passing by.
+
+1. Put your video file somewhere outside the website folder (your
+   Downloads folder is fine) and rename it to `reel.mp4`.
+2. In the terminal, run (with your project's slug):
+
+   ```
+   node scripts/gen-video.mjs --audio --mp4-crf=27 --out-dir=public/productions/your-slug "<path to your video>"
+   npm run images
+   ```
+
+   This writes the video and a still picture used as the preview into the
+   project folder. **Keep the source outside the project folder** — the tool
+   refuses to run if it sits where the outputs go, because that would destroy
+   your original.
+
+   **Delete the `.webm` file it also creates.** Every browser in use plays the
+   `.mp4`, so the second copy is roughly 13 MB of dead weight kept forever in
+   the project's history.
+
+   **Check the size before you publish** — this one is permanent:
+
+   ```
+   ls -l public/productions/your-slug/reel.mp4
+   ```
+
+   Aim for **under 15 MB**. Cloudflare refuses any single file over 25 MB, so an
+   oversized reel does not merely bloat the repository, it fails the publish
+   outright. At 1080p that budget is roughly 90 seconds. A longer film belongs
+   on YouTube (recipe 7c) instead.
+
+3. The preview picture is taken from the very first frame, which on an
+   edited film is often black or a title card. To use a nicer moment —
+   say 5 seconds in — run:
+
+   ```
+   node scripts/poster-at.mjs public/productions/your-slug/reel.mp4 5
+   npm run images
+   ```
+
+4. Preview, then publish. There is nothing to edit in
+   `src/data/three-d.ts` — the page picks the reel up from the folder.
+   If you want a caption other than "Showreel" over the preview, add one
+   line to the project block:
+
+   ```ts
+   reelCaption: "Showreel 2024",
+   ```
+
+---
+
 ---
 
 ## 8. Recipe: publish (put your changes on the real website)
 
-When the preview looks right, run these three commands in the terminal,
-one after the other:
+When the preview looks right, first **look at what you are about to publish**:
+
+```
+git status
+```
+
+Read the list. It should contain only files you meant to change. Then:
 
 ```
 git add -A
@@ -253,9 +337,16 @@ git push
 (The part between quotes after `-m` is a note to yourself — write
 anything, e.g. "new tagline" or "added fog collection".)
 
-Then wait **about two minutes** — a robot on the internet rebuilds the
-site and puts it online. Open haineaux.com and press **Ctrl + F5**
-(a "hard refresh" that skips your browser's memory) to see it.
+Then wait **about a minute** — GitHub rebuilds the site and uploads it to
+Cloudflare. To check that it actually worked:
+
+```
+gh run list --limit 1
+```
+
+A green `success` against your commit means it is live. Then open
+**https://websiteportfolio-4ht.pages.dev** and press **Ctrl + F5** (a "hard
+refresh" that skips your browser's memory).
 
 ---
 
@@ -279,6 +370,20 @@ site and puts it online. Open haineaux.com and press **Ctrl + F5**
 - **The live site doesn't show my change** → wait 2 minutes, then
   Ctrl + F5. Still nothing? The publish robot may have failed — ask for
   help (below).
+- **"I published something broken and need the old site back NOW."**
+  Two steps, in this order:
+  1. **Stop the bleeding.** In the Cloudflare dashboard: Workers & Pages →
+     `websiteportfolio` → Deployments → find the last good build → **Rollback**.
+     That re-serves a build which was already uploaded, instantly, with no
+     rebuild — so it works even when the broken thing is the build itself.
+  2. **Make the code agree.** Back in the terminal:
+
+     ```
+     git revert <commit>
+     git push
+     ```
+
+     Skip this and your next publish quietly re-deploys the broken version.
 - **Anything else** → open this folder in Claude Code, describe the
   problem in plain words ("I added a photo and the page went blank"),
   and let it fix it. That's a completely normal way to work.
@@ -292,6 +397,11 @@ site and puts it online. Open haineaux.com and press **Ctrl + F5**
   download huge files. Never edit or rename them by hand; the command
   refreshes and cleans them up on its own. (If you ever forget to run
   it, the publish robot runs it for you too.)
+- **Never run `scripts/self-host-images.mjs`.** It looks like a harmless
+  leftover. It is not: it overwrites pictures in `public/` and rewrites your
+  project text files. It was a one-time job, and it is already done.
+- **Never turn a see-through animation into a video** (recipe 7b). The tool
+  accepts it and the result is a white box on the page.
 - **Leave these alone** unless you know why:
   `public/_headers` (security), everything in `scripts/` and
   `src/components/` (the machinery and the design),
@@ -300,6 +410,24 @@ site and puts it online. Open haineaux.com and press **Ctrl + F5**
 
 ---
 
-*Cheat sheet: `npm run dev` = preview · `npm run images` = after
-changing pictures · `git add -A` + `git commit -m "note"` + `git push`
-= publish.*
+## Cheat sheet
+
+| I want to… | Command |
+|---|---|
+| Preview while working | `npm run dev` → http://localhost:3100 |
+| Add or replace any picture | drop the file, then `npm run images` |
+| See-through animation → web | `node scripts/gen-anim.mjs <file>` |
+| Opaque animation/capture → web | `node scripts/gen-video.mjs <file>` |
+| Same, keeping every pixel | add `--webm-crf=18 --mp4-crf=16` |
+| Showreel (with sound) | `node scripts/gen-video.mjs --audio --mp4-crf=27 --out-dir=… <file>` |
+| Pick a nicer preview frame | `node scripts/poster-at.mjs <video> <seconds>` |
+| YouTube preview picture | `node scripts/fetch-yt-poster.mjs <slug> <id>` |
+| Publish | `git status` → `git add -A` → `git commit -m "note"` → `git push` |
+| Did it work? | `gh run list --limit 1` |
+
+Files that are **never** shown as gallery items: `cover.*` (the listing card),
+`reel.*` (the showreel), `*-poster.*` (preview stills), `yt-*.jpg` (YouTube
+posters), and the auto-generated `-400.webp` / `-800.webp` … copies.
+
+Photo dimensions are measured automatically by `npm run images` — you never type
+pixel sizes into the text files, and a photo can never appear stretched.

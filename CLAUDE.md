@@ -1,272 +1,105 @@
 # CLAUDE.md
 
 Portfolio site for **Alexandre Haineaux** — photographer & graphic designer.
-Deployed at `https://haineaux.com` via Cloudflare Pages. See
-[WORKFLOW-HANDOUT.md](WORKFLOW-HANDOUT.md) for the general reusable
-tooling/deploy pattern this project was bootstrapped from (that file is about
-plumbing, not this site's content). [NEW-FEATURES.md](NEW-FEATURES.md)
-documents the July 2026 media/authoring upgrade (auto-derived galleries,
-video turnarounds, YouTube facades) in user-facing terms.
 
-## Stack
+## This repository is PUBLIC
 
-Astro 6 (static output) + Tailwind v4 via `@tailwindcss/vite`. **Ships zero
-client JS** — no React/islands; the only browser code is a handful of small
-inline `<script>`s (the photography lightbox in `Lightbox.astro`, the home
-gate's cursor aura, the About copy-email button in `ProfileBlock.astro`, the
-video pause/reduced-motion control in `pages/productions/[slug].astro`,
-the click-to-load YouTube facade in `YouTubeEmbed.astro`, and the sub-nav
-same-section animation skip in `components/shared/SubNav.astro` (shared by
-the thin `ProductionsSubNav.astro` / `PhotographySubNav.astro` wrappers,
-which only supply tabs + aria-label) — the sticky pill tabs only play their entrance
-reveal when arriving from outside the section, detected via same-origin
-`document.referrer` path prefix),
-which Astro inlines into the HTML. No custom YAML build
-pipeline — content lives as typed TS data (`src/data/*.ts`). `npm run build` →
-static output in `dist/`, deployed by `.github/workflows/pages.yml` on push to
-`main`.
+`github.com/Xandrain/websiteportfolio`. Everything committed is world-readable,
+including full history. Never commit credentials, machine paths, client material,
+or account details. `.claude/` is gitignored and has never been pushed.
+
+## What this is, and where edits take effect
+
+**An Astro 6 static site. There is a real build. It runs in CI, not on your machine.**
+
+    push to main
+      → .github/workflows/pages.yml
+      → npm ci
+      → npm run build   (prebuild: scripts/gen-responsive.mjs, then astro build)
+      → npx wrangler pages deploy dist --branch=main   (Direct Upload)
+
+Cloudflare does not build; it receives an already-built `dist/`.
+
+- **`src/` and `public/` are authoritative.** `public/` is SOURCE — every image and
+  font in it is hand-placed and committed, not generated.
+- **`dist/` is disposable output** — gitignored, never committed, never hand-edited.
+- Only pushes to `main` deploy. Other branches deploy nothing. There are no preview
+  deployments from CI. **Every push to `main` goes straight to production.**
+
+**Serving live at `https://websiteportfolio-4ht.pages.dev`.** `astro.config.mjs`
+`site:` points here deliberately, so canonicals, `og:url` and the sitemap match
+reality. `haineaux.com` is NOT attached — it 403s via a redirect to ArtStation.
+**On launch: attach it, drop the redirect, set `site:` back in the same commit.**
+Email is unaffected (`contact@haineaux.com` routes via forwardemail.net).
+
+**To know what is deployed** — never infer it from `npm run preview`, which serves
+whatever you last built locally:
+
+    gh run list --limit 1     # green = the commit it names is live
+    git log origin/main -1
+
+A deploy takes ~30-45s of CI plus propagation. If it fails, the live site is
+unchanged — wrangler never runs if the build exits non-zero.
+
+**To roll back a bad deploy:** dashboard rollback first, `git revert` second —
+full procedure in [UPDATING.md](UPDATING.md).
+
 
 ## Commands
 
 | Command | Action |
 |---|---|
-| `npm run dev` | Local dev server, `localhost:3100` |
-| `npm run build` | Production build to `dist/` |
-| `npm run preview` | Preview the built `dist/` output, `localhost:4321` |
+| `npm run dev` | Dev server, `localhost:3100` — the source of truth while working |
+| `npm run images` | Regenerate WebP variants + `src/data/img-*.json` |
+| `npm run build` | Production build → `dist/` (`prebuild` is byte-identical to `npm run images`) |
+| `npm run preview` | Serves the built `dist/`, `localhost:4321` — NOT what is live |
 
-## File map
+`npm run build` and `npm run images` **write into the repo**. Expect a diff after either.
 
-```
-src/
-  consts.ts               SITE / NAV / SOCIAL — single source for site-wide copy & nav links
-  data/photography.ts     Photography collections (typed, hand-authored array — not YAML)
-  data/three-d.ts         Graphic design / 3D "productions" (same pattern; galleries auto-derived)
-  lib/media.ts            Build-time folder scan → ordered production galleries (images + videos)
-  lib/responsive.ts       srcset()/dims() helpers over the generated img manifests
-  lib/schema.ts           JSON-LD helpers (abs/personRef/breadcrumbs) for the per-page @graph
-  layouts/BaseLayout.astro  <head> — title/description/canonical/OG/Twitter, favicon, JSON-LD @graph, sitemap link
-  components/Nav.astro    Fixed pill nav (stacks + swaps to short labels on small screens)
-  components/Footer.astro Site footer — index + social links, both driven by consts.ts
-  components/about/ProfileBlock.astro  Static About card (glassmorphism, CSS-only reveal)
-  components/productions/YouTubeEmbed.astro  Click-to-load YouTube facade (self-hosted poster)
-  pages/                  photography/, productions/, about.astro, legal.astro, index.astro, 404.astro
-scripts/
-  gen-responsive.mjs      Prebuild: WebP variants + img-manifest/img-dims/img-hashes
-  gen-video.mjs           GIF/capture → .webm + .mp4 + -poster.jpg (ffmpeg-static)
-  gen-anim.mjs            transparent GIF → lossless animated .webp + -poster.webp (sharp)
-  fetch-yt-poster.mjs     Download a YouTube thumbnail to yt-<id>.jpg (self-hosted facade poster)
-public/
-  fonts/*.woff2           Self-hosted Bodoni Moda + Jost (latin subset)
-  og.jpg                  Default Open Graph / Twitter share card (generated)
-  apple-touch-icon.png    iOS home-screen icon (generated)
-  _headers                Cloudflare Pages security headers + CSP + AI opt-out headers
-  robots.txt / llms.txt   AI-crawler policy (see below)
-  .well-known/tdmrep.json TDM Reservation Protocol — machine-readable AI-training opt-out
-```
+## Conventions
 
-Brand rasters (`og.jpg`, `apple-touch-icon.png`) are regenerated from the
-design tokens + fonts by `node scripts/gen-brand-assets.mjs` — swappable
-defaults; edit the script or replace the files for bespoke artwork.
+- Site-wide copy (name, role, tagline, email, nav, social) lives only in
+  `src/consts.ts`. Never hardcode it in a component or page.
+- Production galleries are derived from numbered files in
+  `public/productions/<slug>/` (`01.*`, `02.*`…), in number order. Adding media =
+  adding files; never list them in `three-d.ts`. Reserved, never gallery items:
+  `cover.*`, `reel.*`, `yt-*`, `*-poster.*`, and generated `-400/-800/…webp`.
+- Photos carry `src` + `alt` only — dimensions come from the generated `img-dims.json`.
+- Animated turnarounds in one project must share one lap length
+  (`gen-anim.mjs --cadence=150 --total-ms=3300`). The project page starts them
+  on a shared beat and can only hold loops that agree on how long a lap lasts.
+- No dates anywhere except the footer copyright and `/legal`.
+- CSS custom properties are kebab-case with a category prefix (`--color-*`,
+  `--font-*`, `--max-width-*`, `--radius-*`), declared in `global.css`'s `@theme`.
+- Node 22 (`.nvmrc`, CI, `engines >=22.12.0`).
+- Zero client JS: no framework, no islands, only small inline `<script>`s.
 
-## Content model rules
+## Never do this
 
-- **Photography** (`src/data/photography.ts`): each `Collection` needs
-  `slug`, `title`, `description`, `cover`, `category`, `photos[]`. Projects
-  carry no year/date field — the site deliberately shows no dates anywhere
-  except the footer copyright and the legal notice.
-  Local images go in `public/photography/<file>` and are referenced as
-  `/photography/<file>`. Each `Photo` is just `src` + `alt` — pixel dimensions
-  are read from the generated `img-dims.json` via `dims()`, never hand-typed.
-  The collection gallery is a ratio-preserving CSS-columns masonry (no crop,
-  no JS).
-- **Productions** (`src/data/three-d.ts`): each `Production` has a required
-  `category` — `"productions"` or `"product-visualisation"` — which drives the
-  two-tab sub-nav (`components/productions/ProductionsSubNav.astro`) and splits
-  the section into two pages: `/productions` (category `productions`) and
-  `/productions/product-visualisation` (category `product-visualisation`). The
-  sub-nav is sticky and shown on the two listing pages only; individual
-  `[slug]` project pages omit it (the category tabs are redundant there — the
-  project header carries a category-aware "back" link instead).
-  **Galleries are derived at build time** by `src/lib/media.ts`: every
-  numbered file (`01.*`, `02.*`, …) in `public/productions/<slug>/` becomes a
-  gallery item in name order — images and videos alike (a video is the trio
-  `NN.webm` + `NN.mp4` + `NN-poster.jpg`, produced by `scripts/gen-video.mjs`).
-  Adding/removing project media = dropping/deleting files, no data edit.
-  Optional `Production` fields: `coverInGallery: true` prepends the cover as
-  the first item (the product-viz convention); `images[]` forces an explicit
-  order (rarely needed); `youtube: [{ id, title }]` renders click-to-load
-  YouTube facades after the gallery (poster self-hosted as `yt-<id>.jpg` via
-  `scripts/fetch-yt-poster.mjs`). The project page lays items out by aspect
-  ratio: landscape media span the full editorial width, squarish/portrait flow
-  two-up (odd runs promote a leading squarish item to full width).
-  Real projects (3D modeling/rigging for
-  TV, character studies, product viz) sourced from
-  [artstation.com/xandrain](https://xandrain.artstation.com) — covers/images
-  were originally hotlinked from ArtStation's CDN but are now **self-hosted
-  copies** under `public/productions/<slug>/` (`cover.*`, `01.*`, `02.*`…).
-- Site-wide copy (name, role, tagline, email, nav labels, social links) lives
-  only in `src/consts.ts` — never hardcode it in a component or page. `NAV`
-  items may carry an optional `short` label used by `Nav.astro` on small
-  screens (e.g. "Graphic Design & 3D" → "Design & 3D").
+- **Never run `scripts/self-host-images.mjs`.** A completed one-shot: it downloads
+  into `public/` and rewrites `src/data/*.ts` in place. It is not inert.
+- **Never encode a transparent animation as video.** ffmpeg accepts `-pix_fmt
+  yuva420p` for VP8/VP9 then silently drops the alpha plane and the render ships as
+  a white square. Use `scripts/gen-anim.mjs` (lossless animated WebP).
+- **Never edit `dist/`**, or `src/data/img-*.json` (owned by `npm run images`).
+- **Never trust `WORKFLOW-HANDOUT.md`.** It documents a different project (LAD) —
+  wrong stack, wrong deploy target, and a contact function that does not exist here.
+  Kept only until a copy is confirmed in the LAD repo, then deleted.
+- **Never push unasked** — it deploys to production.
+- **Never add a third-party script, font or analytics origin** without adding it to
+  the CSP in `public/_headers`; it fails silently otherwise. The CSP value must stay
+  on ONE physical line — Cloudflare `_headers` does not support wrapped values.
+- **Never quietly undo the turnaround sync.** The animated WebPs on a project page
+  are phase-aligned by the script in `productions/[slug].astro`, which rests on two
+  things that both look removable: `blob:` in the CSP's `img-src`, and one shared
+  lap length across the set. Remove either and the page still works — the
+  turnarounds just drift apart again, with nothing to show that they should not.
+  The reasoning, the browser behaviour behind it and how to re-verify are in the
+  comment above that script; read it before changing anything there.
 
-## Images — all self-hosted (no hotlinks)
+## Precedence and reference
 
-Nothing is hotlinked. Every image referenced by `src/data/*.ts` and the About
-page lives under `public/` and is served from `'self'` (the CSP `img-src` is
-now just `'self' data:`). Layout:
-
-- `public/photography/<seed>.jpg` — photography covers/photos. **Still
-  placeholder _content_** (downloaded from `picsum.photos`, not real
-  photography) — swap these files for real work before launch; the paths and
-  responsive pipeline stay the same.
-- `public/productions/<slug>/{cover,01,02,…}.{jpg,webp}` — real ArtStation
-  work, self-hosted. **Animation never ships as GIF** — two targets, pick by
-  whether the source has an alpha channel:
-
-  - **Transparent** (the Mojo SwopTops turnarounds): lossless **animated
-    WebP**, `node scripts/gen-anim.mjs <file.gif>` → `NN.webp` +
-    `NN-poster.webp`. Video is not an option for these, for two reasons worth
-    remembering before "optimising" them back into a `<video>`: ffmpeg accepts
-    `-pix_fmt yuva420p` for VP8/VP9 and then **silently drops the alpha
-    plane** (the output decodes as `yuv420p`, so the render lands as a white
-    square on the paper), and constant-frame-rate video cannot express the
-    ~1500 ms hold these turnarounds end on against 150 ms elsewhere. Lossless
-    WebP keeps both and still comes in ~30% under the source GIF, whose
-    256-colour palette is the real size cost. Note the masters are 1-bit alpha
-    and 253 colours, so silhouettes are aliased and gradients banded at the
-    source — re-export from the 3D app (PNG sequence / ProRes 4444) is the only
-    thing that fixes that, not a codec change.
-  - **Opaque** (screen captures, footage): the `NN.webm` (VP9) + `NN.mp4`
-    (H.264) + `NN-poster.jpg` trio from `node scripts/gen-video.mjs
-    <file.gif>`, no audio track at all (the encoder is called with `-an`).
-    Defaults (VP9 crf 42 / H.264 crf 24) are ~93% smaller than a GIF but band
-    on flat-shaded 3D; `--webm-crf=18 --mp4-crf=16` is the near-lossless
-    setting, and `--alpha` exists but only mattes the mp4 — see above.
-
-  Both are ffmpeg-static/sharp devDependencies; delete the source GIF after.
-  `src/lib/media.ts` tells the two apart by convention: a numbered image with
-  a sibling `NN-poster.*` is an animation (rendered as `<img class=
-  "project-anim">` with a click/Enter pause that swaps in the still, and the
-  still served directly under `prefers-reduced-motion`); a numbered image
-  without one is a plain still. `gen-responsive.mjs` skips animated sources
-  (page count > 1) so no srcset can quietly serve a one-frame variant.
-- `public/about/avatar.webp` — profile avatar.
-
-**Responsive images**: `scripts/gen-responsive.mjs` (runs on `prebuild`, or
-`npm run images`) generates downscaled WebP variants next to each raster source
-(`name-400.webp`, `-800.webp`, …) plus a manifest at `src/data/img-manifest.json`
-and a native-dimensions map at `src/data/img-dims.json`. Components build
-`srcset` via the `srcset()` helper in `src/lib/responsive.ts` (returns
-`undefined` for GIFs/unknown paths, so they fall back to the plain `src`); the
-`dims()` helper from the same module returns each source's intrinsic `w`/`h`
-(used by the productions project page to set correct aspect ratios). To add or
-replace images: drop the file in `public/…`, reference it in the data, and
-re-run `npm run images`. Idempotent via content hashes
-(`src/data/img-hashes.json`, committed): unchanged sources keep their variants,
-a replaced source (even same filename) gets its variants regenerated and any
-stale ones deleted. Hashes, not mtimes, because Explorer preserves mtime on
-copy. See `UPDATING.md` for the non-developer walkthrough of routine content
-updates.
-
-The one-shot `scripts/self-host-images.mjs` recorded how the originals were
-pulled down and repointed (kept for reference; not part of the build).
-
-## Fonts
-
-**Bodoni Moda** (display, `--font-display`) + **Jost** (sans/body,
-`--font-sans`) — a high-fashion didone serif paired with a geometric sans
-(the "Luxury Minimalist" pairing). Self-hosted (not Google Fonts `<link>`
-tags) — `src/styles/fonts.css` declares `@font-face` for both typefaces from
-`public/fonts/*.woff2` (latin subset only), imported at the top of
-`src/styles/global.css`. Design tokens (`--font-display`, `--font-sans`) live
-in `global.css`'s `@theme` block. Weights shipped: Bodoni Moda 400/500/700 +
-400 italic; Jost 300/400/500. Reason for self-hosting: works under a strict
-CSP with no external font origin, one fewer network round-trip, no
-third-party request. If a new weight/style is needed, pull it from
-`https://gwfh.mranftl.com/api/fonts/<font-id>` (returns direct
-`fonts.gstatic.com` woff2 URLs per weight) rather than re-adding a Google
-Fonts `<link>`.
-
-## Nav / Footer
-
-Both are driven entirely by `NAV`/`SOCIAL` in `src/consts.ts` — add or
-reorder nav items there, not in the component markup. The home page (`/`)
-renders no `Nav` at all (`noNav` on `BaseLayout`) — its full-screen gate
-supplies its own navigation; every other page gets the translucent-light
-pill.
-
-## AI-crawler / SEO / legal policy
-
-- `public/robots.txt` — allows general crawling and named AI-answer bots
-  (ChatGPT-User, Claude-Web/User/SearchBot, PerplexityBot, DuckAssistBot,
-  etc.); explicitly disallows AI-**training** and dataset scrapers (GPTBot,
-  CCBot, ClaudeBot, Google-Extended, Applebot-Extended, Bytespider,
-  img2dataset, etc.) because the site hosts original creative work with no
-  training-data rights granted. Advisory only — the layers below are the
-  formal reservation.
-- **TDM reservation (EU AI-training opt-out)** — Art. 4(3) Directive (EU)
-  2019/790 lets a rightsholder reserve text-and-data-mining rights if declared
-  machine-readably. Declared three ways, keep them in sync: 
-  `public/.well-known/tdmrep.json` (`tdm-reservation: 1`), the
-  `tdm-reservation: 1` + `X-Robots-Tag: noai, noimageai` headers in
-  `public/_headers` (apply to every response, images included), and the
-  `noai, noimageai` tokens in `BaseLayout.astro`'s robots meta.
-- `src/pages/legal.astro` — the human-readable legal notice backing all of
-  the above: copyright/all-rights-reserved, client-work trademark disclaimer,
-  the Art. 4(3) reservation, licensing contact, liability, hosting, privacy
-  (no cookies/analytics), Luxembourg governing law. Linked from the footer's
-  legal bar via `LEGAL` in `src/consts.ts` (footer-only, not in `NAV`).
-- `public/llms.txt` — hand-authored, human/LLM-readable summary + usage
-  policy per the [llms.txt convention](https://llmstxt.org/). Update the
-  "key facts" section if role/location/contact changes; points to /legal.
-- **Structured data** — every page emits one JSON-LD `@graph`
-  (`BaseLayout.astro`): a site-wide `WebSite` + `Person` pair with stable
-  `@id`s (`/#website`, `/#person`) so search engines merge all pages into one
-  Alexandre Haineaux entity, plus page-specific nodes passed via the layout's
-  `schema` prop using the helpers in `src/lib/schema.ts`. Current page nodes:
-  `ProfilePage` + breadcrumbs on /about, `BreadcrumbList` + `ImageGallery`
-  with per-photo licensable `ImageObject`s (license/acquireLicensePage →
-  /legal — Google Images "Licensable" badge) on photography collections, and
-  `BreadcrumbList` + `VisualArtwork` on production project pages. When adding
-  a page type, reference the person with `personRef()` — don't redeclare it.
-- `sitemap.xml` is generated automatically by `@astrojs/sitemap`
-  (`astro.config.mjs`) from `site: 'https://haineaux.com'` — don't hand-write
-  it, and update `site` there if the domain ever changes (it drives
-  canonical URLs and OG tags too, via `BaseLayout.astro`).
-
-## Security headers (`public/_headers`)
-
-CSP is `default-src 'self'` with narrow allowances: `style-src`/`script-src`
-include `'unsafe-inline'` (Astro scoped `<style>` + inline `style=""`
-attributes, the inlined `<script>`s in `Lightbox.astro` / `index.astro`, and
-the JSON-LD block in `BaseLayout.astro` require it — there's no nonce/hash
-pipeline on static Cloudflare Pages output). The whole `Content-Security-Policy`
-value must stay on **one physical line** (Cloudflare `_headers` does not support
-wrapped values). `img-src` is `'self' data:` (all images are
-self-hosted — see the Images section above). `frame-src` allows exactly
-`https://www.youtube-nocookie.com` for the click-to-load YouTube facade
-(`YouTubeEmbed.astro`); nothing from YouTube is requested until the visitor
-presses play, and facade posters are self-hosted so `img-src` stays `'self'`.
-Self-hosted `<video>` needs no CSP entry (`media-src` falls back to
-`default-src 'self'`). If you add any third-party script,
-font, or analytics, its origin must be added here or it silently fails under CSP —
-there's no dashboard-level CSP config, this file is the only source of truth.
-
-## Deployment
-
-**Live and wired up** (since 2026-07-14). The repo is
-`github.com/Xandrain/websiteportfolio`; `.github/workflows/pages.yml` runs on
-push to `main` (or manual `workflow_dispatch`): `npm ci` → `npm run build` →
-`npx wrangler pages deploy dist --project-name=… --branch=main`. The three
-GitHub Actions secrets are set (`CLOUDFLARE_API_TOKEN` — a least-privilege
-_Cloudflare Pages · Edit_ token, `CLOUDFLARE_ACCOUNT_ID`,
-`CLOUDFLARE_PROJECT_NAME=websiteportfolio`). The Cloudflare Pages project
-`websiteportfolio` is **Direct Upload** (NOT Git-connected — Actions drives the
-deploy) with `main` as its production branch, live at
-`https://websiteportfolio-4ht.pages.dev`. Every push to `main` publishes a
-production deploy. Custom-domain attachment (`haineaux.com`) still happens in
-the Cloudflare dashboard, not in this repo — not yet attached.
-
-Gotcha for setting secrets from Windows PowerShell: pipe-to-`gh` (`"val" | gh
-secret set`) prepends a UTF-8 BOM that wrangler rejects (`U+FEFF` in the auth
-header) — always use `gh secret set NAME --body "val"` instead.
+Code wins over every document. This file wins on conventions; **[UPDATING.md](UPDATING.md)**
+wins on procedures and is the single reference doc — recipes, asset rules, encoding,
+publishing. Read it when doing content work; this file carries only what applies to
+every session.
