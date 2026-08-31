@@ -54,6 +54,26 @@ const { label, tabs, active } = Astro.props;
   })();
 </script>
 
+<script is:inline>
+  // Retire the beat on contact. Hovering, tapping or tabbing into the
+  // bar means the visitor has found it, and a cue that keeps firing
+  // after that is nagging rather than helpful.
+  //
+  // Listeners go on .subnav__inner, not the <nav>: the wrapper is
+  // pointer-events: none outside the pill so it never sees the pointer
+  // itself, and pointerenter does not bubble up from the pill either.
+  // once:true means each one detaches after firing — nothing stays
+  // subscribed for the rest of the visit.
+  (() => {
+    const inner = document.querySelector(".subnav__inner");
+    if (!inner) return;
+    const rest = () => inner.classList.add("subnav__inner--rested");
+    for (const ev of ["pointerenter", "pointerdown", "focusin"]) {
+      inner.addEventListener(ev, rest, { once: true });
+    }
+  })();
+</script>
+
 <style>
   .subnav {
     position: sticky;
@@ -116,10 +136,57 @@ const { label, tabs, active } = Astro.props;
     background: var(--color-accent-wash);
   }
 
+  /* The selected tab is a solid ink chip, not a wash.
+
+     It used to be `oklch(from #1A1917 l c h / 0.06)` — 1.12:1 against
+     the pill it sits in, with a font-weight step as the only other
+     signal. The hover rule above is 1.11:1 in luminance but adds a
+     hue the pill uses nowhere else AND flips the label to accent ink
+     at 6.28:1, so the tab you were NOT on read as the selected one.
+     Solid ink at 16.8:1 settles that, and it is the only version that
+     survives touch, where hover never fires and the wash was the
+     entire state machine.
+
+     Keep hover quieter than this. Restoring a fill/label pair on
+     hover that out-weighs a solid chip brings the inversion back. */
   .subnav__tab.is-active {
-    color: var(--color-ink);
+    color: var(--color-paper);
     font-weight: 500;
-    background: oklch(from #1A1917 l c h / 0.06);
+    background: var(--color-ink);
+  }
+
+  /* ── The beat ──────────────────────────────────────────────
+     A slow breath on the selected chip. This bar sits below the
+     main pill sharing its paper and its blur, and a page that
+     arrives with both already in place gives the eye no reason to
+     read the lower one as something operable. One 5% swell
+     every six seconds is enough to register as pressable and
+     small enough not to pull focus off the work.
+
+     Transform only. It composites, costs no layout, and cannot
+     nudge the tab beside it — a width or padding beat would push
+     its neighbour around on every cycle. The chip rests for 82%
+     of the cycle; the swell itself runs ~1.1s, starting after the
+     entrance above has settled.
+
+     It retires on contact (script below): once a visitor has
+     found the bar, a cue that keeps firing is just noise.
+
+     Guarded like every animation here, so it never runs under
+     `prefers-reduced-motion: reduce` — which includes any machine
+     with OS-level animation effects switched off, where the chip
+     is simply static. That is the intended fallback, not a bug. */
+  @media (prefers-reduced-motion: no-preference) {
+    .subnav__tab.is-active { animation: subnav-beat 6s ease-in-out 2.4s infinite; }
+
+    .subnav__inner--rested .subnav__tab.is-active { animation: none; }
+  }
+
+  @keyframes subnav-beat {
+    0%   { transform: scale(1); }
+    9%   { transform: scale(1.05); }
+    18%  { transform: scale(1); }
+    100% { transform: scale(1); }
   }
 
   @media (max-width: 480px) {
