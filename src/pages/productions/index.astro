@@ -15,22 +15,10 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
   title="Graphic Design & 3D"
   description="3D and graphic design work by Alexandre Haineaux — character modeling, rigging, and texturing for animated television, alongside personal studies."
 >
+  <h1 class="sr-only">Productions</h1>
+
   <div class="subnav-spacer" aria-hidden="true"></div>
   <ProductionsSubNav active="productions" />
-
-  <header class="masthead editorial">
-    <span class="eyebrow">Graphic Design &amp; 3D</span>
-
-    <div class="masthead__row">
-      <h1 class="masthead__title">Productions</h1>
-      <p class="masthead__lede">
-        Modelling, rigging and texturing for broadcast animation — and the
-        character studies made between them.
-      </p>
-    </div>
-
-    <div class="masthead__rule" aria-hidden="true"></div>
-  </header>
 
   <!-- Featured plate: the cover inset on the left, the credit read off as a
        spec column on the right. -->
@@ -87,9 +75,6 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
   <!-- The rest, as plates -->
   {rest.length > 0 && (
     <section class="plates editorial" aria-label="More projects">
-      <h2 class="plates__heading">
-        <span class="label">Index</span>
-      </h2>
       <div class="plates__grid">
         {rest.map((project, i) => (
           <ProjectCard project={project} variant="plate" index={i + 2} />
@@ -103,61 +88,6 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
 
 <style>
   .subnav-spacer { height: 5.5rem; }
-
-  /* ── Masthead ─────────────────────────────────────────────── */
-  /* Max-width and page gutter come from .editorial (global.css). */
-  .masthead { padding-block: 4.5rem 0; }
-
-  .masthead__row {
-    margin-top: 1.625rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-
-  /* The title and the standfirst sit on one baseline at desktop width, ragged
-     from opposite margins. Stacked below that — a right-ragged paragraph under
-     a left-ragged title reads as a mistake at narrow measures. */
-  @media (min-width: 900px) {
-    .masthead__row {
-      flex-direction: row;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 3rem;
-    }
-  }
-
-  .masthead__title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(2.75rem, 5.5vw, 4.25rem);
-    line-height: 1;
-    letter-spacing: -0.01em;
-    color: var(--color-ink);
-    margin: 0;
-  }
-
-  .masthead__lede {
-    margin: 0;
-    font-size: 0.9375rem;
-    line-height: 1.75;
-    color: var(--color-ink-soft);
-    max-width: 40ch;
-    text-wrap: pretty;
-  }
-
-  @media (min-width: 900px) {
-    .masthead__lede {
-      margin-bottom: 0.625rem;
-      text-align: right;
-    }
-  }
-
-  .masthead__rule {
-    height: 1px;
-    background: var(--color-line);
-    margin-top: 2.75rem;
-  }
 
   /* ── Featured plate ───────────────────────────────────────── */
   .featured { padding-block: 3rem 0; }
@@ -284,13 +214,7 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
   }
 
   /* ── Plates ───────────────────────────────────────────────── */
-  .plates { padding-block: 4rem 0; }
-
-  .plates__heading {
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--color-line);
-    margin-bottom: 2rem;
-  }
+  .plates { padding-block: 1.5rem 0; }
 
   .plates__grid {
     display: grid;
