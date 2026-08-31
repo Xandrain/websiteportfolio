@@ -18,13 +18,11 @@ const pv = projects.filter((p) => p.category === "product-visualisation");
   <ProductionsSubNav active="product-visualisation" />
 
   <!-- Projects grid -->
-  <section class="projects-section" aria-label="Product visualisation projects">
-    <div class="projects-inner">
-      <div class="projects-grid">
-        {pv.map((project, i) => (
-          <ProjectCard project={project} eager={i < 3} />
-        ))}
-      </div>
+  <section class="projects-section editorial" aria-label="Product visualisation projects">
+    <div class="projects-grid">
+      {pv.map((project, i) => (
+        <ProjectCard project={project} eager={i < 3} />
+      ))}
     </div>
   </section>
 
@@ -34,16 +32,7 @@ const pv = projects.filter((p) => p.category === "product-visualisation");
 <style>
   .subnav-spacer { height: 5.5rem; }
 
-  .projects-section {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 3.5rem 1.5rem 0;
-  }
-
-  @media (min-width: 640px)  { .projects-section { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .projects-section { padding-inline: 3rem; } }
-
-  .projects-inner { width: 100%; }
+  .projects-section { padding-block: 3.5rem 0; }
 
   .projects-grid {
     display: grid;

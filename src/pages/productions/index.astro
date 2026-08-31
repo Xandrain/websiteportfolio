@@ -15,66 +15,85 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
   title="Graphic Design & 3D"
   description="3D and graphic design work by Alexandre Haineaux — character modeling, rigging, and texturing for animated television, alongside personal studies."
 >
-  <h1 class="sr-only">Graphic Design &amp; 3D</h1>
-
   <div class="subnav-spacer" aria-hidden="true"></div>
   <ProductionsSubNav active="productions" />
 
-  <!-- Featured project -->
-  {featured && (
-    <section class="featured-section" aria-label="Featured project">
-      <div class="featured-inner">
-        <div class="featured-grid">
+  <header class="masthead editorial">
+    <span class="eyebrow">Graphic Design &amp; 3D</span>
 
-          <!-- Visual panel -->
-          <a href={`/productions/${featured.slug}`} class="featured-media">
+    <div class="masthead__row">
+      <h1 class="masthead__title">Productions</h1>
+      <p class="masthead__lede">
+        Modelling, rigging and texturing for broadcast animation — and the
+        character studies made between them.
+      </p>
+    </div>
+
+    <div class="masthead__rule" aria-hidden="true"></div>
+  </header>
+
+  <!-- Featured plate: the cover inset on the left, the credit read off as a
+       spec column on the right. -->
+  {featured && (
+    <section class="featured editorial" aria-label="Featured project">
+      <div class="plate">
+        <div class="plate__media">
+          <div class="plate__well">
             <img
               src={featured.cover}
               srcset={srcset(featured.cover)}
-              sizes="(min-width: 900px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 700px, (min-width: 900px) 60vw, 100vw"
               alt={`${featured.title} — Graphic Design & 3D project`}
               width={featuredDims?.w ?? 1600}
-              height={featuredDims?.h ?? 900}
+              height={featuredDims?.h ?? 1000}
               loading="eager"
               fetchpriority="high"
               decoding="async"
-              class="featured-media__img"
+              class="plate__img"
             />
-          </a>
-
-          <!-- Info panel -->
-          <div class="featured-info">
-            <div class="featured-info__meta">
-              {featured.tags.map((t) => <span class="label">{t}</span>)}
-            </div>
-            <h2 class="featured-info__title">
-              <a href={`/productions/${featured.slug}`} class="featured-info__link">
-                {featured.title}
-              </a>
-            </h2>
-            <p class="featured-info__desc">{featured.description}</p>
-            <a href={`/productions/${featured.slug}`} class="featured-info__cta">
-              View project →
-            </a>
           </div>
+        </div>
 
+        <div class="plate__info">
+          <p class="plate__kicker">01 — Featured</p>
+
+          <h2 class="plate__title">
+            <a href={`/productions/${featured.slug}`} class="plate__link">
+              {featured.title}
+            </a>
+          </h2>
+
+          {featured.specs && featured.specs.length > 0 && (
+            <dl class="specs">
+              {featured.specs.map((row) => (
+                <div class="specs__row">
+                  <dt class="specs__label">{row.label}</dt>
+                  <dd class="specs__value">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          <div class="plate__spacer"></div>
+
+          <a href={`/productions/${featured.slug}`} class="plate__cta">
+            View project →
+          </a>
         </div>
       </div>
     </section>
   )}
 
-  <!-- Other projects grid -->
+  <!-- The rest, as plates -->
   {rest.length > 0 && (
-    <section class="projects-section" aria-label="More projects">
-      <div class="projects-inner">
-        <h2 class="projects-section__heading">
-          <span class="label">More projects</span>
-        </h2>
-        <div class="projects-grid">
-          {rest.map((project) => (
-            <ProjectCard project={project} />
-          ))}
-        </div>
+    <section class="plates editorial" aria-label="More projects">
+      <h2 class="plates__heading">
+        <span class="label">Index</span>
+      </h2>
+      <div class="plates__grid">
+        {rest.map((project, i) => (
+          <ProjectCard project={project} variant="plate" index={i + 2} />
+        ))}
       </div>
     </section>
   )}
@@ -85,127 +104,201 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
 <style>
   .subnav-spacer { height: 5.5rem; }
 
-  /* ── Featured ─────────────────────────────────────────────── */
-  .featured-section {
-    border-bottom: 1px solid var(--color-line);
-    padding-block: 4rem;
-  }
+  /* ── Masthead ─────────────────────────────────────────────── */
+  /* Max-width and page gutter come from .editorial (global.css). */
+  .masthead { padding-block: 4.5rem 0; }
 
-  .featured-inner {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding-inline: 1.5rem;
-  }
-
-  @media (min-width: 640px)  { .featured-inner { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .featured-inner { padding-inline: 3rem; } }
-
-  .featured-grid {
-    display: grid;
-    gap: 3rem;
-    align-items: center;
-  }
-
-  @media (min-width: 900px) {
-    .featured-grid { grid-template-columns: 1fr 1fr; gap: 4rem; }
-  }
-
-  .featured-media {
-    display: block;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    border-radius: 0.25rem;
-    border: 1px solid var(--color-line);
-    background: var(--color-paper-alt);
-  }
-
-  .featured-media__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(20%);
-    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s;
-  }
-
-  .featured-media:hover .featured-media__img {
-    transform: scale(1.03);
-    filter: grayscale(0%);
-  }
-
-  .featured-info__meta {
+  .masthead__row {
+    margin-top: 1.625rem;
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
+    flex-direction: column;
+    gap: 1.25rem;
   }
 
-  .featured-info__title {
+  /* The title and the standfirst sit on one baseline at desktop width, ragged
+     from opposite margins. Stacked below that — a right-ragged paragraph under
+     a left-ragged title reads as a mistake at narrow measures. */
+  @media (min-width: 900px) {
+    .masthead__row {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 3rem;
+    }
+  }
+
+  .masthead__title {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 4.5vw, 4rem);
     font-weight: 400;
-    line-height: 1.0;
+    font-size: clamp(2.75rem, 5.5vw, 4.25rem);
+    line-height: 1;
     letter-spacing: -0.01em;
     color: var(--color-ink);
-    margin-bottom: 1.25rem;
+    margin: 0;
   }
 
-  .featured-info__link {
-    text-decoration: none;
-    color: inherit;
-    transition: opacity 0.2s;
-  }
-
-  .featured-info__link:hover { opacity: 0.7; }
-
-  .featured-info__desc {
+  .masthead__lede {
+    margin: 0;
     font-size: 0.9375rem;
     line-height: 1.75;
     color: var(--color-ink-soft);
-    max-width: 48ch;
-    margin-bottom: 2rem;
+    max-width: 40ch;
+    text-wrap: pretty;
   }
 
-  .featured-info__cta {
-    display: inline-flex;
-    align-items: center;
+  @media (min-width: 900px) {
+    .masthead__lede {
+      margin-bottom: 0.625rem;
+      text-align: right;
+    }
+  }
+
+  .masthead__rule {
+    height: 1px;
+    background: var(--color-line);
+    margin-top: 2.75rem;
+  }
+
+  /* ── Featured plate ───────────────────────────────────────── */
+  .featured { padding-block: 3rem 0; }
+
+  .plate {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 0.375rem;
+    background: var(--color-paper-alt);
+    box-shadow: inset 0 0 0 1px var(--color-line),
+                0 18px 44px rgba(26, 25, 23, 0.06);
+    overflow: hidden;
+  }
+
+  @media (min-width: 900px) {
+    .plate { grid-template-columns: 1.9fr 1fr; }
+  }
+
+  .plate__media { padding: 1.25rem; }
+
+  /* The image sits in a well of page-coloured ground, not flush to the plate
+     edge — that margin is what makes a render read as a mounted object. */
+  .plate__well {
+    overflow: hidden;
+    border-radius: 0.1875rem;
+    background: var(--color-paper);
+    aspect-ratio: 16 / 10;
+  }
+
+  .plate__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plate__info {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.75rem 1.75rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  @media (min-width: 900px) {
+    .plate__info {
+      padding: 2.5rem 2.25rem 2.25rem;
+      border-top: 0;
+      border-left: 1px solid var(--color-line);
+    }
+  }
+
+  .plate__kicker {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+    color: var(--color-accent-ink);
+  }
+
+  .plate__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.875rem, 2.8vw, 2.375rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 1.125rem 0 0;
+  }
+
+  .plate__link {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .plate__link:hover { opacity: 0.7; }
+
+  .plate__spacer { flex-grow: 1; min-height: 2rem; }
+
+  .plate__cta {
+    align-self: flex-start;
     font-size: 0.8125rem;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     text-decoration: none;
-    color: var(--color-ink);
-    border-bottom: 1px solid var(--color-line);
-    padding-bottom: 0.2rem;
+    color: var(--color-accent-ink);
+    border-bottom: 1px solid oklch(from #0C6B43 l c h / 0.35);
+    padding-bottom: 0.25rem;
     transition: border-color 0.25s;
   }
 
-  .featured-info__cta:hover { border-color: var(--color-ink); }
+  .plate__cta:hover { border-color: var(--color-accent-ink); }
 
-  /* ── More projects ────────────────────────────────────────── */
-  .projects-section {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 4rem 1.5rem 0;
+  /* Spec rows — hairlines only, so the column reads as a breakdown rather
+     than a boxed table. */
+  .specs { margin: 1.75rem 0 0; }
+
+  .specs__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--color-line);
   }
 
-  @media (min-width: 640px)  { .projects-section { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .projects-section { padding-inline: 3rem; } }
+  .specs__row:last-child { border-bottom: 1px solid var(--color-line); }
 
-  .projects-inner { width: 100%; }
+  .specs__label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--letter-spacing-label);
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    white-space: nowrap;
+  }
 
-  .projects-section__heading {
-    padding-bottom: 2rem;
+  .specs__value {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+    text-align: right;
+  }
+
+  /* ── Plates ───────────────────────────────────────────────── */
+  .plates { padding-block: 4rem 0; }
+
+  .plates__heading {
+    padding-bottom: 1.25rem;
     border-bottom: 1px solid var(--color-line);
     margin-bottom: 2rem;
   }
 
-  .projects-grid {
+  .plates__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 3.5rem;
+    gap: 1.5rem;
   }
 
   @media (min-width: 640px) {
-    .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+    .plates__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 </style>

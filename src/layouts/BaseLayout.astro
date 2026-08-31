@@ -37,6 +37,14 @@ const ogImage = new URL(image, origin);
 // fixed 1200×630 produced by scripts/gen-brand-assets.mjs.
 const ogDims = dims(image) ?? { w: 1200, h: 630 };
 
+// Which shape the identity morph is landing on. The card lives only on the
+// gate; every other page carries the nav pill instead. The view-transition
+// pseudo-elements belong to the INCOMING document, so this attribute is how
+// the arriving page tells global.css which way to run the shape — pill to
+// card here, card to pill everywhere else. Without it the radius travels the
+// same way in both directions and the card arrives as a stadium.
+const isGate = Astro.url.pathname === "/";
+
 // Floating "Contact" pill (→ /about) on the two work sections only.
 const showContactFab = ["/photography", "/productions"].some((p) =>
   Astro.url.pathname.startsWith(p),
@@ -87,7 +95,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-gate={isGate ? "" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -132,10 +140,12 @@ const jsonLd = {
 
     <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
   </head>
-  <body class="flex min-h-[100dvh] flex-col bg-paper text-ink antialiased">
+  <!-- The column shell (fills the viewport, footer pinned) is on `body` and
+       `body > main` in global.css — it was five utility classes here. -->
+  <body>
     <a href="#main" class="skip-link">Skip to content</a>
     {!noNav && <Nav />}
-    <main id="main" class="flex-1">
+    <main id="main">
       <slot />
     </main>
     {!noFooter && <Footer />}

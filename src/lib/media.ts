@@ -20,18 +20,30 @@ const POSTER_RE = /-poster$/i;
 
 type Parts = { image?: string; webm?: string; mp4?: string; poster?: string };
 
+/** Every project page calls scan() twice — once through gallery(), once
+ *  through reel() — and getStaticPaths renders each page once, so a folder
+ *  would otherwise be read off disk twice per project for an answer that
+ *  cannot change during a build. */
+const scanned = new Map<string, Map<string, Parts>>();
+
 /** Group a project folder's files by basename ("01.webm" + "01.mp4" +
  * "01-poster.jpg" all belong to "01"). Runs at build time only. */
 function scan(slug: string): Map<string, Parts> {
+  const cached = scanned.get(slug);
+  if (cached) return cached;
+
   const dir = path.join(process.cwd(), "public", "productions", slug);
   let files: string[] = [];
   try {
     files = readdirSync(dir);
   } catch {
-    return new Map();
+    const empty = new Map<string, Parts>();
+    scanned.set(slug, empty);
+    return empty;
   }
 
   const map = new Map<string, Parts>();
+  scanned.set(slug, map);
   const get = (base: string) => {
     let p = map.get(base);
     if (!p) map.set(base, (p = {}));

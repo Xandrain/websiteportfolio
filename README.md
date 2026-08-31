@@ -1,7 +1,7 @@
 # haineaux.com
 
 Portfolio site for **Alexandre Haineaux** — photographer & graphic designer.
-Astro 6, static output, zero client-side JavaScript.
+Astro 7, static output, zero client-side JavaScript.
 
 ## How this site gets published
 

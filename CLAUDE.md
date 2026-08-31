@@ -10,7 +10,7 @@ or account details. `.claude/` is gitignored and has never been pushed.
 
 ## What this is, and where edits take effect
 
-**An Astro 6 static site. There is a real build. It runs in CI, not on your machine.**
+**An Astro 7 static site. There is a real build. It runs in CI, not on your machine.**
 
     push to main
       → .github/workflows/pages.yml
@@ -70,7 +70,19 @@ full procedure in [UPDATING.md](UPDATING.md).
   on a shared beat and can only hold loops that agree on how long a lap lasts.
 - No dates anywhere except the footer copyright and `/legal`.
 - CSS custom properties are kebab-case with a category prefix (`--color-*`,
-  `--font-*`, `--max-width-*`, `--radius-*`), declared in `global.css`'s `@theme`.
+  `--font-*`, `--max-width-*`, `--radius-*`), declared in `global.css`'s `:root`.
+- **No CSS framework.** Tailwind was removed: it shipped ~14 KB into every one
+  of the 27 pages (the stylesheet is inlined) to serve about twenty classes,
+  and its scanner read CSS *property values* out of component `<style>` blocks
+  as class candidates, emitting utilities nothing used. Layout is hand-written
+  scoped CSS per component; the only site-wide classes are in `global.css`'s
+  `@layer components` — `.editorial`, `.sr-only`, `.skip-link`, `.label`,
+  `.eyebrow`. Reach for one of those or write scoped CSS; do not reintroduce a
+  utility framework without re-measuring what it costs per page.
+- **Every content band uses `.editorial`** for its horizontal geometry
+  (max-width + the 1.5/2/3rem gutter). A caller adds its own `padding-block`,
+  and must use that longhand — the `padding` shorthand would silently reset
+  the gutter the class just set.
 - Node 22 (`.nvmrc`, CI, `engines >=22.12.0`).
 - Zero client JS: no framework, no islands, only small inline `<script>`s.
 
@@ -89,6 +101,20 @@ full procedure in [UPDATING.md](UPDATING.md).
 - **Never add a third-party script, font or analytics origin** without adding it to
   the CSP in `public/_headers`; it fails silently otherwise. The CSP value must stay
   on ONE physical line — Cloudflare `_headers` does not support wrapped values.
+- **Never deny a browser feature in `Permissions-Policy` without checking the
+  YouTube embed and the About card first.** A document-level `feature=()`
+  overrides what an iframe may be granted, so denying anything in
+  `YouTubeEmbed.astro`'s `allow` list — autoplay, accelerometer, gyroscope,
+  picture-in-picture, encrypted-media, web-share, fullscreen — disables it
+  inside the player with no error. `clipboard-write` is the About card's "Copy
+  mail" button, and `autoplay` is also the gallery's muted looping clips. The
+  list in `_headers` is deliberately restricted to features nothing here uses.
+- **Never set `compressHTML: 'jsx'`** (Astro 7's default, overridden to `true`
+  in `astro.config.mjs`). JSX whitespace rules drop the text node between two
+  inline elements, which HTML treats as a real space — under `'jsx'` the legal
+  notice's inline links and the About card's social rows lost their word gaps
+  and both pages reflowed. Moving to `'jsx'` means auditing every inline gap in
+  the site and adding an explicit `{" "}`.
 - **Never quietly undo the turnaround sync.** The animated WebPs on a project page
   are phase-aligned by the script in `productions/[slug].astro`, which rests on two
   things that both look removable: `blob:` in the CSP's `img-src`, and one shared
@@ -96,6 +122,38 @@ full procedure in [UPDATING.md](UPDATING.md).
   turnarounds just drift apart again, with nothing to show that they should not.
   The reasoning, the browser behaviour behind it and how to re-verify are in the
   comment above that script; read it before changing anything there.
+- **Never put an image under the nav pill without fading it to paper.** The
+  pill is translucent by design (`Nav.astro`) so it can sit over content,
+  and its hairline ring alone will not hold against a dark or busy crop. No
+  page currently bleeds artwork under it; one that does must carry paper
+  down from the top behind the pill, and be re-checked at 390px, where a
+  header shrinks faster than the type inside it.
+
+- **Never let a second element claim `view-transition-name: site-identity`.**
+  The home gate's identity card and the nav pill share that one name, which
+  is what makes the card fly up and become the pill instead of the page
+  cutting. `view-transition-name` must be unique among *rendered* elements
+  in a document: name a third thing, or render the card and the pill on the
+  same page, and the browser discards the whole morph silently — no error,
+  no warning, just the old hard cut back. The declarations sit in
+  `index.astro` and `Nav.astro`; the choreography has to stay in
+  `global.css`, because the `::view-transition-*` pseudo-elements hang off
+  the document root and an Astro-scoped selector would never match them.
+  `@view-transition { navigation: auto }` is site-wide, so every same-origin
+  navigation now cross-fades, not just the gate.
+
+- **Never point the identity morph’s shape tween at `--radius-pill`, and never
+  drop `data-gate`.** The morph clips its box to a border-radius that travels
+  with it, and both ends of that travel are traps. `--radius-pill` is 9999px —
+  a sentinel meaning "fully round", not a geometry — so interpolating from it
+  holds the radius above half the box height until the last percent and the
+  card arrives as a stadium that pops square. Use `--radius-identity-pill`
+  (2rem), which clamps to a true pill on the 43.5px nav bar and still moves.
+  And a keyframe runs one way while navigation goes two: the pseudo-elements
+  belong to the page being navigated TO, so `data-gate` on the gate’s `<html>`
+  (set in `BaseLayout.astro`) is what runs the tween pill-to-card on the way
+  back. Any new page showing the card rather than the pill needs that
+  attribute, or its shape animates backwards.
 
 ## Precedence and reference
 

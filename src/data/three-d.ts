@@ -30,17 +30,29 @@ export interface Production {
    * needs naming more precisely — e.g. a reel that covers several projects.
    */
   reelCaption?: string;
+  /**
+   * Spec rows shown beside the featured project on the Productions index
+   * (Role / Medium / Scope …). Optional — the block is omitted without them,
+   * so a project with nothing precise to say simply says nothing.
+   */
+  specs?: { label: string; value: string }[];
 }
 
 export const projects: Production[] = [
   {
     slug: "mojo-swoptops",
-    title: "Mojo SwopTops — 3D Modeller",
+    title: "Mojo SwopTops",
     description:
       "3D modeling for Mojo SwopTops, a children's animated series broadcast on the BBC — props, vehicles, and characters built over more than a year of production.",
     cover: "/productions/mojo-swoptops/cover.jpg",
     category: "productions",
     tags: ["3D Modeling", "TV / Animation"],
+    specs: [
+      { label: "Role", value: "3D Modeller" },
+      { label: "Medium", value: "Broadcast series, BBC" },
+      { label: "Scope", value: "Props · Vehicles · Characters" },
+      { label: "Duration", value: "Over a year of production" },
+    ],
   },
   {
     slug: "azureus",
@@ -50,6 +62,11 @@ export const projects: Production[] = [
     cover: "/productions/azureus/cover.jpg",
     category: "productions",
     tags: ["Rigging", "TV / Animation"],
+    specs: [
+      { label: "Role", value: "Rigging & texturing" },
+      { label: "Studio", value: "BlackSun Entertainment" },
+      { label: "Supervision", value: "Mason Doran" },
+    ],
   },
   {
     slug: "crown-reinterpretation",
@@ -59,6 +76,12 @@ export const projects: Production[] = [
     cover: "/productions/crown-reinterpretation/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Personal Work"],
+    specs: [
+      { label: "Role", value: "Character art" },
+      { label: "Source", value: "“Crown”, Olivier Menanteau" },
+      { label: "Scope", value: "Deformation-ready topology" },
+      { label: "Detail", value: "Scattered instancing" },
+    ],
   },
   {
     slug: "rambochador",
@@ -68,6 +91,11 @@ export const projects: Production[] = [
     cover: "/productions/rambochador/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Stylized"],
+    specs: [
+      { label: "Role", value: "Character art" },
+      { label: "Source", value: "2D design, Kim Jacinto" },
+      { label: "Study", value: "Pose, weight, proportion" },
+    ],
   },
   {
     slug: "chance-parfume",
@@ -178,5 +206,10 @@ export const projects: Production[] = [
     cover: "/productions/carl-fredricksen/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Fan Art"],
+    specs: [
+      { label: "Role", value: "Texture & shading" },
+      { label: "Subject", value: "Carl Fredricksen, Pixar’s UP" },
+      { label: "Passes", value: "Base colour · Roughness · Normal" },
+    ],
   },
 ];

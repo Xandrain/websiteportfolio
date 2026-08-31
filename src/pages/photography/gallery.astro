@@ -19,10 +19,8 @@ const photos = collections.flatMap((c) => c.photos);
   <PhotographySubNav active="gallery" />
 
   <!-- All photos, one masonry with lightbox -->
-  <section class="gallery-section" aria-label="All photographs">
-    <div class="gallery-wrapper">
-      <Lightbox photos={photos} collectionTitle="Gallery" />
-    </div>
+  <section class="gallery-section editorial" aria-label="All photographs">
+    <Lightbox photos={photos} collectionTitle="Gallery" />
   </section>
 
   <DisciplineSwitch
@@ -35,14 +33,5 @@ const photos = collections.flatMap((c) => c.photos);
 <style>
   .subnav-spacer { height: 5.5rem; }
 
-  .gallery-section {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 3rem 1.5rem 0;
-  }
-
-  @media (min-width: 640px)  { .gallery-section { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .gallery-section { padding-inline: 3rem; } }
-
-  .gallery-wrapper { width: 100%; }
+  .gallery-section { padding-block: 3rem 0; }
 </style>

@@ -1,49 +1,78 @@
 ---
+/**
+ * Pill call-to-action: a label with a trailing glyph in its own circle, which
+ * nudges out and up on hover.
+ *
+ * Was a Tailwind utility string carrying an `ink`/`ghost` variant, an
+ * `external` flag and a `class` passthrough. Nothing ever asked for any of
+ * them — the single caller (404.astro) passes href, label and icon — and the
+ * unused `ghost` branch was not free: its classes sat in this file as plain
+ * text, so Tailwind's scanner found them and emitted the rules into the CSS
+ * inlined on all 27 pages. Restore a variant here if a second style is ever
+ * genuinely needed, rather than keeping one on spec.
+ */
 interface Props {
   href: string;
   label: string;
-  /** "ink" = solid dark pill; "ghost" = light translucent pill. */
-  variant?: "ink" | "ghost";
-  /** Trailing icon glyph rendered inside its own circle. */
+  /** Trailing glyph rendered inside its own circle. */
   icon?: string;
-  /** Render as external link (new tab + rel). */
-  external?: boolean;
-  class?: string;
 }
 
-const {
-  href,
-  label,
-  variant = "ink",
-  icon = "↗", // ↗
-  external = false,
-  class: className = "",
-} = Astro.props;
-
-const base =
-  "group inline-flex w-fit items-center gap-3 rounded-full py-2 pl-6 pr-2 text-sm transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]";
-const variants = {
-  ink: "bg-ink text-paper hover:bg-ink-soft",
-  ghost: "bg-ink/[0.04] text-ink ring-1 ring-ink/[0.08] hover:bg-ink/[0.07]",
-};
-const iconTone =
-  variant === "ink" ? "bg-paper/15 text-paper" : "bg-accent/[0.16] text-accent-ink";
+const { href, label, icon = "↗" } = Astro.props;
 ---
 
-<a
-  href={href}
-  class:list={[base, variants[variant], className]}
-  target={external ? "_blank" : undefined}
-  rel={external ? "noopener noreferrer" : undefined}
->
-  <span class="tracking-wide">{label}</span>
-  <span
-    class:list={[
-      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105",
-      iconTone,
-    ]}
-    aria-hidden="true"
-  >
-    {icon}
-  </span>
+<a href={href} class="cta">
+  <span class="cta__label">{label}</span>
+  <span class="cta__icon" aria-hidden="true">{icon}</span>
 </a>
+
+<style>
+  .cta {
+    /* Local, because only this component uses it: a long, soft settle that
+       suits a button being pressed rather than a page element arriving. */
+    --ease-cta: cubic-bezier(0.32, 0.72, 0, 1);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: fit-content;
+    border-radius: var(--radius-pill);
+    padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: 0.875rem;
+    line-height: 1.4286;
+    text-decoration: none;
+    transition: background 0.5s var(--ease-cta), scale 0.5s var(--ease-cta);
+  }
+
+  .cta:hover { background: var(--color-ink-soft); }
+  .cta:active { scale: 0.98; }
+
+  .cta__label { letter-spacing: 0.025em; }
+
+  .cta__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+    background: rgba(250, 250, 248, 0.15);
+    color: var(--color-paper);
+    font-size: 0.875rem;
+    transition: transform 0.5s var(--ease-cta);
+  }
+
+  /* The glyph leaves the pill slightly before the pill itself reacts —
+     the same "away and up" gesture the arrow makes elsewhere on the site. */
+  .cta:hover .cta__icon {
+    transform: translate(0.125rem, -1px) scale(1.05);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta:hover .cta__icon { transform: none; }
+    .cta:active { scale: 1; }
+  }
+</style>

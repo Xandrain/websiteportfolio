@@ -1,7 +1,18 @@
-@import "tailwindcss";
 @import "./fonts.css";
 
-@theme {
+/* Layer order. Everything declared here sits in one of these two layers, and
+   Astro's per-component <style> blocks are UNLAYERED — unlayered CSS beats
+   layered CSS regardless of specificity, so a component always wins over a
+   site-wide rule it names. That was Tailwind's `theme, base, components,
+   utilities` cascade doing the same job; this line is what keeps the
+   precedence identical now that Tailwind is gone. */
+@layer base, components;
+
+/* ── Design tokens ─────────────────────────────────────────────
+   Formerly a Tailwind `@theme` block. Plain custom properties now: every
+   consumer already reads them as `var(--…)`, and none of them needed the
+   utility classes `@theme` also generated (see astro.config.mjs). */
+:root {
   /* ── Palette ───────────────────────────────────────────────── */
   --color-paper:      #FAFAF8;
   --color-paper-alt:  #F2F0EA;
@@ -10,8 +21,15 @@
   /* Muted meta/label tone. Darkened from #A09D9A (~2.6:1, failed WCAG AA) to
      ~4.85:1 on --color-paper so small meta text stays legible. */
   --color-ink-muted:  #736E68;
-  --color-line:       oklch(from #1A1917 l c h / 0.09);
-  --color-overlay:    oklch(from #1A1917 l c h / 0.48);
+  /* Written out rather than as `oklch(from #1A1917 l c h / 0.09)`: Tailwind
+     resolved that at build time, so the browser never saw relative colour
+     syntax in this token. These are its exact resolved values — keeping them
+     literal means the hairline still renders on engines that predate relative
+     colour (Chrome <119, Firefox <128), which is what shipped before. */
+  --color-line:        oklch(21.3766% 0.00416043 84.5893 / 0.09);
+  /* Translucent emerald wash — the tint filling pills/tabs on hover.
+     Resolved from oklch(from #16A36A l c h / 0.10), same reason as above. */
+  --color-accent-wash: oklch(63.287% 0.140634 159.016 / 0.1);
 
   /* ── Accent — a single emerald hue (~155°) carried across the site ──
      Impact = the vivid "pop" for small decorative marks (eyebrow/footer dots);
@@ -19,8 +37,6 @@
      and underlines. */
   --color-accent:       #16A36A;  /* impact emerald — decorative marks */
   --color-accent-ink:   #0C6B43;  /* deep pine — links/underlines (AA on paper) */
-  /* Translucent emerald wash — the tint filling pills/tabs/buttons on hover. */
-  --color-accent-wash:  oklch(from #16A36A l c h / 0.10);
 
   /* ── Typography ─────────────────────────────────────────────── */
   --font-display: 'Bodoni Moda', Georgia, serif;
@@ -28,32 +44,126 @@
 
   /* ── Layout tokens ───────────────────────────────────────────── */
   --max-width-editorial: 75rem;
-  --max-width-narrow:    52rem;
 
   /* ── Detail tokens ───────────────────────────────────────────── */
   --letter-spacing-label:  0.10em;
   --letter-spacing-caps:   0.16em;
   --radius-pill:    9999px;
+  /* The gate identity card. Named because the identity morph tweens between
+     this and --radius-identity-pill, so the two ends of that tween and the
+     card itself all have to agree — three places that would otherwise drift
+     apart. */
+  --radius-identity: 1.25rem;
+  /* The PILL end of that same tween, and deliberately not --radius-pill.
+     9999px is a sentinel meaning "fully round", not a geometry: interpolating
+     from it keeps the radius above half the box height until the last percent
+     of the animation, so the shape stayed a stadium the whole way and popped
+     into a rounded rectangle at the end. The nav pill measures 43.5px tall at
+     every breakpoint, so anything past ~22px renders fully round once CSS
+     clamps it — 2rem leaves headroom for a pill up to 64px tall while staying
+     a real number the tween can move through. Re-measure if the pill's
+     padding or type size changes. */
+  --radius-identity-pill: 2rem;
 
   /* ── Timing ──────────────────────────────────────────────────── */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Travel curve for the identity morph. --ease-out-expo starts at full
+     speed — right for a hover, but over half a viewport it reads as fired
+     from a gun. cubic-bezier(.2,0,0,1) was barely better: half the travel
+     was over in the first fifth of the time, so the card looked like it
+     teleported and then hung there waiting. This one accelerates from rest
+     and spends its middle actually moving — 12% of the distance at 15% of
+     the time, 67% at 40%, 92% at 65%. Checked against captured frames of
+     the real transition, not picked by eye. */
+  --ease-morph: cubic-bezier(0.3, 0, 0.2, 1);
 }
 
-/* ── Base reset ──────────────────────────────────────────────── */
+/* ── Base reset ──────────────────────────────────────────────────
+   Replaces Tailwind Preflight, which this site no longer pulls in. Only the
+   rules its element set actually needs are kept, but the load-bearing ones
+   are kept EXACTLY: every component stylesheet is written assuming margins
+   and padding start at zero, headings carry no user-agent font-size, lists
+   have no markers, and images are block-level. Drop any of those four and
+   the layout does not degrade, it collapses. */
 @layer base {
-  :root { color-scheme: light; }
+  *,
+  *::before,
+  *::after,
+  ::backdrop {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
 
   html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    tab-size: 4;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
+  /* Headings are sized by whichever component renders them, never by the
+     user-agent stylesheet. */
+  h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+
+  a { color: inherit; text-decoration: inherit; }
+
+  b, strong { font-weight: bolder; }
+
+  code, kbd, samp, pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    font-size: 1em;
+  }
+
+  ol, ul, menu { list-style: none; }
+
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  img, video { max-width: 100%; height: auto; }
+
+  /* Controls inherit the page's type instead of the platform's. The gallery
+     and facade buttons then `all: unset` on top of this. */
+  button, input, select, optgroup, textarea {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    background-color: transparent;
+    border-radius: 0;
+    opacity: 1;
+  }
+
+  button,
+  input:where([type="button"], [type="reset"], [type="submit"]) {
+    appearance: button;
+  }
+
+  /* The About card's "Copied!" label is a plain [hidden] span swapped in by
+     script — without this it would still take up space. */
+  [hidden]:where(:not([hidden="until-found"])) { display: none !important; }
+
+  :root { color-scheme: light; }
+
+  /* The page shell: a column that always fills the viewport, so a short page
+     (404, the legal notice) still pins its footer to the bottom. This used to
+     be utility classes on <body> in BaseLayout. */
   body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
   }
+
+  body > main { flex: 1; }
 
   ::selection {
     background-color: var(--color-accent-ink);
@@ -65,8 +175,6 @@
     box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-accent-ink);
     border-radius: 2px;
   }
-
-  img { display: block; }
 
   @media (prefers-reduced-motion: no-preference) {
     html { scroll-behavior: smooth; }
@@ -83,6 +191,43 @@
 
 /* ── Reusable component classes ──────────────────────────────── */
 @layer components {
+  /* ── The editorial column ───────────────────────────────────
+     Every band of content on the site — mastheads, galleries, project
+     headers, footers — sits in this one measure, with a page gutter that
+     steps 1.5 → 2 → 3rem as the viewport widens.
+
+     Declared once here because it had been copy-pasted into 13 files, and
+     copies drift: the project and collection footers never received the
+     1024px step, so at desktop width their back-link sat a rem inboard of
+     the gallery it belonged under.
+
+     It sets the HORIZONTAL geometry only. Vertical rhythm differs per band,
+     so a caller adds its own `padding-block` — and must use that longhand,
+     never the `padding` shorthand, which would reset the gutter this class
+     just set. */
+  .editorial {
+    max-width: var(--max-width-editorial);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 640px)  { .editorial { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .editorial { padding-inline: 3rem; } }
+
+  /* Visually hidden, still announced — for the headings that give a page its
+     document outline without appearing in the design. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
   /* Keyboard-only "skip to content" link — hidden until focused, then drops
      in above the fixed nav so keyboard users can bypass it. */
   .skip-link {
@@ -123,7 +268,7 @@
     align-items: center;
     gap: 0.375rem;
     border-radius: var(--radius-pill);
-    border: 1px solid oklch(from #1A1917 l c h / 0.10);
+    border: 1px solid oklch(21.3766% 0.00416043 84.5893 / 0.10);
     padding: 0.3rem 0.875rem;
     font-size: 0.625rem;
     font-weight: 500;
@@ -140,5 +285,140 @@
     border-radius: var(--radius-pill);
     background: var(--color-accent);
     flex: none;
+  }
+}
+
+/* ── The identity morph ────────────────────────────────────────────
+   The home gate's identity card (`.gate__id`) and the nav pill
+   (`.site-nav`) are the same object seen twice: a centred rounded
+   rectangle carrying the name. They share the view-transition-name
+   `site-identity`, and the name inside each shares `site-name`, so
+   choosing a discipline on the gate makes the card fly up, widen, round
+   off and turn from ink to paper — arriving as the pill that then
+   follows you around the site.
+
+   This is CSS only, on purpose. `navigation: auto` is a browser-level
+   cross-document transition: no router, no client JS, nothing to
+   hydrate — the site stays zero-JS (see CLAUDE.md). A browser that does
+   not support it simply performs an ordinary page load, which is the
+   behaviour we had before; nothing is left half-animated.
+
+   These selectors CANNOT move into a component's <style> block. Astro
+   scopes those with an attribute selector, and the ::view-transition
+   pseudo-elements hang off the document root, not off any component's
+   markup — scoped, they would silently never match. They are also left
+   UNLAYERED on purpose: at the top of the cascade, nothing a component
+   declares can shadow them.
+
+   The names themselves are declared where the elements live (index.astro
+   and Nav.astro), each with its own reduced-motion opt-out.
+
+   THE TIMELINE, which is the part that took the tuning. Three things
+   used to move at once — the page cross-fade (380ms), the morph (620ms)
+   and the sub-nav's own drop-in (250-525ms) — so none of them read. Now
+   they are staged one after another, each starting as the last settles:
+
+       0ms       260ms           480ms     680ms
+       |----------|----------------|----------|
+       page fade  ###                             260ms
+       the morph  ############################    480ms
+       sub-nav                   ##########      400ms delay (SubNav.astro)
+
+   Move any of these and check the other two: the sub-nav's delay is set
+   against the morph's duration, not against nothing. */
+@view-transition { navigation: auto; }
+
+/* STAGING — one idea at a time. The page beneath settles fast and early
+   so the second half of the card's flight happens on a still stage. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  animation-timing-function: ease;
+}
+
+/* SLOW IN, SLOW OUT. The card starts at rest, so it has to accelerate
+   into the move — hence --ease-morph rather than the site's
+   --ease-out-expo, which begins at full speed. 480ms is long enough to
+   follow across half a viewport, short enough not to feel like waiting
+   for the page. The name travels on exactly the same curve and duration
+   as the box around it: they are one object, and an object does not
+   arrive in pieces. */
+::view-transition-group(site-identity),
+::view-transition-group(site-name) {
+  animation-duration: 480ms;
+  animation-timing-function: var(--ease-morph);
+}
+
+/* SOLID DRAWING — the shape itself morphs. Clipping the pair to a radius
+   that travels with it rounds the corners off for real, instead of a
+   square snapshot cross-fading into a round one. `overflow: clip` also
+   crops the tall card as the box shrinks to pill height; without it the
+   card spills out past the pill on the way in. */
+::view-transition-image-pair(site-identity) {
+  overflow: clip;
+  animation: identity-shape 480ms var(--ease-morph) both;
+}
+
+@keyframes identity-shape {
+  from { border-radius: var(--radius-identity); }
+  to   { border-radius: var(--radius-identity-pill); }
+}
+
+/* DIRECTION. A keyframe runs one way and a navigation goes two, so the rule
+   above — card corners opening out to pill corners — is only right on the way
+   IN. Coming back it ran the same way round: the pill was clipped to the
+   card's radius at the start, and the card arrived as a stadium with its ends
+   bitten off in semicircles before snapping square as the transition ended.
+   That is the "pill going to a rounded square" that was visible.
+
+   The fix rests on WHICH document owns these pseudo-elements: they belong to
+   the page being navigated TO, so the arriving page already knows the shape it
+   is landing on. BaseLayout marks the gate with data-gate, and only there does
+   the tween run pill to card.
+
+   Swapping the animation NAME rather than setting animation-direction:
+   reverse is deliberate — reverse mirrors the timing function too, so the
+   shape would decelerate into its starting corner while the box it clips
+   accelerates away from it.
+
+   Any new page that shows the identity CARD instead of the pill needs this
+   attribute, or it inherits the wrong direction. */
+:root[data-gate]::view-transition-image-pair(site-identity) {
+  animation-name: identity-shape-reverse;
+}
+
+@keyframes identity-shape-reverse {
+  from { border-radius: var(--radius-identity-pill); }
+  to   { border-radius: var(--radius-identity); }
+}
+
+/* The card and the pill are different shapes, and a snapshot stretched
+   between two aspect ratios distorts on the way. So the outgoing card is
+   gone early and the incoming pill only resolves as the travel settles:
+   the eye follows the moving shape and never sees a stretched picture of
+   it. The two fades overlap by 40ms — enough that the object is never
+   empty, little enough that they never ghost over each other. */
+::view-transition-old(site-identity),
+::view-transition-old(site-name) {
+  animation: identity-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(site-identity),
+::view-transition-new(site-name) {
+  animation: identity-in 300ms 170ms var(--ease-morph) both;
+}
+
+@keyframes identity-out { to { opacity: 0; } }
+@keyframes identity-in { from { opacity: 0; } }
+
+/* Reduced motion softens rather than removes. The flight is dropped in
+   the components (they drop the shared names, so no group is formed) and
+   what remains here is a plain cross-fade between the two pages — still
+   a transition, just one that does not travel. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 300ms;
+    animation-timing-function: ease;
   }
 }

@@ -8,7 +8,7 @@ interface Props {
 const { label, href, name } = Astro.props;
 ---
 
-<aside class="discipline-switch" aria-label="Explore other section">
+<aside class="discipline-switch editorial" aria-label="Explore other section">
   <div class="discipline-switch__inner">
     <div class="discipline-switch__rule" aria-hidden="true"></div>
     <a href={href} class="discipline-switch__link">
@@ -23,14 +23,8 @@ const { label, href, name } = Astro.props;
 </aside>
 
 <style>
-  .discipline-switch {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 5rem 1.5rem 0;
-  }
-
-  @media (min-width: 640px)  { .discipline-switch { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .discipline-switch { padding-inline: 3rem; } }
+  /* Max-width and page gutter come from .editorial (global.css). */
+  .discipline-switch { padding-block: 5rem 0; }
 
   .discipline-switch__inner {
     display: flex;

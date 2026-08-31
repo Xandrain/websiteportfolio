@@ -89,7 +89,6 @@ const { photos, collectionTitle } = Astro.props;
   const lbImg   = document.getElementById("lb-img") as HTMLImageElement;
   const lbCap   = document.getElementById("lb-caption") as HTMLElement;
   const lbCurr  = document.getElementById("lb-current") as HTMLElement;
-  const lbTotal = document.getElementById("lb-total") as HTMLElement;
   const btnClose = document.getElementById("lb-close") as HTMLButtonElement;
   const btnPrev  = document.getElementById("lb-prev")  as HTMLButtonElement;
   const btnNext  = document.getElementById("lb-next")  as HTMLButtonElement;
@@ -104,6 +103,13 @@ const { photos, collectionTitle } = Astro.props;
     }));
 
   let current = 0;
+
+  // Fixed for the life of the page: the total is already rendered server-side,
+  // and a one-photo collection can never gain a second. Set once here rather
+  // than on every show().
+  const single = photos.length <= 1;
+  btnPrev.disabled = single;
+  btnNext.disabled = single;
 
   // Warm the browser cache for a neighbouring photo so prev/next feels
   // instant instead of waiting on the network.
@@ -121,14 +127,11 @@ const { photos, collectionTitle } = Astro.props;
     current = (index + photos.length) % photos.length;
     const p = photos[current];
     lbImg.sizes = "90vw";
-    lbImg.srcset = p.srcset ?? "";
+    lbImg.srcset = p.srcset;
     lbImg.src = p.src;
     lbImg.alt = p.alt;
     lbCap.textContent = p.alt;
     lbCurr.textContent = String(current + 1);
-    lbTotal.textContent = String(photos.length);
-    btnPrev.disabled = photos.length <= 1;
-    btnNext.disabled = photos.length <= 1;
     preload(current + 1);
     preload(current - 1);
   }

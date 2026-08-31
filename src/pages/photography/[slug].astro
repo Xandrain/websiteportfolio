@@ -60,7 +60,7 @@ const schema = [
 >
   <!-- Back link + header -->
   <section class="collection-header">
-    <div class="collection-header__inner">
+    <div class="collection-header__inner editorial">
       <a href="/photography" class="back-link">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <polyline points="10,2 4,8 10,14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -82,18 +82,14 @@ const schema = [
   <PhotographySubNav active="collections" />
 
   <!-- Gallery with lightbox -->
-  <section class="gallery-section" aria-labelledby="gallery-title">
+  <section class="gallery-section editorial" aria-labelledby="gallery-title">
     <h2 id="gallery-title" class="sr-only">Photo gallery</h2>
-    <div class="gallery-wrapper">
-      <Lightbox photos={collection.photos} collectionTitle={collection.title} />
-    </div>
+    <Lightbox photos={collection.photos} collectionTitle={collection.title} />
   </section>
 
   <!-- Cross-navigation -->
-  <div class="collection-footer">
-    <div class="collection-footer__inner">
-      <a href="/photography" class="back-link">← All collections</a>
-    </div>
+  <div class="collection-footer editorial">
+    <a href="/photography" class="back-link">← All collections</a>
   </div>
 
   <DisciplineSwitch label="Also explore" href="/productions" name="Graphic Design & 3D" />
@@ -107,17 +103,12 @@ const schema = [
   }
 
 
+  /* Max-width and page gutter come from .editorial (global.css). */
   .collection-header__inner {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding-inline: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
   }
-
-  @media (min-width: 640px)  { .collection-header__inner { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .collection-header__inner { padding-inline: 3rem; } }
 
   .back-link {
     display: inline-flex;
@@ -156,24 +147,11 @@ const schema = [
     color: var(--color-ink-soft);
   }
 
-  .gallery-section {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 3rem 1.5rem 0;
-  }
-
-  @media (min-width: 640px)  { .gallery-section { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .gallery-section { padding-inline: 3rem; } }
-
-  .gallery-wrapper { width: 100%; }
+  .gallery-section { padding-block: 3rem 0; }
 
   .collection-footer {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 2.5rem 1.5rem 0;
+    padding-block: 2.5rem 0;
     border-top: 1px solid var(--color-line);
     margin-top: 3.5rem;
   }
-
-  @media (min-width: 640px)  { .collection-footer { padding-inline: 2rem; } }
 </style>

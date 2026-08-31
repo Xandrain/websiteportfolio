@@ -77,9 +77,18 @@ const { label, tabs, active } = Astro.props;
     box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06), inset 0 0 0 1px rgba(26, 25, 23, 0.09);
   }
 
-  /* Entrance reveal — only when motion is welcome; base state stays visible. */
+  /* Entrance reveal — only when motion is welcome; base state stays visible.
+
+     OVERLAPPING ACTION. The delay is set against the identity morph in
+     global.css (480ms), not picked at random: arriving from the home gate,
+     the main pill is still flying into place, and this pill dropping in
+     underneath it at the same time gave two competing movements and no
+     focal point. Starting at 400ms it begins while the morph is on its
+     last, barely-moving 100ms — late enough to read as a consequence of
+     the pill landing, early enough not to feel like a separate event.
+     Retime the morph and retime this with it. */
   @media (prefers-reduced-motion: no-preference) {
-    .subnav__inner { animation: subnav-in 0.275s var(--ease-out-expo) 0.25s both; }
+    .subnav__inner { animation: subnav-in 0.275s var(--ease-out-expo) 0.4s both; }
     /* Same-section navigation (class set by the inline script): the pill
        persisted from the previous page, so no re-entrance. */
     .subnav__inner.subnav__inner--still { animation: none; }

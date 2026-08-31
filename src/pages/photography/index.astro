@@ -16,7 +16,7 @@ import { collections } from "../../data/photography";
   <PhotographySubNav active="collections" />
 
   <!-- Collections grid -->
-  <section class="collections-section" aria-label="Photography collections">
+  <section class="collections-section editorial" aria-label="Photography collections">
     <div class="collections-grid">
       {collections.map((collection, i) => (
         <CollectionCard collection={collection} eager={i < 2} />
@@ -34,14 +34,7 @@ import { collections } from "../../data/photography";
 <style>
   .subnav-spacer { height: 5.5rem; }
 
-  .collections-section {
-    max-width: var(--max-width-editorial);
-    margin-inline: auto;
-    padding: 3rem 1.5rem 0;
-  }
-
-  @media (min-width: 640px)  { .collections-section { padding-inline: 2rem; } }
-  @media (min-width: 1024px) { .collections-section { padding-inline: 3rem; } }
+  .collections-section { padding-block: 3rem 0; }
 
   .collections-grid {
     display: grid;

@@ -51,13 +51,27 @@ const isActive = (href: string) => path.startsWith(href);
     gap: 2rem;
     width: 100%;
     max-width: 42rem;
-    border-radius: 9999px;
-    background: rgba(250, 250, 248, 0.80);
+    border-radius: var(--radius-pill);
+    /* The pill now rides over full-bleed imagery (the Productions hero),
+       not only over flat paper. Hence more translucency so the picture reads
+       through it, and a firmer ring so its edge survives a busy frame. Any
+       page putting an image under it must fade that image toward paper at the
+       top — the ring alone will not hold against a dark or noisy crop. */
+    background: rgba(250, 250, 248, 0.72);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 1px 2px rgba(26,25,23,0.06), inset 0 0 0 1px rgba(26,25,23,0.09);
+    box-shadow: 0 1px 2px rgba(26,25,23,0.05), inset 0 0 0 1px rgba(26,25,23,0.12);
     padding: 0.5rem 1.25rem 0.5rem 1.375rem;
     transition: background 0.5s, box-shadow 0.5s;
+
+    /* The other half of the identity morph. The home gate's identity
+       card (index.astro) claims this same name, so arriving from the
+       gate flies that card up into this pill instead of cutting to it.
+       The name must stay unique per page — one pill, one card, never
+       both — and the choreography lives in global.css, where the
+       document-level ::view-transition pseudo-elements can be reached.
+       Reduced motion drops it at the foot of this file. */
+    view-transition-name: site-identity;
   }
 
   .site-nav__brand {
@@ -69,6 +83,13 @@ const isActive = (href: string) => path.startsWith(href);
     color: var(--color-ink);
     transition: opacity 0.25s;
     white-space: nowrap;
+
+    /* The name's landing place. Paired with .gate__name on the home
+       gate, so the name flies in as one object instead of fading up
+       inside the pill. Under 560px this shows initials rather than the
+       full name — the shapes differ, so the pair cross-fades there
+       while still travelling together. */
+    view-transition-name: site-name;
   }
 
   .site-nav__brand:hover { opacity: 0.65; }
@@ -152,5 +173,13 @@ const isActive = (href: string) => path.startsWith(href);
 
     .site-nav__link.has-short .site-nav__label-full { display: none; }
     .site-nav__link.has-short .site-nav__label-short { display: inline; }
+  }
+
+  /* Reduced motion softens rather than removes: unpaired from the gate
+     card, this pill no longer flies, and the two pages cross-fade
+     instead (timings in global.css). */
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav,
+    .site-nav__brand { view-transition-name: none; }
   }
 </style>

@@ -5,403 +5,425 @@ import { collections } from "../data/photography";
 import { projects } from "../data/three-d";
 import { srcset, dims } from "../lib/responsive";
 
-// Primary routes (the traffic split) vs. secondary. Driven by consts.
-const primary = NAV.filter((i) => i.href !== "/about");
+// The gate is a two-way splitter and nothing else: one screen, no scroll, the
+// two disciplines carrying exactly half the viewport each. Routes and labels
+// come from NAV so consts.ts stays the single source of site-wide copy.
+const design = NAV.find((i) => i.href === "/productions");
+const photo = NAV.find((i) => i.href === "/photography");
 const about = NAV.find((i) => i.href === "/about");
+if (!design || !photo || !about) {
+  throw new Error("Home gate: NAV is missing /productions, /photography or /about");
+}
 
-// Curated highlight reel below the gate — a 1-2-1-2 editorial rhythm
-// (full-width row, two-up pair, repeated) mixing both disciplines. Each tile
-// links to its collection/project page; covers come from the data files so a
-// swapped cover updates here too. `full` marks the wide rows; `pos` nudges
-// object-position when the wide crop needs reframing.
-const photo = (slug: string) => {
-  const c = collections.find((c) => c.slug === slug);
-  if (!c) throw new Error(`Home featured: unknown collection "${slug}"`);
-  return { href: `/photography/${slug}`, src: c.cover, label: c.title };
+// One cover per route, pulled from the data files so a swapped cover updates
+// here too. Counts are derived, never typed — they cannot drift from reality.
+const cover = (src: string | undefined, what: string) => {
+  if (!src) throw new Error(`Home gate: no cover for ${what}`);
+  return { src, d: dims(src), set: srcset(src) };
 };
-const production = (slug: string) => {
-  const p = projects.find((p) => p.slug === slug);
-  if (!p) throw new Error(`Home featured: unknown production "${slug}"`);
-  return { href: `/productions/${slug}`, src: p.cover, label: p.title };
-};
-
-const featured: {
-  href: string;
-  src: string;
-  label: string;
-  full?: boolean;
-  pos?: string;
-}[] = [
-  { ...photo("northern-light"), full: true },
-  { ...production("mojo-swoptops") },
-  { ...photo("in-the-studio") },
-  { ...production("crown-reinterpretation"), full: true, pos: "50% 62%" },
-  { ...production("half-moon-eau-de-parfum") },
-  { ...photo("concrete-and-glass") },
-];
+const designArt = cover(
+  projects.find((p) => p.slug === "mojo-swoptops")?.cover,
+  'production "mojo-swoptops"',
+);
+const photoArt = cover(
+  collections.find((c) => c.slug === "in-the-studio")?.cover,
+  'collection "in-the-studio"',
+);
 ---
 
-<BaseLayout
-  description={SITE.description}
-  noNav
-  noFooter
->
+<BaseLayout description={SITE.description} noNav noFooter>
   <section class="gate">
-    <div class="gate__aura" aria-hidden="true"></div>
-    <div class="gate__inner">
+    <nav class="gate__routes" aria-label="Enter the portfolio">
+      <a href={design.href} class="gate__route gate__route--design">
+        <img
+          src={designArt.src}
+          srcset={designArt.set}
+          sizes="100vw"
+          alt=""
+          width={designArt.d?.w ?? 1600}
+          height={designArt.d?.h ?? 1067}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="gate__art"
+        />
+        <span class="gate__scrim" aria-hidden="true"></span>
+        <span class="gate__label">
+          <span class="gate__kicker">The rendered form</span>
+          <span class="gate__discipline">{design.label}</span>
+          <span class="gate__enter">
+            {projects.length} projects
+            <svg viewBox="0 0 26 10" class="gate__arrow" aria-hidden="true">
+              <path d="M0 5h22M19 1l4 4-4 4" />
+            </svg>
+          </span>
+        </span>
+      </a>
+
+      <a href={photo.href} class="gate__route gate__route--photo">
+        <img
+          src={photoArt.src}
+          srcset={photoArt.set}
+          sizes="100vw"
+          alt=""
+          width={photoArt.d?.w ?? 1600}
+          height={photoArt.d?.h ?? 1067}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="gate__art"
+        />
+        <span class="gate__scrim" aria-hidden="true"></span>
+        <span class="gate__label">
+          <span class="gate__kicker">The still image</span>
+          <span class="gate__discipline">{photo.label}</span>
+          <span class="gate__enter">
+            {collections.length} collections
+            <svg viewBox="0 0 26 10" class="gate__arrow" aria-hidden="true">
+              <path d="M0 5h22M19 1l4 4-4 4" />
+            </svg>
+          </span>
+        </span>
+      </a>
+    </nav>
+
+    {/* The cut itself. An SVG line rather than a rotated element, because a
+        rotated hairline needs an angle and the angle here depends on the
+        viewport's aspect ratio; `preserveAspectRatio="none"` plus a
+        non-scaling stroke draws it exactly corner-to-corner at any size. Two
+        lines, one per breakpoint — see the geometry note in the stylesheet. */}
+    <svg
+      class="gate__seam"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <line class="gate__seam-wide" x1="100" y1="0" x2="0" y2="100" vector-effect="non-scaling-stroke" />
+      <line class="gate__seam-narrow" x1="0" y1="56" x2="100" y2="44" vector-effect="non-scaling-stroke" />
+    </svg>
+
+    <div class="gate__id">
+      <h1 class="gate__name">{SITE.name}</h1>
       <p class="gate__role">{SITE.role}</p>
-
-      <h1 class="gate__brand">
-        {SITE.name}
-      </h1>
-
-      <nav class="gate__routes" aria-label="Enter the portfolio">
-        {primary.map((item) => (
-          <a href={item.href} class="gate__route">
-            <span class="gate__route-label">{item.label}</span>
-          </a>
-        ))}
-      </nav>
-
-      {about && (
-        <a href={about.href} class="gate__about">
-          {about.label}
-        </a>
-      )}
-    </div>
-
-    <a href="#work" class="gate__scroll">
-      <span class="gate__scroll-label">Scroll</span>
-      <span class="gate__scroll-line" aria-hidden="true"></span>
-    </a>
-  </section>
-
-  <section id="work" class="work">
-    <h2 class="sr-only">Selected work</h2>
-    <div class="work__grid">
-      {featured.map((f) => {
-        const d = dims(f.src);
-        return (
-          <a
-            href={f.href}
-            class:list={["work__item", { "work__item--full": f.full }]}
-          >
-            <img
-              src={f.src}
-              srcset={srcset(f.src)}
-              sizes={f.full ? "100vw" : "50vw"}
-              alt={f.label}
-              width={d?.w ?? 1600}
-              height={d?.h ?? 1067}
-              loading="lazy"
-              decoding="async"
-              class="work__img"
-              style={f.pos ? `object-position: ${f.pos}` : undefined}
-            />
-          </a>
-        );
-      })}
+      <div class="gate__meta">
+        <a href={about.href}>{about.label}</a>
+        <span class="gate__dot" aria-hidden="true"></span>
+        <a href={about.href}>Contact</a>
+      </div>
     </div>
   </section>
 </BaseLayout>
 
 <style>
+  /* ── The gate ──────────────────────────────────────────────────
+     One screen, never scrolled. Two routes, one diagonal cut.
+
+     THE GEOMETRY, because it is the whole idea and it is easy to break:
+     any straight line through the centre of a rectangle divides it into two
+     equal halves, at ANY angle. Both clip-paths below therefore hinge on the
+     cut passing through 50%/50%, and the two endpoints staying symmetric
+     about it (100%,0 ↔ 0,100% wide; 0,56% ↔ 100%,44% narrow). Keep that
+     symmetry and the 50/50 split survives every viewport, portrait or
+     landscape, with no measurement. Break it — nudge one endpoint without
+     the other — and one discipline silently gets the bigger half. */
   .gate {
     position: relative;
+    height: 100svh;
     overflow: hidden;
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6rem 1.5rem;
-
-    /* Discreet complementary wash — a soft warm peach in one corner and its
-       cool periwinkle complement in the other, kept very pale so it reads as
-       a faint tint rather than colour. A gentle bloom lifts the centre. */
-    background:
-      radial-gradient(
-        56% 48% at 50% 30%,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0) 58%
-      ),
-      linear-gradient(
-        155deg,
-        #F4DFCD 0%,   /* warm — soft peach */
-        #F5F2EC 50%,  /* light neutral middle */
-        #D2E0F1 100%  /* cool — soft periwinkle (its complement) */
-      );
+    background: var(--color-ink);
   }
 
-  /* Soft bright aura tracking the cursor (position + opacity set from JS). */
-  .gate__aura {
+  .gate__routes {
     position: absolute;
     inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      circle 360px at var(--mx, 50%) var(--my, 32%),
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0) 62%
-    );
-    opacity: var(--aura, 0);
-    transition: opacity 0.4s ease;
-  }
-
-  .gate__inner {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .gate__aura { transition: none; }
-  }
-
-  /* ── Role eyebrow ──────────────────────────────────────────── */
-  .gate__role {
-    font-family: var(--font-sans);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--color-ink-soft);
-    margin-bottom: 1.5rem;
-  }
-
-  /* ── Wordmark — oversized statement type ───────────────────── */
-  .gate__brand {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(2.75rem, 9vw, 7rem);
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    color: var(--color-ink);
-  }
-
-  /* ── Primary routes — a segmented pill echoing the site nav ─── */
-  /* align-self: stretch makes the bar fill .gate__inner, whose width is
-     set by its widest child (the wordmark) — so the bar matches the name. */
-  .gate__routes {
-    align-self: stretch;
-    margin-top: 2.75rem;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    border-radius: 1.75rem;
-    background: rgba(250, 250, 248, 0.80);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow:
-      0 1px 2px rgba(26, 25, 23, 0.06),
-      inset 0 0 0 1px rgba(26, 25, 23, 0.09);
-    overflow: hidden;
   }
 
   .gate__route {
-    flex: 1 1 0;
-    min-width: 0;
+    position: absolute;
+    inset: 0;
+    display: block;
+    text-decoration: none;
+    /* clip-path clips hit-testing too, so each link only answers clicks
+       inside its own triangle — no overlay maths needed. */
+  }
+
+  /* Wide: corner to corner. Design takes the upper-left triangle,
+     photography the lower-right. */
+  .gate__route--design { clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .gate__route--photo  { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+
+  .gate__art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1);
+    transition: transform 1s var(--ease-out-expo);
+  }
+
+  .gate__route--design .gate__art { object-position: 50% 55%; }
+  .gate__route--photo  .gate__art { object-position: 50% 40%; }
+
+  /* Each half darkens toward its own outer corner, so the label always sits
+     on the densest part of its own triangle. */
+  .gate__scrim {
+    position: absolute;
+    inset: 0;
+    display: block;
+    /* Hovering a route lifts 30% of its own scrim, so the half you are
+       pointing at brightens while the other stays put — the reveal is the
+       affordance. Scaling the whole element's opacity (rather than editing
+       the stops) keeps the gradient's shape intact and stays honestly "the
+       gradient at 70%". */
+    opacity: 1;
+    transition: opacity 0.5s var(--ease-out-expo);
+  }
+
+  .gate__route:hover .gate__scrim,
+  .gate__route:focus-visible .gate__scrim {
+    opacity: 0.7;
+  }
+
+  /* Angles are not interchangeable: 330deg ends (darkest) at the TOP-LEFT,
+     150deg at the BOTTOM-RIGHT — each one pointing at its own label's
+     corner. Swap them and every label lands on the brightest part of its
+     own half, which is exactly where a white word disappears. */
+  .gate__route--design .gate__scrim {
+    background: linear-gradient(
+      330deg,
+      rgba(26, 25, 23, 0.15) 0%,
+      rgba(26, 25, 23, 0.31) 52%,
+      rgba(26, 25, 23, 0.44) 100%
+    );
+  }
+
+  .gate__route--photo .gate__scrim {
+    background: linear-gradient(
+      150deg,
+      rgba(26, 25, 23, 0.15) 0%,
+      rgba(26, 25, 23, 0.31) 52%,
+      rgba(26, 25, 23, 0.44) 100%
+    );
+  }
+
+  /* ── Route labels — each in the fat corner of its own triangle ── */
+  .gate__label {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    max-width: min(30rem, 68vw);
+    color: var(--color-paper);
+  }
+
+  .gate__route--design .gate__label {
+    top: clamp(4rem, 13vh, 7.5rem);
+    left: clamp(1.5rem, 6vw, 5.75rem);
+  }
+
+  .gate__route--photo .gate__label {
+    right: clamp(1.5rem, 6vw, 5.75rem);
+    bottom: clamp(4rem, 13vh, 7.5rem);
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .gate__kicker {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(250, 250, 248, 0.74);
+  }
+
+  .gate__discipline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 6.4vw, 5rem);
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .gate__enter {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0.85rem 1.25rem;
-    font-family: var(--font-sans);
-    font-size: 0.9375rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    text-align: center;
-    color: var(--color-ink-soft);
-    text-decoration: none;
-    touch-action: manipulation;
-    transition: color 0.25s, background 0.3s;
-  }
-
-  /* Hairline divider between the two segments (crisp under the rounded clip).
-     Stacked on mobile → horizontal rule; side-by-side on desktop → vertical. */
-  .gate__route + .gate__route {
-    box-shadow: inset 0 1px 0 rgba(26, 25, 23, 0.09);
-  }
-
-  .gate__route:hover,
-  .gate__route:focus-visible {
-    color: var(--color-accent-ink);
-    background: var(--color-accent-wash);
-  }
-
-  /* ── Secondary — About ─────────────────────────────────────── */
-  .gate__about {
-    position: relative;
-    margin-top: 3rem;
+    gap: 0.85rem;
+    min-height: 2.75rem; /* 44px touch target */
     font-family: var(--font-sans);
     font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: 0.14em;
+    letter-spacing: var(--letter-spacing-caps);
     text-transform: uppercase;
-    color: var(--color-ink-soft);
-    text-decoration: none;
-    touch-action: manipulation;
-    transition: color 0.2s;
+    color: rgba(250, 250, 248, 0.88);
   }
 
-  /* Expand tap area to ≥44px without shifting text. */
-  .gate__about::before {
-    content: "";
+  .gate__arrow {
+    width: 1.625rem;
+    height: 0.625rem;
+    flex: none;
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .gate__route:hover .gate__arrow,
+  .gate__route:focus-visible .gate__arrow {
+    transform: translateX(0.4rem);
+  }
+
+  .gate__route:hover .gate__art,
+  .gate__route:focus-visible .gate__art {
+    transform: scale(1.03);
+  }
+
+  /* ── The cut ───────────────────────────────────────────────────── */
+  .gate__seam {
     position: absolute;
-    inset: -0.85rem -0.75rem;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    stroke: rgba(250, 250, 248, 0.55);
+    stroke-width: 1;
   }
 
-  .gate__about::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -0.35rem;
-    width: 0;
-    height: 1px;
-    background: var(--color-accent-ink);
-    transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
+  .gate__seam-narrow { display: none; }
 
-  .gate__about:hover,
-  .gate__about:focus-visible { color: var(--color-accent-ink); }
-  .gate__about:hover::after,
-  .gate__about:focus-visible::after { width: 100%; }
-
-  @media (min-width: 640px) {
-    .gate__routes {
-      margin-top: 3.25rem;
-      flex-direction: row;
-      border-radius: 9999px;
-    }
-    .gate__route { padding: 0.95rem 1.25rem; }
-    .gate__route + .gate__route {
-      box-shadow: inset 1px 0 0 rgba(26, 25, 23, 0.09);
-    }
-  }
-
-  /* ── Scroll cue — hints at the work section below the fold ──── */
-  .gate__scroll {
+  /* ── Identity — sits astride the cut, so it belongs to neither route ──
+     Anything that is not one of the two destinations lives in this block.
+     Put it anywhere else and it lands inside one triangle and quietly
+     takes a side. It carries its own scrim: the artwork behind it is a
+     photograph or a render, and a hairline alone will not hold against it
+     (see the nav-pill rule in CLAUDE.md — same problem, same fix). */
+  .gate__id {
     position: absolute;
     left: 50%;
-    bottom: 1.25rem;
-    transform: translateX(-50%);
-    z-index: 1;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: min(28.25rem, calc(100vw - 3.5rem));
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 0.9rem 0;
+    gap: 0.5rem;
+    padding: 1.5rem 2rem 1.15rem;
+    background: rgba(26, 25, 23, 0.86);
+    border: 1px solid rgba(250, 250, 248, 0.26);
+    border-radius: var(--radius-identity);
+    text-align: center;
+
+    /* One half of the identity morph. This card and the nav pill share
+       this name, so choosing a discipline flies the card up into the
+       pill rather than cutting to it. The choreography is in global.css
+       — it has to be: the ::view-transition pseudo-elements hang off the
+       document root and an Astro-scoped selector would never match them.
+       Reduced motion drops the name (below), which dissolves the pair and
+       leaves the plain page cross-fade. */
+    view-transition-name: site-identity;
+  }
+
+  .gate__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--color-paper);
+
+    /* Nested inside the card's morph: the name is lifted out of the
+       card snapshot and travels as its own object, so it shrinks and
+       slides into the pill's brand rather than dissolving into it.
+       Same curve and duration as the card (global.css) — one object. */
+    view-transition-name: site-name;
+  }
+
+  .gate__role {
+    margin: 0;
     font-family: var(--font-sans);
     font-size: 0.625rem;
     font-weight: 500;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: var(--color-ink-soft);
-    text-decoration: none;
-    touch-action: manipulation;
-    transition: color 0.2s;
+    color: rgba(250, 250, 248, 0.66);
   }
 
-  .gate__scroll:hover,
-  .gate__scroll:focus-visible { color: var(--color-accent-ink); }
-
-  .gate__scroll-line {
-    position: relative;
-    width: 1px;
-    height: 2.5rem;
-    background: currentColor;
-    opacity: 0.35;
-    overflow: hidden;
-  }
-
-  /* A short bright segment sweeps down the hairline; the static line above
-     is the reduced-motion (and resting) presentation. */
-  @media (prefers-reduced-motion: no-preference) {
-    .gate__scroll-line::after {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 40%;
-      background: var(--color-ink);
-      animation: gate-scroll-sweep 2.4s cubic-bezier(0.4, 0, 0.4, 1) infinite;
-    }
-    @keyframes gate-scroll-sweep {
-      0%        { transform: translateY(-110%); }
-      55%, 100% { transform: translateY(260%); }
-    }
-  }
-
-  /* ── Selected work — 1-2-1-2 editorial rhythm ────────────────── */
-  /* Frameless mosaic: full-bleed, zero gutters, flush against the gate —
-     the tiles read as one stitched block. */
-  .work__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .work__item {
-    position: relative;
-    display: block;
-    overflow: hidden;
-    background: var(--color-paper-alt);
-  }
-
-  /* Soft vignette running from each tile's edges toward its centre — frames
-     every image without drawing a border line, so the mosaic stays seamless. */
-  .work__item::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    box-shadow:
-      inset 0 0 1.25rem rgba(26, 25, 23, 0.10),
-      inset 0 0 3.5rem rgba(26, 25, 23, 0.20);
-  }
-
-  .work__item--full { grid-column: 1 / -1; }
-
-  .work__img {
-    display: block;
+  .gate__meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 0.6rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(250, 250, 248, 0.18);
     width: 100%;
-    height: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    transform: scale(1.04);
-    filter: grayscale(15%);
-    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                filter    0.6s;
+    justify-content: center;
   }
 
-  /* Full rows read as wide editorial banners; on phones they relax to 4:3
-     so they don't shrink to a letterbox strip. */
-  .work__item--full .work__img { aspect-ratio: 4 / 3; }
-
-  .work__item:hover .work__img,
-  .work__item:focus-visible .work__img {
-    transform: scale(1);
-    filter: grayscale(0%);
+  .gate__meta a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem; /* 44px touch target */
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(250, 250, 248, 0.82);
+    transition: color 0.25s;
   }
 
-  @media (min-width: 640px) {
-    .work__item--full .work__img { aspect-ratio: 16 / 9; }
+  .gate__meta a:hover,
+  .gate__meta a:focus-visible { color: var(--color-paper); }
+
+  .gate__dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(250, 250, 248, 0.36);
+  }
+
+  /* ── Narrow / portrait ─────────────────────────────────────────
+     Corner-to-corner on a tall screen leaves two slivers with nowhere to put
+     a word, so the cut shallows out: same line through the same centre,
+     different angle. Regions become top and bottom; each label keeps the
+     deep corner of its own region. */
+  @media (max-width: 900px) {
+    .gate__route--design { clip-path: polygon(0 0, 100% 0, 100% 44%, 0 56%); }
+    .gate__route--photo  { clip-path: polygon(0 56%, 100% 44%, 100% 100%, 0 100%); }
+
+    .gate__seam-wide { display: none; }
+    .gate__seam-narrow { display: inline; }
+
+    .gate__route--design .gate__label {
+      top: clamp(3.5rem, 9vh, 5.5rem);
+      left: 1.625rem;
+    }
+
+    .gate__route--photo .gate__label {
+      right: 1.625rem;
+      bottom: clamp(3.5rem, 9vh, 5.5rem);
+    }
+
+    .gate__discipline { font-size: clamp(2.25rem, 11vw, 3.25rem); }
+  }
+
+  /* Reduced motion drops the movement, not the feedback: the scrim still
+     lifts on hover, it just does so without an eased fade. */
+  @media (prefers-reduced-motion: reduce) {
+    .gate__art,
+    .gate__arrow,
+    .gate__scrim { transition: none; }
+    .gate__route:hover .gate__art,
+    .gate__route:focus-visible .gate__art { transform: none; }
+
+    /* Dropping the name unpairs the card from the nav pill, so no
+       morph group is formed and the two pages simply cross-fade.
+       Softened, not removed. */
+    .gate__id,
+    .gate__name { view-transition-name: none; }
   }
 </style>
-
-<script>
-  // Bright aura follows the cursor across the splitter gradient.
-  // Hover-capable pointers only; fades out when the cursor leaves.
-  const gate = document.querySelector<HTMLElement>(".gate");
-
-  if (gate && window.matchMedia("(hover: hover)").matches) {
-    const move = (e: PointerEvent) => {
-      const r = gate.getBoundingClientRect();
-      gate.style.setProperty("--mx", `${((e.clientX - r.left) / r.width) * 100}%`);
-      gate.style.setProperty("--my", `${((e.clientY - r.top) / r.height) * 100}%`);
-      gate.style.setProperty("--aura", "1");
-    };
-    gate.addEventListener("pointermove", move);
-    gate.addEventListener("pointerleave", () => gate.style.setProperty("--aura", "0"));
-  }
-</script>
