@@ -16,12 +16,30 @@ interface Props {
   label: string;
   tabs: SubNavTab[];
   active: string;
+  /**
+   * Prefix for the SELECTED chip's view-transition-name, so it can fly down
+   * and become the "Back to ..." pill on a detail page. Omit it and the bar
+   * names nothing, which is what a section whose detail pages have no
+   * matching pill wants.
+   *
+   * The name is composed PER TAB — `${morphPrefix}-${active}` — never per
+   * section, and that is the whole trick to keeping this bar snappy. Two
+   * tabs in one bar therefore never share a name, so switching between them
+   * pairs nothing and the browser just cuts. Give the whole bar one name
+   * instead and the black chip slides across the pill on every tab switch,
+   * which is motion nobody asked for on what is meant to be an instant
+   * control.
+   */
+  morphPrefix?: string;
 }
 
-const { label, tabs, active } = Astro.props;
+const { label, tabs, active, morphPrefix } = Astro.props;
+
+// Per tab, not per section — see morphPrefix above.
+const morph = morphPrefix ? `${morphPrefix}-${active}` : undefined;
 ---
 
-<nav class="subnav" aria-label={label}>
+<nav class="subnav" aria-label={label} style={morph ? `--subnav-morph:${morph}` : undefined}>
   <div class="subnav__inner">
     {tabs.map((t) => (
       <a
@@ -158,6 +176,45 @@ const { label, tabs, active } = Astro.props;
     color: var(--color-paper);
     font-weight: 500;
     background: var(--color-ink);
+  }
+
+  /* ── The chip becomes the way out ──────────────────────────
+     Opening a project from this bar carries the selected chip down to the
+     top-left of the project page, where it lands as that page's "Back to
+     ..." pill; pressing it flies the pill back up into the bar. Same
+     object, two places — the mechanism is the home gate's identity morph,
+     and the choreography lives beside it in global.css (::view-transition
+     pseudo-elements hang off the document root, so an Astro-scoped
+     selector would never match them).
+
+     The name arrives as --subnav-morph, composed per tab in the frontmatter
+     above, so a bar with no prefix falls through to `none` and claims
+     nothing. It goes on the SELECTED chip only: the name has to be unique
+     among rendered elements, and naming every tab would put several
+     claimants in one document and make the browser drop the whole morph
+     with no error.
+
+     Switching TABS inside this bar is deliberately not animated. The two
+     tabs hold different names, so nothing pairs and the browser cuts —
+     which is what a control like this should feel like.
+
+     A detail page must therefore NOT render this bar if it wants the
+     morph. Neither kind does: a productions project never had one, and a
+     photography collection had its bar removed precisely so the chip could
+     fly into its "Back to Collections" pill. Put this bar back on either
+     and the pill's name gains a rival, and the browser drops every morph on
+     the page with no error to show for it. */
+  .subnav__tab.is-active {
+    view-transition-name: var(--subnav-morph, none);
+  }
+
+  /* The beat below scales this same chip. A capture taken mid-swell starts
+     the flight ~5% large, which is under 2px on a 35px pill and settles
+     within the first frames — not worth suppressing, but it is why the two
+     ends can look a hair different from each other. */
+
+  @media (prefers-reduced-motion: reduce) {
+    .subnav__tab.is-active { view-transition-name: none; }
   }
 
   /* ── The beat ──────────────────────────────────────────────

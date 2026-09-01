@@ -2,7 +2,6 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Lightbox from "../../components/photography/Lightbox.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
-import PhotographySubNav from "../../components/photography/PhotographySubNav.astro";
 import { collections } from "../../data/photography";
 import { SITE } from "../../consts";
 import { dims } from "../../lib/responsive";
@@ -58,16 +57,26 @@ const schema = [
   image={collection.cover}
   schema={schema}
 >
-  <!-- Back link + header -->
-  <section class="collection-header">
-    <div class="collection-header__inner editorial">
-      <a href="/photography" class="back-link">
+  <!-- Inside a collection the Collections/Gallery bar is gone and this is
+       the only chrome: one way out, pinned like the nav so a long scroll of
+       photographs never strands the visitor. Fixed rather than sticky —
+       sticky is bounded by its parent, and that parent is the header. It
+       says "Collections" because that is the chip it flies from and back
+       to, and the two have to read as one object. -->
+  <div class="back-rail">
+    <div class="editorial">
+      <a href="/photography" class="back-pill">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <polyline points="10,2 4,8 10,14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Photography
+        Back to collections
       </a>
+    </div>
+  </div>
 
+  <!-- Header -->
+  <section class="collection-header">
+    <div class="collection-header__inner editorial">
       <div>
         <div class="collection-header__meta">
           <span class="label">{collection.category}</span>
@@ -78,8 +87,6 @@ const schema = [
       </div>
     </div>
   </section>
-
-  <PhotographySubNav active="collections" />
 
   <!-- Gallery with lightbox -->
   <section class="gallery-section editorial" aria-labelledby="gallery-title">
@@ -96,10 +103,43 @@ const schema = [
 </BaseLayout>
 
 <style>
+  /* Clearance for the fixed pill: nav gap + pill + the gap that used to be
+     the flex row's. Both this and the rail read --back-pill-h, which is why
+     the pill is given a DEFINITE height below. */
+  .back-rail,
   .collection-header {
-    padding-top: 6.5rem;
+    --back-pill-h: 2.5rem;
+    /* The sub-nav's stuck top + the bar's inner padding — see .back-rail. */
+    --back-rail-top: calc(4.75rem + 0.4rem);
+  }
+
+  .collection-header {
+    padding-top: calc(var(--back-rail-top) + var(--back-pill-h) + 1.75rem);
     padding-bottom: 3rem;
     border-bottom: 1px solid var(--color-line);
+  }
+
+  /* Full-bleed, so its inner .editorial lands the pill on the same left edge
+     as the header text — the gutter is never restated, it is the one
+     .editorial owns. pointer-events is the .subnav trick: the rail spans the
+     viewport and would otherwise swallow clicks across that strip. */
+  /* WHERE THIS SITS, and why it is not a round number. The pill is the
+     sub-nav's selected chip after it has flown down, so it sits exactly
+     where that chip sits once the bar is stuck: the bar's own sticky
+     `top: 4.75rem` plus the 0.4rem of padding inside it (SubNav.astro).
+     Move either of those and move this with them.
+
+     It was 6.5rem, which was the header's old top padding rather than a
+     position in the chrome — a 40px gap under the nav where the sub-nav
+     band has 19px. Aligned to nothing, it read as a pill that had fallen
+     too far. This also makes the flight nearly horizontal: the chip
+     crosses to the corner instead of dropping to it. */
+  .back-rail {
+    position: fixed;
+    inset-inline: 0;
+    top: var(--back-rail-top);
+    z-index: 45;
+    pointer-events: none;
   }
 
 
@@ -110,6 +150,75 @@ const schema = [
     gap: 1.75rem;
   }
 
+  /* Same ink pill as the productions project pages, for the same reason —
+     a grey text link under a full-bleed header was not reading as the way
+     out. Kept in step with .back-pill in productions/[slug].astro and with
+     the selected chip in SubNav.astro; the three are one shape.
+
+     This page used to render PhotographySubNav as well, which put the
+     selected "Collections" chip on screen right beside this pill and made
+     the morph impossible — one object cannot be in two places, and a
+     second claimant of the name makes the browser drop every morph on the
+     page silently. The bar is gone from a collection now, so this pill is
+     the only claimant and the chip can fly into it and back, exactly as on
+     the productions side.
+
+     align-self: .collection-header__inner is a flex column, so the default
+     stretch would run this pill the full editorial width. */
+  .back-pill {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* Definite, and equal to what the sub-nav chip measures — the chip is a
+       stretched flex item, so its 40px comes from the bar, not from type.
+       The header's clearance and both ends of the morph depend on it. */
+    height: var(--back-pill-h);
+    padding-inline: 1.15rem 1.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-paper);
+    text-decoration: none;
+    white-space: nowrap;
+    /* It floats over the photographs now. The fill is opaque so contrast
+       inside is safe on any crop, but without a shadow it reads as pasted
+       onto the picture rather than above it. Not on the chip, which sits in
+       a frosted bar where a cast shadow would be wrong. */
+    box-shadow: 0 2px 12px rgba(26, 25, 23, 0.18);
+    transition: background 0.25s;
+  }
+
+  /* Pairs with the Collections chip in the sub-nav on /photography. Named
+     per tab, like the productions pills — see SubNav.astro. */
+  .back-pill {
+    view-transition-name: section-chip-collections;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-pill { view-transition-name: none; }
+  }
+
+  .back-pill:hover { background: var(--color-ink-soft); }
+
+  /* The global :focus-visible ring sets border-radius: 2px; put the pill
+     radius back so tabbing to it does not square it off. */
+  .back-pill:focus-visible { border-radius: var(--radius-pill); }
+
+  @media (max-width: 480px) {
+    .back-rail,
+    .collection-header { --back-pill-h: 2.125rem; }
+
+    .back-pill {
+      padding-inline: 0.8rem 1rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  /* Footer cross-link — plain text, not a pill. */
   .back-link {
     display: inline-flex;
     align-items: center;

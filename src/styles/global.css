@@ -411,6 +411,95 @@
 @keyframes identity-out { to { opacity: 0; } }
 @keyframes identity-in { from { opacity: 0; } }
 
+/* ── The section-chip morph ────────────────────────────────────────
+   The same idea as the identity morph above, one level down. The sub-nav's
+   selected chip and a project page's "Back to ..." pill are one object seen
+   twice: the black chip you pressed travels to the top-left corner of the
+   project and waits there as the way out, then flies back into the bar when
+   you take it. Opening a project and leaving one are the same move run in
+   opposite directions, which is why neither needs a keyframe of its own —
+   the group animation is symmetric, unlike the identity card's shape tween.
+
+   ONE NAME PER TAB, and that granularity is doing three jobs at once.
+   It is what pairs a Product Visualisation project with the PV chip rather
+   than the Productions one. It is what keeps the DisciplineSwitch at the
+   foot of every project page — "Also explore → Photography" — from flinging
+   the back button up into another section's bar. And it is what makes
+   switching tabs INSIDE the bar a plain cut: the two tabs hold different
+   names, so nothing pairs and nothing travels. Collapse these into a single
+   section-wide name and the chip starts sliding across the pill on every
+   tab switch. The names are declared where the elements live: SubNav.astro
+   (composed per tab into --subnav-morph) and the .back-pill rule in
+   productions/[slug].astro (via --back-morph), and photography/[slug].astro
+   for section-chip-collections. section-chip-gallery is deliberately absent
+   here: /photography/gallery has no detail page and so no pill to pair
+   with, and a name listed with nothing to pair against would only ever
+   animate a lone chip.
+
+   Like the identity rules, these CANNOT move into a component <style>
+   block — Astro would scope them and the ::view-transition pseudo-elements
+   hang off the document root, so they would never match. Unlayered on
+   purpose, at the top of the cascade.
+
+   TIMING, staged against the two animations either side of it:
+
+       0ms       260ms        420ms
+       |----------|-------------|
+       page fade  ###                   260ms  (root, above)
+       the chip   ##################    420ms
+
+   420ms rather than the identity morph's 480: a smaller, lighter object
+   making a shorter drop, on the same curve so it reads as the same
+   vocabulary rather than a second one. The sub-nav's 400ms entrance delay
+   never collides with this — a project page shows no sub-nav on the way
+   out, and on the way back SubNav's referrer check marks the bar `still`
+   because both pages share a first path segment. Retime that check and
+   this needs looking at again. */
+::view-transition-group(section-chip-productions),
+::view-transition-group(section-chip-product-visualisation),
+::view-transition-group(section-chip-collections) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-morph);
+}
+
+/* SOLID DRAWING. Both ends are pills, so unlike the identity card there is
+   no shape to tween — but the box changes width mid-flight ("Productions"
+   is much narrower than "Back to Graphic Design & 3D"), and a stretched
+   snapshot would flatten the round caps into ellipses. Clipping the pair to
+   a stadium for the whole trip keeps the ends true at every width.
+
+   A STATIC radius, deliberately. --radius-pill is 9999px — a sentinel
+   meaning "fully round", not a geometry — and interpolating from it is the
+   trap documented in CLAUDE.md. Nothing is interpolated here: the value is
+   set once and clamps to half the box height at whatever width the group
+   currently has. */
+::view-transition-image-pair(section-chip-productions),
+::view-transition-image-pair(section-chip-product-visualisation),
+::view-transition-image-pair(section-chip-collections) {
+  overflow: clip;
+  border-radius: var(--radius-pill);
+}
+
+/* The two labels are different words at different lengths, so the outgoing
+   one leaves early and the incoming one only resolves as the travel
+   settles: the eye follows the moving chip and never reads a stretched
+   picture of the old label. Overlapping by 40ms, as above, so the pill is
+   never empty and the two never ghost over each other. */
+::view-transition-old(section-chip-productions),
+::view-transition-old(section-chip-product-visualisation),
+::view-transition-old(section-chip-collections) {
+  animation: chip-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(section-chip-productions),
+::view-transition-new(section-chip-product-visualisation),
+::view-transition-new(section-chip-collections) {
+  animation: chip-in 260ms 140ms var(--ease-morph) both;
+}
+
+@keyframes chip-out { to { opacity: 0; } }
+@keyframes chip-in { from { opacity: 0; } }
+
 /* Reduced motion softens rather than removes. The flight is dropped in
    the components (they drop the shared names, so no group is formed) and
    what remains here is a plain cross-fade between the two pages — still

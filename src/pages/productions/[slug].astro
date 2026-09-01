@@ -16,7 +16,16 @@ const { project } = Astro.props;
 
 const isPV = project.category === "product-visualisation";
 const backHref = isPV ? "/productions/product-visualisation" : "/productions";
-const backLabel = isPV ? "Product Visualisation" : "Graphic Design & 3D";
+// Names the TAB it returns to, not the section: the pill and that tab's chip are
+// the two ends of one morph, and "Graphic Design & 3D" named neither. Cased as
+// prose, not as the chip — the pill reads as a sentence, so only "Back" leads.
+const backLabel = isPV ? "product visualisation" : "productions";
+// Pairs the back pill with the sub-nav chip for the exact TAB it returns to.
+// SubNav composes its names per tab, not per section, so that switching tabs
+// inside the bar pairs nothing and stays a cut — which means this has to name
+// the tab too. Naming the section instead would pair a Product Visualisation
+// project with the Productions chip and fly the pill to the wrong tab.
+const backMorph = `section-chip-${isPV ? "product-visualisation" : "productions"}`;
 
 const origin = Astro.site ?? Astro.url.origin;
 const pageUrl = abs(origin, `/productions/${project.slug}/`);
@@ -75,17 +84,26 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
 <BaseLayout title={project.title} description={project.description} image={project.cover} schema={schema}>
 
-  <!-- Header -->
-  <section class="project-header">
-    <div class="project-header__inner editorial">
-      <a href={backHref} class="back-link">
+  <!-- The way out, pinned like the nav. A project is a long scroll of
+       artwork and the header carrying this pill is gone within one screen,
+       which left no route back but the browser's own. Fixed rather than
+       sticky because sticky is bounded by its parent, and every parent here
+       is the header itself. -->
+  <div class="back-rail">
+    <div class="editorial">
+      <a href={backHref} class="back-pill" style={`--back-morph:${backMorph}`}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <polyline points="10,2 4,8 10,14" stroke="currentColor" stroke-width="1.25"
             stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        {backLabel}
+        Back to {backLabel}
       </a>
+    </div>
+  </div>
 
+  <!-- Header -->
+  <section class="project-header">
+    <div class="project-header__inner editorial">
       <div>
         <div class="project-header__meta">
           {project.tags.map((t) => <span class="label">{t}</span>)}
@@ -422,10 +440,46 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 </script>
 
 <style>
+  /* The pill is out of flow now, so the header reserves its own clearance:
+     nav gap + the pill + the gap that used to be the flex row's. Both this
+     and the rail read --back-pill-h, which is why the pill below is given a
+     DEFINITE height rather than being left to its padding — a header that
+     guesses at the pill's height goes wrong the moment the type changes. */
+  .back-rail,
   .project-header {
-    padding-top: 6.5rem;
+    --back-pill-h: 2.5rem;
+    /* The sub-nav's stuck top + the bar's inner padding — see .back-rail. */
+    --back-rail-top: calc(4.75rem + 0.4rem);
+  }
+
+  .project-header {
+    padding-top: calc(var(--back-rail-top) + var(--back-pill-h) + 1.75rem);
     padding-bottom: 3rem;
     border-bottom: 1px solid var(--color-line);
+  }
+
+  /* Full-bleed so its inner .editorial lands the pill on the same left edge
+     as the header text below it — the gutter is never restated here, it is
+     the one .editorial already owns. pointer-events is the .subnav trick:
+     the rail spans the viewport and would otherwise swallow every click
+     across that strip. */
+  /* WHERE THIS SITS, and why it is not a round number. The pill is the
+     sub-nav's selected chip after it has flown down, so it sits exactly
+     where that chip sits once the bar is stuck: the bar's own sticky
+     `top: 4.75rem` plus the 0.4rem of padding inside it (SubNav.astro).
+     Move either of those and move this with them.
+
+     It was 6.5rem, which was the header's old top padding rather than a
+     position in the chrome — a 40px gap under the nav where the sub-nav
+     band has 19px. Aligned to nothing, it read as a pill that had fallen
+     too far. This also makes the flight nearly horizontal: the chip
+     crosses to the corner instead of dropping to it. */
+  .back-rail {
+    position: fixed;
+    inset-inline: 0;
+    top: var(--back-rail-top);
+    z-index: 45;
+    pointer-events: none;
   }
 
 
@@ -436,6 +490,85 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     gap: 1.75rem;
   }
 
+  /* ── The way out, as the chip that brought you here ──────────
+     This is the sub-nav's selected chip after it has flown down: same ink
+     fill, same paper label, same radius and metrics, so the object that
+     left the bar is the object that lands here. Keep the two in step — if
+     the chip in SubNav.astro changes shape or size, this changes with it,
+     or the morph ends on something that is not quite what set off.
+
+     align-self is load-bearing. .project-header__inner is a flex COLUMN,
+     so its default `stretch` would pull this to the full editorial width
+     and the pill would read as a banner across the top of the page rather
+     than a button in the corner. inline-flex alone does not stop that. */
+  .back-pill {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* A DEFINITE height, matching what the sub-nav chip actually measures
+       (it is a stretched flex item, so its 40px comes from the bar, not
+       from type). Two things depend on this: the header's clearance above,
+       and the morph — the chip used to arrive 2px taller than it set off
+       because the chevron sat on a taller line box than the chip's text. */
+    height: var(--back-pill-h);
+    /* Tighter on the chevron side: the icon's own bearing makes a symmetric
+       1.5rem look inset. */
+    padding-inline: 1.15rem 1.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-paper);
+    text-decoration: none;
+    white-space: nowrap;
+    /* It now floats over the gallery rather than sitting on paper. The fill
+       is opaque, so contrast inside the pill is safe on any crop, but
+       without a shadow it reads as pasted onto the artwork instead of
+       above it. Deliberately not on the chip, which sits in a frosted bar
+       where a cast shadow would be wrong; the morph cross-fades the two. */
+    box-shadow: 0 2px 12px rgba(26, 25, 23, 0.18);
+    transition: background 0.25s;
+  }
+
+  .back-pill:hover { background: var(--color-ink-soft); }
+
+  /* The global :focus-visible ring sets border-radius: 2px, which would
+     square the pill off the moment it is tabbed to. Put the pill radius
+     back; the ring itself is inherited unchanged. */
+  .back-pill:focus-visible { border-radius: var(--radius-pill); }
+
+  /* The landing end of the morph declared on the sub-nav's selected chip
+     (SubNav.astro). The name is per tab and comes in as --back-morph, set
+     in the frontmatter from the category this project belongs to. A
+     productions project page renders no sub-nav, so this pill is the only
+     claimant here — which is exactly what lets the round trip work in both
+     directions. Adding a sub-nav to this page, or a second element with
+     this name, silently kills the morph. */
+  .back-pill {
+    view-transition-name: var(--back-morph, none);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-pill { view-transition-name: none; }
+  }
+
+  /* Match the chip's phone metrics so both ends of the flight are the same
+     size at the width where the header shrinks fastest. */
+  @media (max-width: 480px) {
+    .back-rail,
+    .project-header { --back-pill-h: 2.125rem; }
+
+    .back-pill {
+      padding-inline: 0.8rem 1rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  /* Footer cross-link — plain text, deliberately not a pill: one emphatic
+     way out per page, and it is the one at the top. */
   .back-link {
     display: inline-flex;
     align-items: center;

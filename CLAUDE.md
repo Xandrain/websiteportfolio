@@ -194,6 +194,58 @@ full procedure in [UPDATING.md](UPDATING.md).
   `@view-transition { navigation: auto }` is site-wide, so every same-origin
   navigation now cross-fades, not just the gate.
 
+- **The sub-nav's black chip and a detail page's "Back to ..." pill are one
+  object.** Opening a project or a collection carries the selected chip down
+  to the top-left corner, where it lands as the way out; pressing it flies
+  back into the bar. Same mechanism as the identity morph, and the same
+  uniqueness rule bites harder, because it constrains the page's structure:
+  **a detail page must not render a sub-nav.** A productions project never
+  had one; a photography collection had its Collections/Gallery bar removed
+  precisely so the chip could fly into its pill. Put a bar back on either and
+  the pill's name gains a rival in the same document, and the browser drops
+  every morph on the page silently.
+
+  **The name is scoped per TAB, never per section** — `section-chip-productions`,
+  `-product-visualisation`, `-collections` — composed in `SubNav.astro` as
+  `${morphPrefix}-${active}` and matched in `productions/[slug].astro` (via
+  `--back-morph`, since it varies by category) and `photography/[slug].astro`.
+  That granularity does three jobs: it pairs a Product Visualisation project
+  with the PV chip rather than the Productions one; it stops the
+  DisciplineSwitch at the foot of a detail page ("Also explore → Photography")
+  flinging the back button into another section's bar; and it is the only
+  reason **switching tabs inside the bar stays an instant cut** — two tabs
+  hold different names, so nothing pairs and nothing travels. Give a bar one
+  section-wide name and the chip slides across the pill on every tab switch.
+  `section-chip-gallery` is intentionally absent from the choreography in
+  `global.css`: `/photography/gallery` has no detail page and so no pill.
+
+  **The pill is `position: fixed` inside a full-bleed `.back-rail`**, not in
+  the header flow — sticky would be bounded by the header, which scrolls
+  away within one screen. The rail is full-bleed so its inner `.editorial`
+  supplies the gutter rather than restating it, and carries
+  `pointer-events: none` (the `.subnav` trick) or it swallows every click
+  across that strip. **Its vertical position is `--back-rail-top`,
+  `calc(4.75rem + 0.4rem)`** — the sub-nav's own sticky `top` plus the
+  0.4rem of padding inside the bar, so the pill sits exactly where the chip
+  sits once that bar is stuck, and the flight reads as a crossing rather
+  than a drop. It is not a free number: change the bar's `top` or its inner
+  padding and change this with them. It was `6.5rem` — the header's old top
+  padding, which is a spacing value and not a position in the chrome, and it
+  put the pill 40px under the nav where the sub-nav band sits at 19px.
+  Aligned to nothing, it read as having fallen too far. Because the pill is
+  out of flow, **the header reserves its clearance through `--back-rail-top`
+  + `--back-pill-h`** — which is also why the pill is
+  given a DEFINITE height rather than one derived from padding: the chip is
+  a stretched flex item measuring 40px (34px ≤480px) that its own type does
+  not determine, and the two ends of a morph must be the same size. Change
+  the pill's height and the header's `padding-top` follows automatically;
+  change either without the header reading the same variables and the fixed
+  pill lands on the eyebrow.
+  Do not tween the pill radius: `--radius-pill` is the 9999px sentinel, so
+  the image-pair clips to a *static* one. Guarded by `prefers-reduced-motion`
+  at both ends, so on a machine with OS animation effects off the pills are
+  simply static — intended, not a bug.
+
 - **Never point the identity morph’s shape tween at `--radius-pill`, and never
   drop `data-gate`.** The morph clips its box to a border-radius that travels
   with it, and both ends of that travel are traps. `--radius-pill` is 9999px —
