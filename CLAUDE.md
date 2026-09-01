@@ -109,6 +109,19 @@ full procedure in [UPDATING.md](UPDATING.md).
   inside the player with no error. `clipboard-write` is the About card's "Copy
   mail" button, and `autoplay` is also the gallery's muted looping clips. The
   list in `_headers` is deliberately restricted to features nothing here uses.
+- **Never write a vendor-prefixed property AFTER its standard form**, and never
+  drop `vite.build.cssTarget` from `astro.config.mjs`. Lightning CSS (Astro 7's
+  minifier) treats a prefixed/standard pair as ONE property, keeps whichever
+  was declared last, and regenerates prefixes from the targets. With no
+  targets it de-prefixes everything; with the `-webkit-` form last it keeps
+  only that. Both shipped: `backdrop-filter` in `Nav.astro`, `SubNav.astro`,
+  `ContactFab.astro` and `productions/index.astro` reached Firefox as
+  `none`, so all four pills rendered unfrosted there — invisible in Chrome,
+  invisible in dev (which serves unminified CSS), visible only in a built
+  Firefox render. Write `-webkit-*` first and the standard property last, and
+  verify against `npm run preview` in a non-Chromium engine, never against
+  `npm run dev`. The target floor is load-bearing in both directions — the
+  reasoning is in the config comment.
 - **Never set `compressHTML: 'jsx'`** (Astro 7's default, overridden to `true`
   in `astro.config.mjs`). JSX whitespace rules drop the text node between two
   inline elements, which HTML treats as a real space — under `'jsx'` the legal

@@ -41,4 +41,28 @@ export default defineConfig({
     // handful of real utilities are written out there by hand.
     inlineStylesheets: 'always',
   },
+  vite: {
+    build: {
+      // Lightning CSS (Astro 7's minifier) prefixes AND de-prefixes against
+      // this list. With no targets it assumes the newest engine everywhere
+      // and collapses a prefixed/standard pair down to whichever of the two
+      // was declared last — so `-webkit-backdrop-filter` beside
+      // `backdrop-filter` shipped as ONE property, not two. That was
+      // silently wrong in both directions: Firefox does not support the
+      // `-webkit-` alias at all (verified — it computed `none` on the built
+      // output), and Safari below 18 supports ONLY that alias. The nav pill,
+      // the sub-nav, the contact pill and the Productions masthead all
+      // frost through `backdrop-filter`, and all four were broken in one
+      // engine or the other.
+      //
+      // The floor is chosen, not guessed. Safari must stay BELOW 18 or the
+      // `-webkit-` prefix stops being generated; Chrome/Firefox must stay
+      // AT OR ABOVE the versions that shipped `oklch()` (111 and 113) or
+      // Lightning CSS rewrites every token in global.css into a hex
+      // fallback plus a `lab()` copy, which is both lossy in intent and
+      // ~600 bytes on each of the 27 inlined pages. Moving any of these
+      // means re-checking both of those.
+      cssTarget: ['chrome111', 'edge111', 'firefox113', 'safari16'],
+    },
+  },
 });

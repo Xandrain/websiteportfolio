@@ -92,8 +92,13 @@ const { label, tabs, active } = Astro.props;
     padding: 0.4rem;
     border-radius: var(--radius-pill);
     background: rgba(250, 250, 248, 0.8);
-    backdrop-filter: blur(20px);
+    /* Standard LAST. Lightning CSS treats the last-declared of a
+     * prefixed/standard pair as canonical and regenerates prefixes from the
+     * build targets; with the -webkit- form last it kept only that, and
+     * Firefox does not support the alias — the pill shipped unfrosted there.
+     */
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06), inset 0 0 0 1px rgba(26, 25, 23, 0.09);
   }
 
