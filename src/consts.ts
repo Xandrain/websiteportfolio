@@ -6,7 +6,7 @@ export const SITE = {
   role: "Graphic Designer & Photographer",
   tagline: "Light, form, and the space between.",
   description:
-    "The portfolio of Alexandre Haineaux — photographer & graphic designer in Luxembourg. Photography, graphic design and 3D; light, restraint, and considered form.",
+    "The portfolio of Alexandre Haineaux — photographer & graphic designer in Luxembourg. Photography, graphic design, and 3D; light, restraint, and considered form.",
   email: "contact@haineaux.com",
   location: "Luxembourg · Worldwide",
 };

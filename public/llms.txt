@@ -18,7 +18,7 @@ design, and 3D work.
 
 ## Sections
 
-- /photography — photography portfolio, organized by series
+- /photography — photography portfolio, organised by collection
 - /productions — graphic design and 3D work
 - /about — biography and contact
 - /legal — legal notice: copyright, licensing, AI-training policy, privacy

@@ -43,10 +43,10 @@ export const projects: Production[] = [
     slug: "mojo-swoptops",
     title: "Mojo SwopTops",
     description:
-      "3D modeling for Mojo SwopTops, a children's animated series broadcast on the BBC — props, vehicles, and characters built over more than a year of production.",
+      "3D modelling for Mojo SwopTops, a children’s animated series broadcast on the BBC — props, vehicles, and characters built over more than a year of production.",
     cover: "/productions/mojo-swoptops/cover.jpg",
     category: "productions",
-    tags: ["3D Modeling", "TV / Animation"],
+    tags: ["3D Modelling", "TV / Animation"],
     specs: [
       { label: "Role", value: "3D Modeller" },
       { label: "Medium", value: "Broadcast series, BBC" },
@@ -72,7 +72,7 @@ export const projects: Production[] = [
     slug: "crown-reinterpretation",
     title: "Crown Reinterpretation",
     description:
-      "A 3D reinterpretation of \"Crown\", a watercolour and Indian ink painting by Olivier Menanteau — deformation-ready topology throughout, with scattered instancing for the grass, rock, and mushroom detail.",
+      "A 3D reinterpretation of “Crown”, a watercolour and Indian ink painting by Olivier Menanteau — deformation-ready topology throughout, with scattered instancing for the grass, rock, and mushroom detail.",
     cover: "/productions/crown-reinterpretation/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Personal Work"],
@@ -90,7 +90,7 @@ export const projects: Production[] = [
       "Personal study translating a 2D character design by Kim Jacinto into 3D — working through pose, weight, and how a figure that size handles a gun that large.",
     cover: "/productions/rambochador/cover.jpg",
     category: "productions",
-    tags: ["Character Art", "Stylized"],
+    tags: ["Character Art", "Stylised"],
     specs: [
       { label: "Role", value: "Character art" },
       { label: "Source", value: "2D design, Kim Jacinto" },
@@ -99,12 +99,12 @@ export const projects: Production[] = [
   },
   {
     slug: "chance-parfume",
-    title: "Chance Parfume",
+    title: "Chance — Eau Vive",
     description:
-      "Product visualisation study of Chanel's Chance Eau Vive, made for training purposes.",
+      "Product visualisation study of Chanel’s Chance Eau Vive, made for training purposes.",
     cover: "/productions/chance-parfume/cover.jpg",
     category: "product-visualisation",
-    tags: ["Product Visualization"],
+    tags: ["Product Visualisation"],
   },
 
   // ── Product Visualisation — product renders (bottles, labels, packaging) ──
@@ -112,20 +112,20 @@ export const projects: Production[] = [
     slug: "vermouth-rosso",
     title: "Vermouth Rosso — Emi Renzi",
     description:
-      "Product visualisation of Emi Renzi's \"El néctar de Los Guardas\" vermouth — bottle, label, and studio-lit environment renders.",
+      "Product visualisation of Emi Renzi’s “El néctar de Los Guardas” vermouth — bottle, label, and studio-lit environment renders.",
     cover: "/productions/vermouth-rosso/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "3D Render"],
+    tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
   },
   {
     slug: "half-moon-eau-de-parfum",
     title: "Half Moon — Eau de Parfum",
     description:
-      "A perfume-bottle visualisation for \"Half Moon\" eau de parfum — studio render with a wireframe breakdown.",
+      "A perfume-bottle visualisation for “Half Moon” eau de parfum — studio render with a wireframe breakdown.",
     cover: "/productions/half-moon-eau-de-parfum/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "Packaging"],
+    tags: ["Product Visualisation", "Packaging"],
     coverInGallery: true,
   },
   {
@@ -135,27 +135,27 @@ export const projects: Production[] = [
       "Product render of the Avocado LMS Bio bottle — a clean studio setup with a wireframe pass.",
     cover: "/productions/avocado-lms-bio/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "3D Render"],
+    tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
   },
   {
     slug: "emperor-orange-lime",
     title: "Emperor — Orange-Lime",
     description:
-      "Beverage-bottle visualisation for \"Emperor\" Orange-Lime — beauty and wireframe renders.",
+      "Beverage-bottle visualisation for “Emperor” Orange-Lime — beauty and wireframe renders.",
     cover: "/productions/emperor-orange-lime/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "3D Render"],
+    tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
   },
   {
     slug: "lulu-acidoactive",
     title: "Lulu — AcidoActive",
     description:
-      "Cosmetic-bottle visualisation for \"Lulu AcidoActive\" — studio lighting with a wireframe breakdown.",
+      "Cosmetic-bottle visualisation for “Lulu AcidoActive” — studio lighting with a wireframe breakdown.",
     cover: "/productions/lulu-acidoactive/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "Cosmetics"],
+    tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
   },
   {
@@ -165,17 +165,17 @@ export const projects: Production[] = [
       "Wine-bottle visualisation of a Luxembourg Riesling — high-resolution beauty and wireframe renders.",
     cover: "/productions/riesling-luxembourg/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "3D Render"],
+    tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
   },
   {
     slug: "l-u-x-proaging",
     title: "L.U.X ProAging",
     description:
-      "Skincare-bottle visualisation for \"L.U.X ProAging\" — studio render and wireframe.",
+      "Skincare-bottle visualisation for “L.U.X ProAging” — studio render and wireframe.",
     cover: "/productions/l-u-x-proaging/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "Cosmetics"],
+    tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
   },
   {
@@ -185,24 +185,24 @@ export const projects: Production[] = [
       "Product render of the Natuargua Collection 844 bottle, with a wireframe pass.",
     cover: "/productions/natuargua-collection-844/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "3D Render"],
+    tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
   },
   {
     slug: "91-1-herbal-serum",
     title: "91.1 Herbal Serum",
     description:
-      "Serum-bottle visualisation for \"91.1 Herbal Serum\" — beauty and wireframe renders.",
+      "Serum-bottle visualisation for “91.1 Herbal Serum” — beauty and wireframe renders.",
     cover: "/productions/91-1-herbal-serum/cover.webp",
     category: "product-visualisation",
-    tags: ["Product Visualization", "Cosmetics"],
+    tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
   },
   {
     slug: "carl-fredricksen",
     title: "Carl Fredricksen — UP",
     description:
-      "A 3D bust of Carl Fredricksen from Pixar's UP — a full texture and shading study, from base color through roughness and normal passes.",
+      "A 3D bust of Carl Fredricksen from Pixar’s UP — a full texture and shading study, from base colour through roughness and normal passes.",
     cover: "/productions/carl-fredricksen/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Fan Art"],
