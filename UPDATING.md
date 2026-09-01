@@ -316,6 +316,34 @@ nobody downloads a minute of video just for passing by.
 
 ---
 
+## 7e. Recipe: check the menu still reads over a new cover
+
+Only for **Graphic Design & 3D** covers (`cover.*`), and only because that page
+is unusual: on `/productions` the pictures run the full width of the screen and
+slide up **underneath** the menu as you scroll. Nothing sits between them any
+more — no white strip, on purpose. The menu bar and the Productions / Product
+Visualisation bar are frosted glass, and that frost is the only thing keeping
+the words readable.
+
+So a very pale, very bright or very busy cover can wash the menu out. It never
+shows in a screenshot of the top of the page, because it only happens **while
+scrolling**.
+
+The check, once, after adding or swapping a cover:
+
+1. `npm run dev`, open `/productions`.
+2. Scroll slowly, all the way down and back up, watching the words
+   **Photography** and **About** in the top bar — they are the palest, so they
+   go first.
+3. Do it again with the browser window made narrow (phone width).
+
+If a word gets hard to read against the picture behind it, don't touch the
+picture — the fix is in `src/components/Nav.astro` and
+`src/components/shared/SubNav.astro`, where the frost is set to `0.86` and
+`0.9`. Nudge those up. Going the other way — thinning them — has to be measured
+properly first; the method is written down in CLAUDE.md, under "The nav pills
+carry their own contrast".
+
 ---
 
 ## 8. Recipe: publish (put your changes on the real website)

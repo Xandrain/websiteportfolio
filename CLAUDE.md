@@ -135,39 +135,38 @@ full procedure in [UPDATING.md](UPDATING.md).
   turnarounds just drift apart again, with nothing to show that they should not.
   The reasoning, the browser behaviour behind it and how to re-verify are in the
   comment above that script; read it before changing anything there.
-- **Never put an image under the nav pill without fading it to paper.** The
-  pill is translucent by design (`Nav.astro`) so it can sit over content,
-  and its hairline ring alone will not hold against a dark or busy crop.
-  `/productions` is the page that does bleed artwork under it — its chapter
-  bands are full-bleed and scroll up through the chrome — so
-  `productions/index.astro` carries TWO fixed sibling layers, and they have
-  to stay siblings — an element with a mask or a backdrop-filter is a
-  Backdrop Root, so a backdrop-filter nested inside one samples only that
-  ancestor's own painting and silently does nothing. `.masthead-lens`
-  (`z-index: 38`) is blur only, no tint, full to 128px and gone by 184px;
-  `.masthead-fade` (39) is the frost — a 20px blur with `saturate(160%)`,
-  paper graduated 0.90 → 0.79 down the strip, full strength to 150px
-  (clearing the sub-nav's resting bottom at ~141px) then out over 16px.
-  Both sit under the sub-nav (40) and the nav (50) and over the bands. The
-  lens is what lets the paper end crisply while focus keeps returning for
-  another ~18px beneath it, so a band resolves out of the glass instead of
-  switching — and it can run long precisely because it adds no paper. The
-  saturation is load-bearing too: paper over a 20px blur desaturates a
-  cover into grey mush, the opposite of the drifting colour this strip
-  exists to preserve. Frosted rather than opaque is deliberate and it costs
-  contrast — the inactive nav labels have less room here than on a
-  flat-paper page, still clear of the 4.5 floor. Re-measure the composited
-  pixels if either pill's opacity or that density curve moves. **Never fade `backdrop-filter` with a gradient
-  background** — the filter cannot be graduated, so the blur would stop on a
-  hard line across the viewport while the tint faded; `mask-image` is what
-  attenuates both together. That mask is a defined edge, not a dissolve: the
-  50px ramp it started as washed the top of the first band grey for nothing.
-  Keep it in the 12–20px range — below the 20px blur radius the boundary
-  starts showing as a seam on a busy crop. Any other page that
-  bleeds artwork upward needs the same treatment, re-checked at 390px where
-  a header shrinks faster than the type inside it. The failure is invisible
-  at rest — it only shows while scrolling — so a screenshot of the top of
-  the page proves nothing.
+- **The nav pills carry their own contrast — there is no scrim under them.**
+  Both pills are translucent so they can sit over content, and `/productions`
+  bleeds artwork straight under them: its chapter bands are full-bleed and
+  scroll up through the chrome with nothing in between. That used to be
+  handled by two fixed sibling layers on `productions/index.astro`
+  (`.masthead-lens` + `.masthead-fade`), a 166px frosted strip across the top
+  of the viewport. **It is gone, and it should not come back.** It read as a
+  white banner bolted to the page — worse on a phone, where it took the top
+  fifth of the screen — and, measured, it was not even doing its job: the
+  inactive nav labels bottomed out at **3.50:1** underneath it, below the 4.5
+  floor it was supposed to protect.
+  What replaces it is density in the pills themselves — `Nav.astro` at
+  `rgba(250,250,248,0.86)`, `SubNav.astro` at `0.9`, each over a 20px blur and
+  lifted off the crop by a two-part drop shadow. Worst case is now **4.92:1**
+  across the whole scroll. Those numbers are the entire contrast story, so
+  **thinning either pill means re-measuring**, and so does any new page that
+  bleeds artwork upward.
+  Measure it properly or not at all. Sample the **composited pixels** in each
+  label's **text line box** — a Range over the element's contents, not its
+  bounding box, which runs into the pill's corner radius where no glyph is
+  ever painted and reports failures that are not there — with the glyphs
+  hidden (`color: transparent`) so the backdrop is what you read, stepping the
+  full length of the scroll at every viewport that changes the layout
+  (360/390/640/1440). Take the **minimum** ratio in the box, not the mean: a
+  glyph can land on the worst pixel. Measure the sub-nav's boxes **scrolled**,
+  never at rest — the bar sits in flow at 88px and sticks at 76px, and boxes
+  taken at scrollY 0 sample 12px of artwork below the pill. The failure is
+  invisible at rest; it only shows while scrolling, so a screenshot of the top
+  of the page proves nothing.
+  Under `prefers-reduced-transparency: reduce` both pills drop the blur and go
+  fully opaque — with no scrim left, 0.86 paper over a live crop is not a
+  surface.
 
 - **Swapping a `/productions` cover means re-measuring the band contrast.**
   The index sets white type straight over each crop, and the scrim stops in
@@ -177,9 +176,9 @@ full procedure in [UPDATING.md](UPDATING.md).
   against the bottom edge. A paler, brighter or busier cover can push a
   title under the floor with nothing on screen to announce it. Sample the
   composited pixels behind the text at 360/390/640/1440 and compare against
-  the element's real `color` alpha — do not eyeball it, and do not trust a
-  full-page screenshot, which paints the fixed fade over the whole capture
-  and reports false failures.
+  the element's real `color` alpha — do not eyeball it, and clip the capture
+  to the viewport: a full-page screenshot flattens the fixed chrome over the
+  whole image and reports failures that are not there.
 
 - **Never let a second element claim `view-transition-name: site-identity`.**
   The home gate's identity card and the nav pill share that one name, which
