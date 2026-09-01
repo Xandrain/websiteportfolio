@@ -69,11 +69,17 @@ const meta = project.tags.slice(0, 2).join(" · ");
     color: inherit;
   }
 
+  /* Corners are softened to sit with the pill chrome (nav, sub-nav, FAB) that
+     floats over this grid — enough curve to read as the same family, well
+     short of the pill itself, which on a 4:3 plate would round the render
+     away rather than frame it. The scaled, grayscaled <img> and the hover
+     scrim are both clipped by the overflow above, so the radius carries. */
   .project-card__media {
     position: relative;
     overflow: hidden;
     background: var(--color-paper-alt);
     aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
   }
 
   .project-card__img {

@@ -1,87 +1,80 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import ProjectCard from "../../components/productions/ProjectCard.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import ProductionsSubNav from "../../components/productions/ProductionsSubNav.astro";
 import { projects } from "../../data/three-d";
 import { srcset, dims } from "../../lib/responsive";
 
 const productionsList = projects.filter((p) => p.category === "productions");
-const [featured, ...rest] = productionsList;
-const featuredDims = featured ? dims(featured.cover) : undefined;
 ---
 
 <BaseLayout
   title="Graphic Design & 3D"
-  description="3D and graphic design work by Alexandre Haineaux — character modeling, rigging, and texturing for animated television, alongside personal studies."
+  description="3D and graphic design work by Alexandre Haineaux — character modelling, rigging, and texturing for animated television, alongside personal studies."
 >
   <h1 class="sr-only">Productions</h1>
+
+  <!-- Paper carried down from the top of the viewport, behind the fixed nav
+       pill and the sticky sub-nav.
+
+       THIS IS LOAD-BEARING, not decoration. Both pills are deliberately
+       translucent so they can sit over content, and this is the first page
+       whose artwork bleeds under them: every band scrolls up through that
+       strip. Without this fade, a dark or busy crop passing underneath leaves
+       the pill's hairline ring as the only thing separating the navigation
+       from the picture, and the labels stop being readable — silently, only
+       while scrolling, so it does not show up in a screenshot of the page at
+       rest. See CLAUDE.md, "Never put an image under the nav pill".
+
+       The stop positions are measured, not picked: the sub-nav rests with its
+       bottom edge at ~141px (5.5rem spacer + its own height), so the fade
+       holds full paper to 150px and only then starts to clear. z-index 39
+       puts it under the sub-nav (40) and the nav (50) and over the bands.
+       Re-measure if the spacer or either pill's padding changes.
+
+       TWO layers, and they have to stay SIBLINGS. An element carrying a mask
+       or a backdrop-filter is a Backdrop Root, and a backdrop-filter on a
+       DESCENDANT of one samples only that ancestor's own painting rather
+       than the page behind it. Nest these, or wrap them in a container that
+       picks up a mask, an opacity or a filter of its own, and the inner
+       layer blurs flat colour and silently does nothing. -->
+  <div class="masthead-lens" aria-hidden="true"></div>
+  <div class="masthead-fade" aria-hidden="true"></div>
 
   <div class="subnav-spacer" aria-hidden="true"></div>
   <ProductionsSubNav active="productions" />
 
-  <!-- Featured plate: the cover inset on the left, the credit read off as a
-       spec column on the right. -->
-  {featured && (
-    <section class="featured editorial" aria-label="Featured project">
-      <div class="plate">
-        <div class="plate__media">
-          <div class="plate__well">
-            <img
-              src={featured.cover}
-              srcset={srcset(featured.cover)}
-              sizes="(min-width: 1024px) 700px, (min-width: 900px) 60vw, 100vw"
-              alt={`${featured.title} — Graphic Design & 3D project`}
-              width={featuredDims?.w ?? 1600}
-              height={featuredDims?.h ?? 1000}
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-              class="plate__img"
-            />
+  <!-- Chapters: one full-bleed band per project, the title set over the crop. -->
+  <section class="chapters" aria-label="Projects">
+    {productionsList.map((project, i) => {
+      const d = dims(project.cover);
+      return (
+        <a href={`/productions/${project.slug}`} class="chapter">
+          <img
+            src={project.cover}
+            srcset={srcset(project.cover)}
+            sizes="100vw"
+            alt={`${project.title} — Graphic Design & 3D project`}
+            width={d?.w ?? 1600}
+            height={d?.h ?? 1000}
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchpriority={i === 0 ? "high" : undefined}
+            decoding="async"
+            class="chapter__img"
+          />
+
+          <div class="chapter__scrim" aria-hidden="true"></div>
+
+          <div class="chapter__body editorial">
+            <p class="chapter__kicker">{`${String(i + 1).padStart(2, "0")} — Chapter`}</p>
+            <h2 class="chapter__title">{project.title}</h2>
+            <p class="chapter__tags">{project.tags.slice(0, 2).join(" · ")}</p>
+            <span class="chapter__cta">View project →</span>
           </div>
-        </div>
-
-        <div class="plate__info">
-          <p class="plate__kicker">01 — Featured</p>
-
-          <h2 class="plate__title">
-            <a href={`/productions/${featured.slug}`} class="plate__link">
-              {featured.title}
-            </a>
-          </h2>
-
-          {featured.specs && featured.specs.length > 0 && (
-            <dl class="specs">
-              {featured.specs.map((row) => (
-                <div class="specs__row">
-                  <dt class="specs__label">{row.label}</dt>
-                  <dd class="specs__value">{row.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-
-          <div class="plate__spacer"></div>
-
-          <a href={`/productions/${featured.slug}`} class="plate__cta">
-            View project →
-          </a>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- The rest, as plates -->
-  {rest.length > 0 && (
-    <section class="plates editorial" aria-label="More projects">
-      <div class="plates__grid">
-        {rest.map((project, i) => (
-          <ProjectCard project={project} variant="plate" index={i + 2} />
-        ))}
-      </div>
-    </section>
-  )}
+        </a>
+      );
+    })}
+  </section>
 
   <DisciplineSwitch label="Also explore" href="/photography" name="Photography" />
 </BaseLayout>
@@ -89,140 +82,274 @@ const featuredDims = featured ? dims(featured.cover) : undefined;
 <style>
   .subnav-spacer { height: 5.5rem; }
 
-  /* ── Featured plate ───────────────────────────────────────── */
-  .featured { padding-block: 3rem 0; }
+  /* ── The masthead glass ───────────────────────────────────────
+     WHY this strip exists is in the comment above the markup. This is what
+     it is MADE of: two stacked layers, so the glass has an optical thickness
+     that reaches further down the page than its paper does.
 
-  .plate {
-    display: grid;
-    grid-template-columns: 1fr;
-    border-radius: 0.375rem;
-    background: var(--color-paper-alt);
-    box-shadow: inset 0 0 0 1px var(--color-line),
-                0 18px 44px rgba(26, 25, 23, 0.06);
-    overflow: hidden;
+       .masthead-lens (z 38)  blur only, no tint.  full to 8rem → 11.5rem
+       .masthead-fade (z 39)  the frost: blur + saturation + paper.
+                                                   full to 9.375rem → 10.375rem
+
+     Painted in that order, so the frost's own blur samples the lens's output
+     and the two compound (~21px at the top) instead of reading as two sheets.
+
+     A masked backdrop-filter is NOT a blur that stops — it is the blurred
+     backdrop cross-faded with the sharp one at the mask's alpha. That is what
+     turns two flat layers into one graduated material, and it is the whole
+     trick here: the paper still ends crisply at 10.375rem while focus keeps
+     coming back for another ~18px underneath it, so a band resolves out of
+     the glass rather than switching.
+
+     THE MASKS ARE NOT OPTIONAL. `backdrop-filter` cannot be graduated — it is
+     either on for the whole element or off — so fading the tint with a
+     gradient background alone would leave the BLUR stopping dead on a
+     horizontal line across the viewport. Masking attenuates tint and blur
+     together, which is the only way to get one soft edge.
+
+     Lengths, not percentages, so the geometry survives a change of height.
+     Do not stretch the frost's 16px ramp back out: the long ramp it replaced
+     washed the top of the first band grey for no gain, and the lens is what
+     does that job now — without adding paper, which is why it can be long.
+     Do not take the frost's ramp below ~12px either.
+
+     SATURATION IS THE POINT, not decoration. Frosted glass desaturates what
+     is behind it, and paper over a 20px blur was turning a chapter cover into
+     grey mush — the opposite of what the comment above asks this strip for
+     ("visible underneath as drifting colour"). saturate() runs on the
+     backdrop BEFORE the paper composites over it, so the colour survives the
+     trip. Push it past ~180% and the crops go radioactive under the pills.
+
+     CONTRAST. The two pills occupy 0–141px and carry their own paper on top
+     of this (0.72 nav, 0.80 sub-nav), so what actually backs a nav label is
+     the composite of the two. The density curve below is set for that: it
+     opens DENSER than the flat 0.82 it replaced and thins only below where
+     the pills end, so every label sits on at least as much paper as before.
+     Re-measure the composited pixels if either pill's opacity or this curve
+     moves — never from a screenshot, which paints this strip over the whole
+     capture and reports failures that are not there. */
+  .masthead-lens,
+  .masthead-fade {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    pointer-events: none;
   }
 
-  @media (min-width: 900px) {
-    .plate { grid-template-columns: 1.9fr 1fr; }
+  /* The reach. No background at all — this layer only softens, which is what
+     lets it run past the paper without greying the artwork it covers. */
+  .masthead-lens {
+    z-index: 38;
+    height: 11.5rem;
+    /* Prefixed FIRST, standard last — see .masthead-fade below for why. */
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 8rem, transparent 11.5rem);
+    mask-image: linear-gradient(to bottom, #000 8rem, transparent 11.5rem);
   }
 
-  .plate__media { padding: 1.25rem; }
+  .masthead-fade {
+    z-index: 39;
+    height: 10.375rem;
+    /* Two backgrounds: sheen over density.
 
-  /* The image sits in a well of page-coloured ground, not flush to the plate
-     edge — that margin is what makes a render read as a mounted object. */
-  .plate__well {
-    overflow: hidden;
-    border-radius: 0.1875rem;
-    background: var(--color-paper);
-    aspect-ratio: 16 / 10;
+       The sheen is the one liquid cue in here — glass catches light unevenly
+       across its width. It is pure white, so it can only ever ADD paper and
+       can never cost a label its contrast, and at 6–10% it is invisible over
+       an empty page. It shows only when something dark passes under it,
+       which on this page means while a chapter band is scrolling through.
+
+       The density curve runs 0.90 → 0.79 down the strip: heaviest where the
+       nav pill needs backing, lightest at 9.375rem, where nothing sits on it
+       and the artwork should come closest to reading through. */
+    background:
+      linear-gradient(105deg,
+        rgba(255, 255, 255, 0.10) 0%,
+        rgba(255, 255, 255, 0)    46%,
+        rgba(255, 255, 255, 0.06) 78%,
+        rgba(255, 255, 255, 0)    100%),
+      linear-gradient(to bottom,
+        rgba(252, 252, 250, 0.90) 0,
+        rgba(250, 250, 248, 0.84) 4.75rem,
+        rgba(247, 246, 243, 0.79) 9.375rem);
+    /* Prefixed FIRST, standard last. Reversed, the minifier collapses the
+       pair to `-webkit-backdrop-filter` alone — and Firefox does not support
+       that alias (`CSS.supports('-webkit-backdrop-filter', …)` is false
+       there), so the panel would ship to Firefox as flat paper with the
+       artwork sharp behind it rather than frosted. */
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 9.375rem, transparent 10.375rem);
+    mask-image: linear-gradient(to bottom, #000 9.375rem, transparent 10.375rem);
   }
 
-  .plate__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  /* Reduced transparency asks for surfaces, not layers: drop the lens and
+     serve the frost as plain paper. The mask stays, so the strip still ends
+     on a soft edge instead of a rule drawn across the page. */
+  @media (prefers-reduced-transparency: reduce) {
+    .masthead-lens { display: none; }
 
-  .plate__info {
-    display: flex;
-    flex-direction: column;
-    padding: 2rem 1.75rem 1.75rem;
-    border-top: 1px solid var(--color-line);
-  }
-
-  @media (min-width: 900px) {
-    .plate__info {
-      padding: 2.5rem 2.25rem 2.25rem;
-      border-top: 0;
-      border-left: 1px solid var(--color-line);
+    .masthead-fade {
+      background: var(--color-paper);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
   }
 
-  .plate__kicker {
+  /* ── Chapters ──────────────────────────────────────────────────
+     Deliberately NOT `.editorial` — the bands run the full width of the
+     viewport, and only the text inside each one is held to the editorial
+     measure. */
+  .chapters { padding-block: 3rem 0; }
+
+  .chapter {
+    position: relative;
+    display: block;
+    /* 21vw lands the band at ~300px on a 1440 viewport, and the clamp holds
+       it readable either side: 240px on a phone, capped at 352px so a wide
+       desktop does not turn five projects into five screens. */
+    height: clamp(15rem, 21vw, 22rem);
+    overflow: hidden;
+    text-decoration: none;
+    /* A hairline of paper between bands, so two dark crops meeting do not
+       read as one continuous image. */
+    box-shadow: inset 0 -1px 0 rgba(250, 250, 248, 0.2);
+  }
+
+  /* The band is the whole link, so the global focus ring — which draws
+     OUTSIDE the box — would be clipped at the viewport edges. Drawn inward
+     instead, with a paper gap so it survives a busy crop. */
+  .chapter:focus-visible {
+    box-shadow: inset 0 0 0 3px var(--color-paper),
+                inset 0 0 0 6px var(--color-accent-ink);
+  }
+
+  .chapter__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Four of the five covers are square masters; centring the crop on the
+       upper-middle keeps a character's head in frame at this aspect. */
+    object-position: center 42%;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .chapter:hover .chapter__img { transform: scale(1.03); }
+
+  /* Phone: the text stacks against the bottom edge, so the scrim runs upward
+     and has to stay strong through the whole block — the kicker sits ~90px up
+     from the base of a 240px band, and a gradient already thinning by there
+     measured 2.0:1. These stops hold it above the AA floor for the full
+     stack. */
+  .chapter__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      rgba(10, 9, 8, 0.92) 0%,
+      rgba(10, 9, 8, 0.8)  42%,
+      rgba(10, 9, 8, 0.36) 76%,
+      rgba(10, 9, 8, 0.06) 100%
+    );
+  }
+
+  .chapter__body {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-block-end: 1.5rem;
+  }
+
+  /* Past the phone the scrim turns to run left-to-right and the text centres
+     in the band — there is room beside the artwork rather than only under it,
+     so the crop stays visible instead of being darkened along its full width.
+
+     The stops are set by measurement, not taste. At 0.52/34% the white titles
+     measured 2.7:1 over the pale crops (Crown, Rambochador) — under the 3:1
+     WCAG AA floor for large text, and the pale ones are exactly the covers
+     this layout cannot avoid. 0.62 held to 40% clears every band with margin
+     while leaving the right half of each crop untouched. Re-measure if the
+     scrim, the title size or the covers change. */
+  @media (min-width: 640px) {
+    .chapter__scrim {
+      background: linear-gradient(
+        to right,
+        rgba(10, 9, 8, 0.86) 0%,
+        rgba(10, 9, 8, 0.62) 40%,
+        rgba(10, 9, 8, 0)    74%
+      );
+    }
+
+    .chapter__body {
+      justify-content: center;
+      padding-block-end: 0;
+    }
+  }
+
+  .chapter__kicker {
     margin: 0;
     font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: var(--letter-spacing-caps);
     text-transform: uppercase;
-    color: var(--color-accent-ink);
+    /* 0.80, not the 0.66 the mockup carried: AZUREUS is the one title that
+       wraps to two lines on a phone, which lifts the kicker into the thin end
+       of the scrim and over the blue glow behind it. At 0.72 it measured
+       4.34:1, just under the 4.5 floor for 11px text. */
+    color: rgba(255, 255, 255, 0.8);
   }
 
-  .plate__title {
+  .chapter__title {
+    /* Held inside the dark end of the scrim — see the stop measurements
+       above. Wider and the longest titles run into the bright half. */
+    max-width: 32rem;
+    margin: 0.5rem 0 0;
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(1.875rem, 2.8vw, 2.375rem);
+    font-size: clamp(1.625rem, 3.2vw, 2.875rem);
     line-height: 1.05;
-    letter-spacing: -0.01em;
-    margin: 1.125rem 0 0;
+    letter-spacing: -0.015em;
+    color: #FFFFFF;
+    text-wrap: balance;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
   }
 
-  .plate__link {
-    color: inherit;
-    text-decoration: none;
-    transition: opacity 0.2s;
+  .chapter__tags {
+    margin: 0.625rem 0 0;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: var(--letter-spacing-caps);
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
   }
 
-  .plate__link:hover { opacity: 0.7; }
-
-  .plate__spacer { flex-grow: 1; min-height: 2rem; }
-
-  .plate__cta {
-    align-self: flex-start;
+  /* Phone bands carry no call to action: the whole band is the link, and the
+     four lines it would make do not fit above the fold of a 240px band
+     without pushing the kicker up into the thin end of the scrim. */
+  .chapter__cta {
+    display: none;
+    padding-bottom: 0.25rem;
     font-size: 0.8125rem;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    text-decoration: none;
-    color: var(--color-accent-ink);
-    border-bottom: 1px solid oklch(from #0C6B43 l c h / 0.35);
-    padding-bottom: 0.25rem;
+    color: #FFFFFF;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.42);
     transition: border-color 0.25s;
   }
 
-  .plate__cta:hover { border-color: var(--color-accent-ink); }
-
-  /* Spec rows — hairlines only, so the column reads as a breakdown rather
-     than a boxed table. */
-  .specs { margin: 1.75rem 0 0; }
-
-  .specs__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.75rem 0;
-    border-top: 1px solid var(--color-line);
-  }
-
-  .specs__row:last-child { border-bottom: 1px solid var(--color-line); }
-
-  .specs__label {
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: var(--letter-spacing-label);
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-    white-space: nowrap;
-  }
-
-  .specs__value {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--color-ink);
-    text-align: right;
-  }
-
-  /* ── Plates ───────────────────────────────────────────────── */
-  .plates { padding-block: 1.5rem 0; }
-
-  .plates__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+  .chapter:hover .chapter__cta { border-color: #FFFFFF; }
 
   @media (min-width: 640px) {
-    .plates__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .chapter__title { margin-top: 0.75rem; }
+    .chapter__tags  { margin-top: 1rem; }
+    .chapter__cta   { display: block; margin-top: 1.375rem; }
   }
 </style>

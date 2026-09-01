@@ -137,10 +137,49 @@ full procedure in [UPDATING.md](UPDATING.md).
   comment above that script; read it before changing anything there.
 - **Never put an image under the nav pill without fading it to paper.** The
   pill is translucent by design (`Nav.astro`) so it can sit over content,
-  and its hairline ring alone will not hold against a dark or busy crop. No
-  page currently bleeds artwork under it; one that does must carry paper
-  down from the top behind the pill, and be re-checked at 390px, where a
-  header shrinks faster than the type inside it.
+  and its hairline ring alone will not hold against a dark or busy crop.
+  `/productions` is the page that does bleed artwork under it — its chapter
+  bands are full-bleed and scroll up through the chrome — so
+  `productions/index.astro` carries TWO fixed sibling layers, and they have
+  to stay siblings — an element with a mask or a backdrop-filter is a
+  Backdrop Root, so a backdrop-filter nested inside one samples only that
+  ancestor's own painting and silently does nothing. `.masthead-lens`
+  (`z-index: 38`) is blur only, no tint, full to 128px and gone by 184px;
+  `.masthead-fade` (39) is the frost — a 20px blur with `saturate(160%)`,
+  paper graduated 0.90 → 0.79 down the strip, full strength to 150px
+  (clearing the sub-nav's resting bottom at ~141px) then out over 16px.
+  Both sit under the sub-nav (40) and the nav (50) and over the bands. The
+  lens is what lets the paper end crisply while focus keeps returning for
+  another ~18px beneath it, so a band resolves out of the glass instead of
+  switching — and it can run long precisely because it adds no paper. The
+  saturation is load-bearing too: paper over a 20px blur desaturates a
+  cover into grey mush, the opposite of the drifting colour this strip
+  exists to preserve. Frosted rather than opaque is deliberate and it costs
+  contrast — the inactive nav labels have less room here than on a
+  flat-paper page, still clear of the 4.5 floor. Re-measure the composited
+  pixels if either pill's opacity or that density curve moves. **Never fade `backdrop-filter` with a gradient
+  background** — the filter cannot be graduated, so the blur would stop on a
+  hard line across the viewport while the tint faded; `mask-image` is what
+  attenuates both together. That mask is a defined edge, not a dissolve: the
+  50px ramp it started as washed the top of the first band grey for nothing.
+  Keep it in the 12–20px range — below the 20px blur radius the boundary
+  starts showing as a seam on a busy crop. Any other page that
+  bleeds artwork upward needs the same treatment, re-checked at 390px where
+  a header shrinks faster than the type inside it. The failure is invisible
+  at rest — it only shows while scrolling — so a screenshot of the top of
+  the page proves nothing.
+
+- **Swapping a `/productions` cover means re-measuring the band contrast.**
+  The index sets white type straight over each crop, and the scrim stops in
+  `productions/index.astro` are measured, not chosen: the palest covers
+  (Crown, Rambochador) sit at roughly 4.5:1 against a 3:1 floor for the
+  titles, and the phone breakpoint is tighter still because the text stacks
+  against the bottom edge. A paler, brighter or busier cover can push a
+  title under the floor with nothing on screen to announce it. Sample the
+  composited pixels behind the text at 360/390/640/1440 and compare against
+  the element's real `color` alpha — do not eyeball it, and do not trust a
+  full-page screenshot, which paints the fixed fade over the whole capture
+  and reports false failures.
 
 - **Never let a second element claim `view-transition-name: site-identity`.**
   The home gate's identity card and the nav pill share that one name, which
