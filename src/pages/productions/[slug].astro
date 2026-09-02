@@ -250,9 +250,27 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   //
   // The one moment the page does control is when a loop *begins* — assigning
   // a src whose bytes are already in memory starts that animation at frame 1,
-  // now. So the page runs a metronome per loop length and lets an animation
-  // in only on a beat. Everything admitted on any beat shares a phase from
-  // then on, for as long as the page lives.
+  // now. That is the whole lever, and it cuts one way only: there is no seek,
+  // so a latecomer can be brought into step with what is already spinning
+  // ONLY by holding it until that set comes round to frame 1 again. "Starts
+  // the instant it is seen" and "in phase with its neighbours" cannot both be
+  // true of it. Something has to give.
+  //
+  // What gives is the page-wide phase, because the other choice reads as
+  // broken. This used to align every arrival to one clock running since the
+  // first beat, which meant a turnaround scrolled into view sat on its still
+  // for up to a full lap — 3.3s here, 1.65s on average — while the tiles
+  // around it visibly spun. Correct, and indistinguishable from an image that
+  // failed to load.
+  //
+  // So a beat is per *arrival* now, not per lap. A new arrival books one
+  // CLUSTER_MS out and everything that becomes ready inside that window rides
+  // it, which is what keeps a grid row scrolled into view spinning as one —
+  // the comparison the eye actually makes, since a row is two tiles side by
+  // side. A row already running keeps the phase it started on, so a long page
+  // settles into a few phases rather than one. That is the price of the
+  // snap, and it is deliberate: see the CLUSTER_MS note below before trading
+  // it back.
   //
   // Three things it depends on, each measured across the three engines rather
   // than assumed:
@@ -270,10 +288,12 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   //   • Admit only what is on screen. Assigning to an off-screen image does
   //     not start its loop — that happens at the first paint — so it would
   //     begin whenever the visitor scrolled to it, in nobody's phase.
-  //   • Waiting for a beat costs nothing to look at. These turnarounds spend
-  //     the last ~1.8s of every lap held on the front pose, which is exactly
-  //     the still they show while queued, so one waiting to join is
-  //     indistinguishable from one holding.
+  //   • A queued turnaround is only invisible while the wait stays short.
+  //     These spend the last ~1.8s of every lap held on the front pose, which
+  //     is exactly the still they show while queued, so one waiting to join
+  //     looks like one holding — but only for as long as the eye grants it,
+  //     and a lap is far longer than that. CLUSTER_MS sits well inside the
+  //     hold; the lap-boundary wait it replaced did not.
   //
   // After that an animation is left alone: every engine keeps its clock
   // running while it is scrolled past (Blink catches the frame up on the way
@@ -282,11 +302,14 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   //
   // To re-verify after touching any of this: drive the page with Playwright,
   // screenshot each turnaround every ~100ms, and cross-correlate the tiles'
-  // frame-to-frame difference signals — in phase they peak at lag 0, which is
-  // what Chromium and Firefox both measure. Playwright's headless WebKit
-  // renders these loops too irregularly to measure (its per-tile share of
-  // moving samples scatters where Chromium's is uniform) and it is not
-  // Safari, so do not read a phase offset from it.
+  // frame-to-frame difference signals — tiles admitted on the same beat peak
+  // at lag 0, which is what Chromium and Firefox both measure. Correlate
+  // within a cluster, never across the whole page: two rows revealed by
+  // separate scrolls are now supposed to differ, so a page-wide figure proves
+  // nothing in either direction. Playwright's headless WebKit renders these
+  // loops too irregularly to measure (its per-tile share of moving samples
+  // scatters where Chromium's is uniform) and it is not Safari, so do not
+  // read a phase offset from it.
   type Turn = {
     img: HTMLImageElement;
     anim: string;
@@ -299,11 +322,19 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     playing: boolean;
     paused: boolean;
   };
-  type Clock = { epoch: number | null; timer: number; queued: number; waiting: Set<Turn> };
+  type Clock = { started: boolean; timer: number; queued: number; waiting: Set<Turn> };
 
   // How long a clock with nothing running yet waits for the rest of the
   // on-screen turnarounds to arrive before starting the ones it has.
   const GATHER_MS = 1200;
+
+  // And how long a clock that is already running holds a new arrival, so that
+  // a row scrolling into view is admitted on one beat rather than two. The
+  // ceiling is the eye, not the encoder: this has to stay far enough under
+  // the ~1.8s front-pose hold that a queued tile reads as a held one. Raising
+  // it towards a lap length buys back page-wide phase and brings back the
+  // stall it was written to remove.
+  const CLUSTER_MS = 200;
 
   const turns = new Map<Element, Turn>();
   const clocks = new Map<number, Clock>();
@@ -328,7 +359,7 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
   const clockFor = (loop: number) => {
     let c = clocks.get(loop);
-    if (!c) clocks.set(loop, (c = { epoch: null, timer: 0, queued: 0, waiting: new Set() }));
+    if (!c) clocks.set(loop, (c = { started: false, timer: 0, queued: 0, waiting: new Set() }));
     return c;
   };
 
@@ -341,7 +372,7 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
   function beat(c: Clock) {
     c.timer = 0;
-    if (c.epoch === null) c.epoch = performance.now();
+    c.started = true;
     for (const t of c.waiting) start(t);
     c.waiting.clear();
   }
@@ -355,11 +386,12 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 
     if (!t.loop) return beat(c); // no readable loop length: nothing to sync to
 
-    if (c.epoch === null) {
-      // Nothing is running on this clock yet, so the first beat is ours to
+    if (!c.started) {
+      // Nothing has run on this clock yet, so the first beat is ours to
       // place: hold it until every turnaround already on screen has its bytes
       // — but no longer than GATHER_MS, so one slow fetch cannot keep the
-      // whole page still.
+      // whole page still. Re-booked on every arrival rather than left alone,
+      // because `pending` going false is what fires this early.
       const pending = [...turns.values()].some(
         (o) => o.loop === t.loop && o.onScreen && !o.ready && !o.paused,
       );
@@ -370,9 +402,11 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
       return;
     }
 
+    // Already running, so this is a latecomer: it starts on its own beat a
+    // moment from now rather than on the running set's, and takes with it
+    // whatever else lands inside the window.
     if (c.timer) return; // a beat is already booked; it will take this one too
-    const into = (performance.now() - c.epoch) % t.loop;
-    c.timer = window.setTimeout(() => beat(c), t.loop - into);
+    c.timer = window.setTimeout(() => beat(c), CLUSTER_MS);
   }
 
   if (!reduce && turns.size > 0) {
@@ -415,8 +449,9 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   }
 
   // The pause control (WCAG 2.2.2). Pausing parks the turnaround back on its
-  // still; playing again asks for the next beat, so one that is resumed comes
-  // back in step with the rest rather than on its own.
+  // still; playing again asks for the next beat, so a resumed one starts in
+  // step with anything resumed alongside it. Not with the set it left — that
+  // would mean waiting out a lap for a frame 1 it can no longer be given.
   for (const t of turns.values()) {
     onActivate(t.img, () => {
       if (reduce) {

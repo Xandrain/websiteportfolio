@@ -128,13 +128,28 @@ full procedure in [UPDATING.md](UPDATING.md).
   notice's inline links and the About card's social rows lost their word gaps
   and both pages reflowed. Moving to `'jsx'` means auditing every inline gap in
   the site and adding an explicit `{" "}`.
-- **Never quietly undo the turnaround sync.** The animated WebPs on a project page
-  are phase-aligned by the script in `productions/[slug].astro`, which rests on two
-  things that both look removable: `blob:` in the CSP's `img-src`, and one shared
-  lap length across the set. Remove either and the page still works — the
-  turnarounds just drift apart again, with nothing to show that they should not.
-  The reasoning, the browser behaviour behind it and how to re-verify are in the
-  comment above that script; read it before changing anything there.
+- **The turnaround sync is per ARRIVAL, not per page — and that is the whole
+  point.** The animated WebPs on a project page are phase-aligned by the script
+  in `productions/[slug].astro`, which rests on two things that both look
+  removable: `blob:` in the CSP's `img-src`, and one shared lap length across
+  the set. Remove either and the page still works — the turnarounds just drift
+  apart again, with nothing to show that they should not.
+  What it does NOT do any more is align every turnaround to one page-long
+  phase. An animated WebP has no seek: the only thing the page can choose is
+  when frame 1 happens, so a latecomer can join the running set only by waiting
+  for it to come round again. That wait was a full lap — **3.3s worst case,
+  1.65s measured mean** — spent parked on a still while the neighbouring tiles
+  visibly spun, and it read as an image that had failed to load. So a beat is
+  now booked `CLUSTER_MS` (200ms) after a new arrival and everything ready
+  inside that window rides it: **measured 163ms mean / 209ms worst**, with the
+  two tiles of a grid row starting **0ms apart**, in both Chromium and Firefox.
+  The cost is real and was chosen: a row already spinning keeps its own phase,
+  so a long page holds a few phases rather than one. **Do not "fix" that by
+  raising `CLUSTER_MS` towards a lap length** — that is precisely the stall
+  above, rebuilt. The reasoning, the browser behaviour behind it and how to
+  re-verify are in the comment above that script; read it before changing
+  anything there. When re-verifying, correlate phase *within* a cluster only —
+  a page-wide figure now proves nothing in either direction.
 - **The nav pills carry their own contrast — there is no scrim under them.**
   Both pills are translucent so they can sit over content, and `/productions`
   bleeds artwork straight under them: its chapter bands are full-bleed and

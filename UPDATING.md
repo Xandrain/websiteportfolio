@@ -199,10 +199,18 @@ they will spin out of step with each other:
 node scripts/gen-anim.mjs --cadence=150 --total-ms=3300 public/productions/your-slug/01.webp public/productions/your-slug/02.webp
 ```
 
-The project page starts every turnaround on a shared beat, so a grid of them
-holds and spins together instead of each doing its own thing. It can only do
-that for animations whose laps are the same length — so give the whole set one
-`--total-ms`. Re-running this on files already on the clock changes nothing.
+The project page admits turnarounds on a shared beat, so a row that scrolls
+into view holds and spins together instead of each tile doing its own thing.
+It can only do that for animations whose laps are the same length — a lap
+length is what puts two of them on the same clock in the first place — so give
+the whole set one `--total-ms`. Re-running this on files already on the clock
+changes nothing.
+
+The beat is per *arrival*, not page-wide: tiles revealed by the same scroll
+start together, while a row already spinning keeps the phase it started on.
+That is deliberate — aligning a latecomer to the running set would mean
+parking it on a still for up to a full lap, which reads as a broken image.
+The guardrail in [CLAUDE.md](CLAUDE.md) has the measurements.
 To see what you have (swap in your slug):
 
 ```
