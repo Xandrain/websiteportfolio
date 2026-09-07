@@ -16,6 +16,13 @@ interface Props {
   noFooter?: boolean;
   /** Omit nav (used on full-screen gateway pages that supply their own navigation) */
   noNav?: boolean;
+  /**
+   * Keep the page out of the index, and emit no canonical. For pages that are
+   * served under whatever URL was asked for rather than at one address of their
+   * own — currently just 404.astro, which Cloudflare returns for every missing
+   * path. A canonical there would name /404/, which is not a route.
+   */
+  noindex?: boolean;
   /** Extra JSON-LD nodes merged into the page's @graph (see src/lib/schema.ts) */
   schema?: Record<string, unknown>[];
 }
@@ -26,6 +33,7 @@ const {
   image = "/og.jpg",
   noFooter,
   noNav,
+  noindex,
   schema = [],
 } = Astro.props;
 
@@ -44,6 +52,15 @@ const ogDims = dims(image) ?? { w: 1200, h: 630 };
 // card here, card to pill everywhere else. Without it the radius travels the
 // same way in both directions and the card arrives as a stadium.
 const isGate = Astro.url.pathname === "/";
+
+// noai/noimageai stay on a noindex page: that opt-out is about training, not
+// listing, and applies whether or not the page is indexed. max-image-preview
+// goes, since there is no preview to size. Built here rather than inline in the
+// <head> — a comment in the markup is emitted into all 27 pages, and the two
+// lines this replaced cost 204 bytes on every one of them.
+const robots = noindex
+  ? "noindex, follow, noai, noimageai"
+  : "index, follow, max-image-preview:large, noai, noimageai";
 
 // Floating "Contact" pill (→ /about) on the two work sections only.
 const showContactFab = ["/photography", "/productions"].some((p) =>
@@ -103,10 +120,10 @@ const jsonLd = {
 
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <!-- max-image-preview:large lets Google show full-size image previews;
          noai/noimageai are AI-training opt-out tokens (ignored by search engines) -->
-    <meta name="robots" content="index, follow, max-image-preview:large, noai, noimageai" />
+    <meta name="robots" content={robots} />
     <meta name="theme-color" content="#FAFAF8" />
 
     <!-- Open Graph -->

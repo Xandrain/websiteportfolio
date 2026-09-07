@@ -3,7 +3,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import CTA from "../components/CTA.astro";
 ---
 
-<BaseLayout title="Page not found" description="The page you were looking for has moved or never existed.">
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for has moved or never existed."
+  noindex
+>
   <section class="notfound editorial">
     <p class="eyebrow notfound__kicker">Error 404</p>
     <h1 class="notfound__title">Page not found</h1>
