@@ -180,8 +180,10 @@ const social: Social[] = [
     border: 1px solid var(--color-line);
     background: rgba(250, 250, 248, 0.72);
     box-shadow: 0 8px 48px rgba(26, 25, 23, 0.05), 0 1px 4px rgba(26, 25, 23, 0.04);
-    backdrop-filter: blur(24px);
+    /* Standard LAST — see Nav.astro. Written the other way round, Lightning CSS
+       kept only the -webkit- alias and this card shipped unfrosted to Firefox. */
     -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     padding: 2rem;
   }
 
@@ -333,8 +335,9 @@ const social: Social[] = [
     border-radius: 1.75rem;
     border: 1px solid var(--color-line);
     background: rgba(250, 250, 248, 0.62);
-    backdrop-filter: blur(20px);
+    /* Standard LAST — see Nav.astro. */
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     padding: 2rem;
   }
 
