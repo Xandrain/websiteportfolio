@@ -72,7 +72,7 @@ export const projects: Production[] = [
     slug: "crown-reinterpretation",
     title: "Crown Reinterpretation",
     description:
-      "A 3D reinterpretation of “Crown”, a watercolour and Indian ink painting by Olivier Menanteau — deformation-ready topology throughout, with scattered instancing for the grass, rock, and mushroom detail.",
+      "A 3D reinterpretation of “Crown” by Olivier Menanteau — deformation-ready topology, with scattered instancing for the grass, rock, and mushroom detail.",
     cover: "/productions/crown-reinterpretation/cover.jpg",
     category: "productions",
     tags: ["Character Art", "Personal Work"],
