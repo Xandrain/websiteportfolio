@@ -11,7 +11,9 @@
     "prebuild": "node scripts/gen-responsive.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "postbuild": "node scripts/verify-css-prefixes.mjs",
+    "verify:css": "node scripts/verify-css-prefixes.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
