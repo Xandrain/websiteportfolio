@@ -61,7 +61,11 @@ const { photos, collectionTitle } = Astro.props;
     </button>
 
     <figure class="lightbox__figure">
-      <img id="lb-img" src="" alt="" class="lightbox__img" />
+      {/* No `src` until show() sets one. An empty src="" is invalid HTML and
+          historically resolves against the document URL, making the browser
+          re-request the page itself. This comment form is not emitted; an
+          HTML comment here would ship on all five collection pages. */}
+      <img id="lb-img" alt="" class="lightbox__img" />
       <figcaption id="lb-caption" class="lightbox__caption" aria-live="polite"></figcaption>
     </figure>
 
