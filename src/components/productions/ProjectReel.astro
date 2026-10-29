@@ -28,9 +28,11 @@ interface Props {
   h?: number;
   /** Small uppercase label above the player. */
   caption?: string;
+  /** Start with the sound off; the player's own volume control turns it on. */
+  muted?: boolean;
 }
 
-const { title, webm, mp4, poster, w, h, caption = "Showreel" } = Astro.props;
+const { title, webm, mp4, poster, w, h, caption = "Showreel", muted = false } = Astro.props;
 const d = poster ? dims(poster) : undefined;
 const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 / 9";
 ---
@@ -44,8 +46,10 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
   data-mp4={mp4}
   data-poster={poster}
   data-title={title}
+  data-caption={caption}
+  data-muted={muted ? "" : undefined}
 >
-  <button type="button" class="reel__btn" aria-label={`Play the ${title} showreel`}>
+  <button type="button" class="reel__btn" aria-label={`Play ${title} — ${caption}`}>
     {poster && d && (
       <img
         src={poster}
@@ -92,7 +96,8 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
       video.disablePictureInPicture = true;
       video.disableRemotePlayback = true;
       if (el.dataset.poster) video.poster = el.dataset.poster;
-      video.setAttribute("aria-label", `${el.dataset.title ?? "Project"} showreel`);
+      video.setAttribute("aria-label", `${el.dataset.title ?? "Project"} — ${el.dataset.caption ?? "showreel"}`);
+      video.muted = el.dataset.muted !== undefined;
 
       for (const [src, type] of [
         [el.dataset.webm, "video/webm"],

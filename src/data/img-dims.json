@@ -131,21 +131,25 @@
     "w": 1920,
     "h": 1920
   },
-  "/productions/azureus/01.jpg": {
-    "w": 1772,
-    "h": 1907
-  },
-  "/productions/azureus/02.jpg": {
+  "/productions/azureus/01-poster.jpg": {
     "w": 1920,
     "h": 1080
   },
-  "/productions/azureus/03.jpg": {
+  "/productions/azureus/02-poster.jpg": {
     "w": 1920,
     "h": 1080
   },
   "/productions/azureus/cover.jpg": {
     "w": 1920,
     "h": 1920
+  },
+  "/productions/azureus/reel-poster.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/productions/azureus/yt-K1tGFuxmuKw.jpg": {
+    "w": 1280,
+    "h": 720
   },
   "/productions/carl-fredricksen/01.jpg": {
     "w": 1920,

@@ -148,7 +148,11 @@ full procedure in [UPDATING.md](UPDATING.md).
   raising `CLUSTER_MS` towards a lap length** — that is precisely the stall
   above, rebuilt. The reasoning, the browser behaviour behind it and how to
   re-verify are in the comment above that script; read it before changing
-  anything there. When re-verifying, correlate phase *within* a cluster only —
+  anything there.
+  A gallery that is turnarounds ONLY (today: Mojo SwopTops) skips all of
+  this: it renders as a spotlight — one stage, a picker of posters — and the
+  sync script finds no `.project-anim` to drive. Only a gallery mixing
+  turnarounds with stills still runs the beat. When re-verifying, correlate phase *within* a cluster only —
   a page-wide figure now proves nothing in either direction.
 - **The nav pills carry their own contrast — there is no scrim under them.**
   Both pills are translucent so they can sit over content, and `/productions`

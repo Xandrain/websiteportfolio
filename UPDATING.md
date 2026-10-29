@@ -211,6 +211,13 @@ start together, while a row already spinning keeps the phase it started on.
 That is deliberate — aligning a latecomer to the running set would mean
 parking it on a still for up to a full lap, which reads as a broken image.
 The guardrail in [CLAUDE.md](CLAUDE.md) has the measurements.
+
+**A project whose gallery is turnarounds and nothing else** (Mojo SwopTops)
+does not get the grid at all: it gets a spotlight, one large stage plus a
+picker of stills beside it, and only the picked model spins. That switch is
+automatic, decided by what is in the folder. Add a single still image to such
+a project and it goes back to the grid. The picker reads best with an even
+number of turnarounds, because it is two columns wide on desktop.
 To see what you have (swap in your slug):
 
 ```

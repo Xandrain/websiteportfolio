@@ -49,6 +49,8 @@
   --letter-spacing-label:  0.10em;
   --letter-spacing-caps:   0.16em;
   --radius-pill:    9999px;
+  /* A barely-there corner for media cards (the project page's video band). */
+  --radius-card:    0.25rem;
   /* The gate identity card. Named because the identity morph tweens between
      this and --radius-identity-pill, so the two ends of that tween and the
      card itself all have to agree — three places that would otherwise drift

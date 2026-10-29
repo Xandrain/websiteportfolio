@@ -22,14 +22,18 @@ export interface Production {
    * needs a self-hosted poster at public/productions/<slug>/yt-<id>.jpg —
    * run `node scripts/fetch-yt-poster.mjs <slug> <id>` to download it.
    * Example: youtube: [{ id: "dQw4w9WgXcQ", title: "360° turnaround" }],
+   * Give an entry a `heading` to render it as a band instead — the heading
+   * on the left, the player on the right (stacked on a phone).
    */
-  youtube?: { id: string; title: string }[];
+  youtube?: { id: string; title: string; heading?: string }[];
   /**
    * Caption over the showreel's poster, when the folder has a `reel.*` trio
    * (see src/lib/media.ts). Defaults to "Showreel"; override when the piece
    * needs naming more precisely — e.g. a reel that covers several projects.
    */
   reelCaption?: string;
+  /** Start the showreel muted (the player's volume control unmutes it). */
+  reelMuted?: boolean;
   /**
    * Spec rows shown beside the featured project on the Productions index
    * (Role / Medium / Scope …). Optional — the block is omitted without them,
@@ -62,6 +66,15 @@ export const projects: Production[] = [
     cover: "/productions/azureus/cover.jpg",
     category: "productions",
     tags: ["Rigging", "TV / Animation"],
+    youtube: [
+      {
+        id: "K1tGFuxmuKw",
+        title: "Chapter 1: The Escape",
+        heading: "Discover the entire episode here",
+      },
+    ],
+    reelCaption: "Door rig + roof tiles texturing",
+    reelMuted: true,
     specs: [
       { label: "Role", value: "Rigging & texturing" },
       { label: "Studio", value: "BlackSun Entertainment" },

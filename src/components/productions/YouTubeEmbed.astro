@@ -10,6 +10,18 @@
  * then run `npm run images`. Without a poster the facade still works, it just
  * shows a dark panel with the title.
  *
+ * `minimal` swaps YouTube's own control bar for four of ours: play/pause,
+ * sound, fullscreen, and a link out to YouTube. It exists for small players,
+ * where YouTube's chrome (title bar, CC, settings, "More videos") buries the
+ * picture. That chrome cannot be trimmed piecemeal — the embed parameters
+ * that once hid the title and logo (showinfo, modestbranding) and picked a
+ * quality (vq) have all been retired, and covering parts of the player
+ * breaks YouTube's embed policy — so the only lever left is controls=0 plus
+ * our own buttons. They drive the player over YouTube's postMessage protocol
+ * (enablejsapi=1), so no YouTube script is loaded and the CSP is unchanged.
+ * YouTube still shows its title bar for the first seconds of play, and its
+ * own end screen; nothing in the embed can turn those off.
+ *
  * CSP: the iframe origin is allowed via `frame-src` in public/_headers.
  */
 import { srcset, dims } from "../../lib/responsive";
@@ -18,20 +30,24 @@ interface Props {
   slug: string;
   id: string;
   title: string;
+  /** Poster `sizes` — override when the player is narrower than the page. */
+  sizes?: string;
+  /** Our own minimal controls instead of YouTube's (see above). */
+  minimal?: boolean;
 }
 
-const { slug, id, title } = Astro.props;
+const { slug, id, title, sizes = "(min-width: 1280px) 1104px, 100vw", minimal = false } = Astro.props;
 const poster = `/productions/${slug}/yt-${id}.jpg`;
 const d = dims(poster); // present once the poster exists and `npm run images` ran
 ---
 
-<div class="yt-facade" data-yt-id={id} data-yt-title={title}>
+<div class="yt-facade" data-yt-id={id} data-yt-title={title} data-yt-minimal={minimal ? "" : undefined}>
   <button type="button" class="yt-facade__btn" aria-label={`Play video: ${title}`}>
     {d && (
       <img
         src={poster}
         srcset={srcset(poster)}
-        sizes="(min-width: 1280px) 1104px, 100vw"
+        sizes={sizes}
         alt=""
         width={d.w}
         height={d.h}
@@ -47,27 +63,157 @@ const d = dims(poster); // present once the poster exists and `npm run images` r
     </span>
     <span class="yt-facade__title">{title}</span>
   </button>
+
+  {minimal && (
+    <template class="yt-controls-tpl">
+      <div class="yt-controls">
+        <button type="button" class="yt-ctl" data-ctl="play" aria-label="Pause">
+          <svg class="yt-ico yt-ico--pause" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="3.5" y="2.5" width="3" height="11" rx="0.75" fill="currentColor"/>
+            <rect x="9.5" y="2.5" width="3" height="11" rx="0.75" fill="currentColor"/>
+          </svg>
+          <svg class="yt-ico yt-ico--play" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <polygon points="4,2.5 13.5,8 4,13.5" fill="currentColor"/>
+          </svg>
+        </button>
+        <button type="button" class="yt-ctl" data-ctl="mute" aria-label="Mute">
+          <svg class="yt-ico yt-ico--sound" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor"/>
+            <path d="M10.5 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6.5 6.5 0 0 1 0 9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+          </svg>
+          <svg class="yt-ico yt-ico--muted" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor"/>
+            <path d="M10.5 6l4 4M14.5 6l-4 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="yt-controls__spacer"></span>
+        <a class="yt-ctl yt-ctl--link" href={`https://www.youtube.com/watch?v=${id}`} target="_blank" rel="noopener noreferrer" aria-label="Watch on YouTube (opens in a new tab)">
+          <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
+            <rect width="20" height="14" rx="3.5" fill="currentColor"/>
+            <polygon points="8,4 13.5,7 8,10" fill="#0c0b0a"/>
+          </svg>
+        </a>
+        <button type="button" class="yt-ctl" data-ctl="fs" aria-label="Full screen">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </template>
+  )}
 </div>
 
 <script>
+  const YT_ORIGIN = "https://www.youtube-nocookie.com";
+
+  /** Our own controls for a `minimal` player, over YouTube's postMessage API. */
+  function wireControls(el: HTMLElement, iframe: HTMLIFrameElement, tpl: HTMLTemplateElement) {
+    const bar = (tpl.content.cloneNode(true) as DocumentFragment).firstElementChild as HTMLElement;
+    el.append(bar);
+
+    const send = (func: string) =>
+      iframe.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), YT_ORIGIN);
+
+    const play = bar.querySelector<HTMLButtonElement>('[data-ctl="play"]')!;
+    const mute = bar.querySelector<HTMLButtonElement>('[data-ctl="mute"]')!;
+    const fs = bar.querySelector<HTMLButtonElement>('[data-ctl="fs"]')!;
+    const link = bar.querySelector<HTMLAnchorElement>(".yt-ctl--link")!;
+
+    // Optimistic until the player reports: it was started by a click with
+    // autoplay=1, so it is playing with sound.
+    let playing = true;
+    let muted = false;
+    const render = () => {
+      el.classList.toggle("is-paused", !playing);
+      el.classList.toggle("is-muted", muted);
+      play.setAttribute("aria-label", playing ? "Pause" : "Play");
+      mute.setAttribute("aria-label", muted ? "Unmute" : "Mute");
+    };
+    render();
+
+    const togglePlay = () => {
+      send(playing ? "pauseVideo" : "playVideo");
+      playing = !playing;
+      render();
+    };
+    play.addEventListener("click", togglePlay);
+    // The iframe takes no pointer input (see the CSS), so a click on the
+    // picture lands here — give it the play/pause it would have had.
+    el.addEventListener("click", (e) => {
+      if (!(e.target as Element).closest(".yt-controls")) togglePlay();
+    });
+    mute.addEventListener("click", () => {
+      send(muted ? "unMute" : "mute");
+      muted = !muted;
+      render();
+    });
+    // Leaving for YouTube should not leave this one talking underneath.
+    link.addEventListener("click", () => {
+      send("pauseVideo");
+      playing = false;
+      render();
+    });
+
+    // The wrapper goes fullscreen, not the iframe, so our bar comes with it.
+    // iPhone Safari has no element fullscreen; the button just isn't offered.
+    if (document.fullscreenEnabled) {
+      fs.addEventListener("click", () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else el.requestFullscreen();
+      });
+    } else {
+      fs.hidden = true;
+    }
+
+    // The player reports its own state once we say we are listening; that
+    // keeps the buttons true when the visitor clicks the picture itself or
+    // the video ends.
+    iframe.addEventListener("load", () => {
+      iframe.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), YT_ORIGIN);
+    });
+    window.addEventListener("message", (e) => {
+      if (e.origin !== YT_ORIGIN || e.source !== iframe.contentWindow) return;
+      let data: { info?: { playerState?: number; muted?: boolean } };
+      try { data = JSON.parse(e.data); } catch { return; }
+      const info = data.info;
+      if (!info) return;
+      if (typeof info.playerState === "number") playing = info.playerState === 1 || info.playerState === 3;
+      if (typeof info.muted === "boolean") muted = info.muted;
+      render();
+    });
+  }
+
   // Swap the facade for the real player on demand. Runs once per page; Astro
   // dedupes this script across multiple component instances.
   document.querySelectorAll<HTMLElement>(".yt-facade").forEach((el) => {
     el.querySelector("button")?.addEventListener("click", () => {
+      const minimal = el.dataset.ytMinimal !== undefined;
+      const tpl = el.querySelector<HTMLTemplateElement>(".yt-controls-tpl");
+      const params = new URLSearchParams({ autoplay: "1", rel: "0" });
+      if (minimal) {
+        params.set("controls", "0");
+        params.set("iv_load_policy", "3");
+        params.set("cc_load_policy", "0");
+        params.set("playsinline", "1");
+        params.set("enablejsapi", "1");
+        params.set("origin", location.origin);
+      }
       const iframe = document.createElement("iframe");
-      iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(el.dataset.ytId ?? "")}?autoplay=1&rel=0`;
+      iframe.src = `${YT_ORIGIN}/embed/${encodeURIComponent(el.dataset.ytId ?? "")}?${params}`;
       iframe.title = el.dataset.ytTitle ?? "YouTube video";
       iframe.allow =
         "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
       iframe.allowFullscreen = true;
       iframe.className = "yt-facade__iframe";
       el.replaceChildren(iframe);
+      if (minimal && tpl) wireControls(el, iframe, tpl);
     });
   });
 </script>
 
 <style>
   .yt-facade {
+    position: relative;
     aspect-ratio: 16 / 9;
     background: #0c0b0a;
     overflow: hidden;
@@ -142,4 +288,81 @@ const d = dims(poster); // present once the poster exists and `npm run images` r
     border: 0;
     display: block;
   }
+
+  /* ── Minimal controls ─────────────────────────────────────── */
+  /* Measured: with controls=0 YouTube still paints its title bar, "More
+     videos" and logo whenever the pointer is over the player, and they land
+     on top of our bar. With no pointer input it shows them only for the
+     first seconds of play, then leaves the picture alone, and a paused
+     player is clean. Clicks fall through to the facade, which maps them to
+     play/pause. */
+  .yt-facade[data-yt-minimal] :global(.yt-facade__iframe) {
+    pointer-events: none;
+  }
+
+  .yt-facade[data-yt-minimal] { cursor: pointer; }
+
+  /* Injected from the <template> after the iframe, hence :global. A bottom
+     strip over a soft gradient: shown while paused, on hover and on keyboard
+     focus; it fades out over a playing picture. Touch screens have no hover,
+     so there it simply stays. */
+  .yt-facade :global(.yt-controls) {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 1.5rem 0.375rem 0.375rem;
+    background: linear-gradient(to top, rgba(12, 11, 10, 0.7), transparent);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .yt-facade:hover :global(.yt-controls),
+  .yt-facade:focus-within :global(.yt-controls),
+  .yt-facade:global(.is-paused) :global(.yt-controls) {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .yt-facade :global(.yt-controls) { opacity: 1; }
+  }
+
+  .yt-facade :global(.yt-controls__spacer) { flex: 1; }
+
+  .yt-facade :global(.yt-ctl) {
+    all: unset;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.9);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .yt-facade :global(.yt-ctl[hidden]) { display: none; }
+
+  .yt-facade :global(.yt-ctl:hover) {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .yt-facade :global(.yt-ctl:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+    border-radius: 50%;
+  }
+
+  /* Which icon of each pair shows follows the state classes on the facade. */
+  .yt-facade :global(.yt-ico--play),
+  .yt-facade :global(.yt-ico--muted) { display: none; }
+  .yt-facade:global(.is-paused) :global(.yt-ico--play) { display: block; }
+  .yt-facade:global(.is-paused) :global(.yt-ico--pause) { display: none; }
+  .yt-facade:global(.is-muted) :global(.yt-ico--muted) { display: block; }
+  .yt-facade:global(.is-muted) :global(.yt-ico--sound) { display: none; }
 </style>

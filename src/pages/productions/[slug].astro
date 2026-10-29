@@ -73,6 +73,17 @@ for (let i = 0; i <= spans.length; i++) {
   }
 }
 
+// A gallery made only of turnarounds becomes a spotlight instead: one large
+// stage and a picker of stills. Ten ~1 MB animations spinning at once was a
+// long scroll of small, equal tiles where no single model could be studied,
+// and the page decoded all of them; the stage shows one at full size and
+// decodes only that one. A gallery that mixes turnarounds with stills keeps
+// the grid (and the sync script below), since it has no single subject.
+const spotlight = items.length > 1 && items.every((it) => it.kind === "animation");
+// The picker is two columns beside the stage; its row count feeds the CSS
+// that sizes that rail so its height matches the square stage.
+const spotRows = Math.ceil(items.length / 2);
+
 // A reel is a 16:9 hero under an already-tall header, so it pushes the whole
 // grid below the fold: the poster becomes the LCP candidate and nothing in the
 // gallery is worth eager-loading (these turnarounds run ~1 MB each).
@@ -80,6 +91,13 @@ const galleryEager = showreel ? 0 : 2;
 
 const SIZES_FULL = "(min-width: 1280px) 1104px, 100vw";
 const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
+// The band's player takes 30% of the editorial width beside its heading.
+const SIZES_BAND = "(min-width: 1280px) 331px, (min-width: 768px) 30vw, 100vw";
+
+// A video with a heading renders as a band (heading left, player right);
+// the rest stack full-width after the gallery as before.
+const ytBands = (project.youtube ?? []).filter((v) => v.heading);
+const ytPlain = (project.youtube ?? []).filter((v) => !v.heading);
 ---
 
 <BaseLayout title={project.title} description={project.description} image={project.cover} schema={schema}>
@@ -114,10 +132,38 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     </div>
   </section>
 
+  <!-- Episode band: a YouTube video with a heading leads the page, above the
+       project's own media — it is the finished piece the rest breaks down.
+       Click-to-load like every facade: nothing third-party until play. -->
+  {ytBands.map((v) => (
+    <section class="project-yt-band editorial" aria-labelledby={`yt-band-${v.id}`}>
+      <div class="project-yt-band__text">
+        <h2 class="project-yt-band__title" id={`yt-band-${v.id}`}>{v.heading}</h2>
+        <div class="project-yt-band__actions">
+          <a
+            class="yt-action"
+            href={`https://www.youtube.com/watch?v=${v.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Watch on YouTube
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M4 2h6v6M10 2 2 10" stroke="currentColor" stroke-width="1.25"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="project-yt-band__player">
+        <YouTubeEmbed slug={project.slug} id={v.id} title={v.title} sizes={SIZES_BAND} minimal />
+      </div>
+    </section>
+  ))}
+
   <!-- Showreel: the project's edited piece, click-to-play so its soundtrack
        survives and nothing but the poster is fetched up front -->
   {showreel && (
-    <section class="project-reel editorial" aria-label={`${project.title} showreel`}>
+    <section class="project-reel editorial" aria-label={`${project.title} — ${project.reelCaption ?? "showreel"}`}>
       <ProjectReel
         title={project.title}
         webm={showreel.webm}
@@ -126,6 +172,7 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
         w={showreel.w}
         h={showreel.h}
         caption={project.reelCaption ?? "Showreel"}
+        muted={project.reelMuted}
       />
     </section>
   )}
@@ -133,6 +180,46 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   <!-- Gallery: images + self-hosted video loops, derived from the project folder -->
   {items.length > 0 && (
     <section class="project-images editorial" aria-label="Project media">
+      {spotlight && (
+        <div class="spot" style={`--rows:${spotRows}`}>
+          {/* The stage keeps the grid's pause control: a <button> around the
+              image, toggling it between the animation and its still. Its src
+              is the first animation in the markup, so with JS off the stage
+              still spins and only the picker is inert. */}
+          <div class="spot__stage">
+            <button type="button" class="project-media-btn" aria-pressed="false">
+              <img
+                class="spot__anim"
+                src={items[0].src}
+                data-anim={items[0].src}
+                data-still={items[0].kind === "animation" ? items[0].poster : undefined}
+                alt={`${project.title} — animation 1`}
+                width={items[0].w ?? 1024}
+                height={items[0].h ?? 1024}
+                loading={galleryEager ? "eager" : "lazy"}
+                decoding="async"
+              />
+              <span class="sr-only">Pause this animation</span>
+            </button>
+          </div>
+          <div class="spot__thumbs" role="group" aria-label={`Choose a ${project.title} animation`}>
+            {items.map((item, i) => item.kind === "animation" && (
+              <button
+                type="button"
+                class="spot__thumb"
+                aria-pressed={i === 0 ? "true" : "false"}
+                data-anim={item.src}
+                data-still={item.poster}
+                data-alt={`${project.title} — animation ${i + 1}`}
+              >
+                <img src={item.poster} alt="" width={item.w ?? 1024} height={item.h ?? 1024} loading="lazy" decoding="async" />
+                <span class="sr-only">{`Show animation ${i + 1}`}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {!spotlight && (
       <div class="project-images__grid">
         {items.map((item, i) => {
           const span2 = spans[i] === 2;
@@ -140,38 +227,51 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
           return (
             <div class:list={["project-image-wrap", span2 && "span-2", item.kind === "animation" && "is-alpha"]} style={ar}>
               {item.kind === "video" ? (
-                <video
-                  class="project-video"
-                  autoplay
-                  muted
-                  loop
-                  playsinline
-                  preload="metadata"
-                  poster={item.poster}
-                  width={item.w}
-                  height={item.h}
-                  tabindex="0"
-                  aria-label={`${project.title} — animation ${i + 1}. Click or press Enter to pause.`}
-                >
-                  {item.webm && <source src={item.webm} type="video/webm" />}
-                  {item.mp4 && <source src={item.mp4} type="video/mp4" />}
-                </video>
+                /* The pause control is a real <button> wrapping the media, not
+                   tabindex on the media itself. An <img>/<video> given
+                   tabindex="0" is focusable but keeps its img/video role, so a
+                   screen reader announces a graphic rather than something
+                   operable — which is why the operating instruction had been
+                   pushed into aria-label, i.e. into the element's NAME. A
+                   button carries the role and the keyboard behaviour natively,
+                   the media keeps its alt as content, and aria-pressed carries
+                   the state. The button sits INSIDE .project-image-wrap, so
+                   the grid still has exactly one child per item. */
+                <button type="button" class="project-media-btn" aria-pressed="false">
+                  <video
+                    class="project-video"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="metadata"
+                    poster={item.poster}
+                    width={item.w}
+                    height={item.h}
+                    aria-hidden="true"
+                  >
+                    {item.webm && <source src={item.webm} type="video/webm" />}
+                    {item.mp4 && <source src={item.mp4} type="video/mp4" />}
+                  </video>
+                  <span class="sr-only">{`Pause ${project.title} — animation ${i + 1}`}</span>
+                </button>
               ) : item.kind === "animation" ? (
-                <img
-                  class="project-anim"
-                  src={item.src}
-                  data-still={item.poster}
-                  data-anim={item.src}
-                  data-loop={item.loopMs}
-                  alt={`${project.title} — animation ${i + 1}`}
-                  width={item.w ?? 1024}
-                  height={item.h ?? 1024}
-                  loading={i < galleryEager ? "eager" : "lazy"}
-                  fetchpriority={i === 0 && !showreel ? "high" : undefined}
-                  decoding="async"
-                  tabindex="0"
-                  aria-label={`${project.title} — animation ${i + 1}. Click or press Enter to pause.`}
-                />
+                <button type="button" class="project-media-btn" aria-pressed="false">
+                  <img
+                    class="project-anim"
+                    src={item.src}
+                    data-still={item.poster}
+                    data-anim={item.src}
+                    data-loop={item.loopMs}
+                    alt={`${project.title} — animation ${i + 1}`}
+                    width={item.w ?? 1024}
+                    height={item.h ?? 1024}
+                    loading={i < galleryEager ? "eager" : "lazy"}
+                    fetchpriority={i === 0 && !showreel ? "high" : undefined}
+                    decoding="async"
+                  />
+                  <span class="sr-only">Pause this animation</span>
+                </button>
               ) : (
                 <img
                   src={item.src}
@@ -190,14 +290,15 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
           );
         })}
       </div>
+      )}
     </section>
   )}
 
   <!-- YouTube (turnarounds, breakdowns) — click-to-load facade, nothing
        third-party is requested until the visitor presses play -->
-  {project.youtube && project.youtube.length > 0 && (
+  {ytPlain.length > 0 && (
     <section class="project-yt editorial" aria-label="Project videos">
-      {project.youtube.map((v) => (
+      {ytPlain.map((v) => (
         <YouTubeEmbed slug={project.slug} id={v.id} title={v.title} />
       ))}
     </section>
@@ -214,27 +315,93 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
 <script>
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /** Click, Enter or Space on an element the markup has made focusable. */
-  function onActivate(el: HTMLElement, fn: () => void) {
-    el.addEventListener("click", fn);
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        fn();
-      }
+  /**
+   * Wire a media item's pause button. The control is the <button> wrapping the
+   * media, so Enter and Space are the browser's job — a native button already
+   * fires `click` for both, and the hand-rolled keydown this replaced would now
+   * fire a second time on top of it. `toggle` returns the new paused state,
+   * which is mirrored to aria-pressed so the button announces where it is.
+   */
+  function onActivate(media: Element, toggle: () => boolean) {
+    const btn = media.closest<HTMLButtonElement>(".project-media-btn");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      btn.setAttribute("aria-pressed", String(toggle()));
     });
   }
 
-  // Looping videos: honour prefers-reduced-motion (start paused, show native
-  // controls) and give everyone a pause control — click or Enter/Space toggles
-  // playback (WCAG 2.2.2).
+  /** Reflect a starting state that the server could not know (reduced motion). */
+  function setPressed(media: Element, pressed: boolean) {
+    media.closest(".project-media-btn")?.setAttribute("aria-pressed", String(pressed));
+  }
+
+  // Looping videos: honour prefers-reduced-motion (start paused) and give
+  // everyone a pause control — the wrapping button toggles playback (WCAG
+  // 2.2.2). No native `controls` under reduced motion any more: the video now
+  // sits inside a <button>, and putting the browser's own control strip inside
+  // another control nests interactive elements, so a click on the scrubber
+  // would toggle the button too.
   for (const v of document.querySelectorAll<HTMLVideoElement>(".project-video")) {
     if (reduce) {
       v.removeAttribute("autoplay");
       v.pause();
-      v.controls = true;
-    } else {
-      onActivate(v, () => (v.paused ? v.play() : v.pause()));
+      setPressed(v, true);
+    }
+    onActivate(v, () => {
+      if (v.paused) v.play(); else v.pause();
+      return v.paused;
+    });
+  }
+
+  // ── Spotlight (a gallery of turnarounds only) ───────────────────────
+  // One animation on the stage at a time, so none of the beat machinery
+  // below applies: there is nothing beside it to be in phase with. Pause is
+  // the same swap to the still as in the grid, and it is a mode rather than
+  // a per-model state — picking another model while paused shows its still,
+  // and under reduced motion the stage starts paused.
+  const stage = document.querySelector<HTMLImageElement>(".spot__anim");
+  if (stage) {
+    const thumbs = [...document.querySelectorAll<HTMLButtonElement>(".spot__thumb")];
+    let anim = stage.dataset.anim ?? stage.src;
+    let still = stage.dataset.still ?? anim;
+    let paused = reduce;
+    let pick = 0;
+
+    // The still goes up first and the animation replaces it once its bytes
+    // are in. The still is already cached — it is that model's thumbnail —
+    // so a pick answers at once, instead of leaving the previous model on
+    // the stage (or a blank one) while a megabyte downloads.
+    const show = () => {
+      const mine = ++pick;
+      stage.src = still;
+      if (paused) return;
+      const pre = new Image();
+      pre.onload = pre.onerror = () => {
+        if (mine === pick && !paused) stage.src = anim;
+      };
+      pre.src = anim;
+    };
+
+    if (paused) {
+      stage.src = still;
+      setPressed(stage, true);
+    }
+
+    onActivate(stage, () => {
+      paused = !paused;
+      show();
+      return paused;
+    });
+
+    for (const b of thumbs) {
+      b.addEventListener("click", () => {
+        if (b.getAttribute("aria-pressed") === "true") return;
+        anim = b.dataset.anim ?? anim;
+        still = b.dataset.still ?? anim;
+        stage.alt = b.dataset.alt ?? stage.alt;
+        for (const o of thumbs) o.setAttribute("aria-pressed", String(o === b));
+        show();
+      });
     }
   }
 
@@ -453,15 +620,21 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
   // step with anything resumed alongside it. Not with the set it left — that
   // would mean waiting out a lap for a frame 1 it can no longer be given.
   for (const t of turns.values()) {
+    // Under reduced motion the set starts parked, so the buttons start pressed.
+    // Rendered here rather than in the markup because the server cannot know
+    // the visitor's motion preference — the NAME is static in the HTML, which
+    // is what matters; only the state is settled at runtime.
+    if (reduce) setPressed(t.img, true);
+
     onActivate(t.img, () => {
       if (reduce) {
         // Nothing is synchronised under reduced motion — the set starts
         // parked, and playing one is a deliberate act.
         t.playing = !t.playing;
         t.img.src = t.playing ? t.anim : t.still;
-        return;
+        return !t.playing;
       }
-      if (!t.paused && !t.playing) return; // still loading; nothing to toggle yet
+      if (!t.paused && !t.playing) return t.paused; // still loading; nothing to toggle yet
       t.paused = !t.paused;
       if (t.paused) {
         clockFor(t.loop).waiting.delete(t);
@@ -470,6 +643,7 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
       } else {
         enqueue(t);
       }
+      return t.paused;
     });
   }
 </script>
@@ -689,10 +863,22 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     cursor: pointer;
   }
 
-  .project-video:focus-visible,
-  .project-anim:focus-visible {
+  /* The pause control. `all: unset` is the reset this codebase already uses on
+     .gallery-item and .yt-facade__btn. It must fill the wrap: the media inside
+     is height:100%, and the wrap's height comes from its inline aspect-ratio,
+     so a button that did not stretch would collapse that chain and the media
+     with it. -2px offset keeps the ring inside the wrap's overflow:hidden. */
+  .project-media-btn {
+    all: unset;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .project-media-btn:focus-visible {
     outline: 2px solid var(--color-ink);
-    outline-offset: 2px;
+    outline-offset: -2px;
   }
 
   /* Transparent turnarounds: contain, not cover — a cropped 3D turnaround
@@ -707,11 +893,152 @@ const SIZES_HALF = "(min-width: 1280px) 544px, (min-width: 640px) 50vw, 100vw";
     cursor: pointer;
   }
 
+  /* ── Spotlight ───────────────────────────────────────────── */
+  /* Phone: the stage, then the picker underneath as rows of five. From
+     640px: the picker sits beside the stage, two columns wide, and its
+     column width is SOLVED so the rail comes out exactly as tall as the
+     square stage — rows × thumb + gaps = stage width. With S the stage, R
+     the rail, G the 1rem column gap and g the 0.5rem thumb gap:
+       S = rows·(R − g)/2 + (rows − 1)·g   and   S = 100% − G − R
+     which gives the calc below. Change either gap and change it there too. */
+  .spot {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .spot {
+      grid-template-columns:
+        minmax(0, 1fr)
+        calc((100% - 1rem - (var(--rows) / 2 - 1) * 0.5rem) / (1 + var(--rows) / 2));
+      align-items: start;
+    }
+  }
+
+  /* Transparent like the grid's turnarounds: the page shows through. */
+  .spot__stage { aspect-ratio: 1; }
+
+  .spot__anim {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    cursor: pointer;
+  }
+
+  .spot__thumbs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .spot__thumbs { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* The thumbs, unlike the stage, take the paper-alt tint: it is what marks
+     a floating model as a pressable tile rather than more artwork. The
+     selection ring is an outline, not a border or an inset shadow, because
+     it must paint ABOVE the image — the models run to the tile's edge. */
+  .spot__thumb {
+    all: unset;
+    display: block;
+    aspect-ratio: 1;
+    cursor: pointer;
+    background: var(--color-paper-alt);
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    transition: outline-color 0.2s;
+  }
+
+  .spot__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .spot__thumb:hover { outline-color: var(--color-ink-muted); }
+  .spot__thumb[aria-pressed="true"] { outline-color: var(--color-ink); }
+
+  .spot__thumb:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+
   /* ── YouTube ─────────────────────────────────────────────── */
   .project-yt {
     padding-block: 1rem 0;
     display: grid;
     gap: 1rem;
+  }
+
+  /* Band: heading beside the player. padding-block longhand — the shorthand
+     would reset the gutter .editorial sets. */
+  .project-yt-band {
+    padding-block: 3rem 0;
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  /* Player at 30% of the width — compact, with "Watch on YouTube" for the
+     full size. On a phone it stacks full-width: half of 360px is too small to
+     read. */
+  @media (min-width: 768px) {
+    .project-yt-band {
+      grid-template-columns: minmax(0, 1fr) 30%;
+      gap: 3rem;
+    }
+  }
+
+  .project-yt-band__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  .project-yt-band__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    margin-top: 1.5rem;
+  }
+
+  .yt-action {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding-inline: 1.25rem;
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .yt-action:hover { background: var(--color-paper-alt); }
+
+  /* Slightly rounded card. The facade's own overflow:hidden clips the
+     poster, and later the iframe, to this radius. */
+  .project-yt-band__player :global(.yt-facade) {
+    border-radius: var(--radius-card);
+  }
+
+  .yt-action:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: var(--radius-pill);
   }
 
   /* ── Footer ──────────────────────────────────────────────── */
