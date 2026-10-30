@@ -1,0 +1,343 @@
+---
+/**
+ * A shuffled slideshow of a series' episode thumbnails, each slide a link to
+ * that episode on YouTube. Sits above the "watch the series" pill in the
+ * identity card's episodes panel, and shares its physical language: the same brick border and
+ * hard shadow, the same lift on hover and press on click.
+ *
+ * Thumbnails are self-hosted (scripts/fetch-yt-thumbs.mjs → yt-<id>.jpg), so
+ * nothing third-party loads until a slide is clicked.
+ *
+ * The FIRST slide is picked at build time, not in the browser. A client-side
+ * pick would either flash a fixed episode before swapping it, or ship an
+ * empty <img> until the script ran; the build pick paints straight away and
+ * is still a different episode on every deploy. From there the browser shuffles
+ * the other 51 and plays through all of them before any repeats.
+ *
+ * Only two layers ever exist: the slide on show and the next one, decoded
+ * behind it before the crossfade so a slide never fades in half-loaded. A
+ * visitor downloads the thumbnail on screen plus one ahead — ~25 KB each.
+ */
+import type { Episode } from "../../data/three-d";
+import { srcset } from "../../lib/responsive";
+
+interface Props {
+  slug: string;
+  series: string;
+  playlist: string;
+  episodes: Episode[];
+}
+
+const { slug, series, playlist, episodes } = Astro.props;
+
+const thumb = (id: string) => `/productions/${slug}/yt-${id}.jpg`;
+const href = (id: string) => `https://www.youtube.com/watch?v=${id}&list=${playlist}`;
+const alt = (e: Episode) => `${e.title} — ${series} episode ${e.n}, on YouTube`;
+
+const first = episodes[Math.floor(Math.random() * episodes.length)];
+
+// Every thumbnail has the same variant widths (they are all 640×360), so the
+// client can rebuild any slide's srcset from the first one's widths rather
+// than carrying 52 srcset strings in the page.
+const widths = [...(srcset(thumb(first.id)) ?? "").matchAll(/-(\d+)\.webp (\d+)w/g)].map((m) => m[2]);
+// The panel beside the facts tops out around 410px; stacked, it is the card.
+const SIZES = "(min-width: 900px) 420px, 100vw";
+
+const data = JSON.stringify({
+  base: `/productions/${slug}/yt-`,
+  widths,
+  playlist,
+  series,
+  list: episodes.map((e) => [e.n, e.id, e.title]),
+});
+---
+
+<figure class="eps" data-eps={data} data-current={first.id}>
+  <div class="eps__frame">
+    {[first, null].map((e, i) => (
+      <a
+        class:list={["eps__slide", i === 0 && "is-on"]}
+        href={e ? href(e.id) : undefined}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-hidden={i === 0 ? undefined : "true"}
+        tabindex={i === 0 ? undefined : -1}
+      >
+        {e && (
+          <img
+            src={thumb(e.id)}
+            srcset={srcset(thumb(e.id))}
+            sizes={SIZES}
+            alt={alt(e)}
+            width="640"
+            height="360"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+      </a>
+    ))}
+  </div>
+  <figcaption class="eps__cap">
+    <span class="label eps__num">E{first.n}</span>
+    <span class="eps__title">{first.title}</span>
+    <button type="button" class="eps__pause" aria-pressed="false" hidden>
+      <svg class="eps__icon-pause" width="10" height="12" viewBox="0 0 10 12" aria-hidden="true">
+        <rect x="1" y="1" width="2.5" height="10" rx="0.5" fill="currentColor"/>
+        <rect x="6.5" y="1" width="2.5" height="10" rx="0.5" fill="currentColor"/>
+      </svg>
+      <svg class="eps__icon-play" width="10" height="12" viewBox="0 0 10 12" aria-hidden="true">
+        <path d="M2 1l7 5-7 5z" fill="currentColor"/>
+      </svg>
+      <span class="sr-only">Pause episode slideshow</span>
+    </button>
+  </figcaption>
+</figure>
+
+<script>
+  const HOLD_MS = 3500;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  type Data = {
+    base: string;
+    widths: string[];
+    playlist: string;
+    series: string;
+    list: [number, string, string][];
+  };
+
+  for (const root of document.querySelectorAll<HTMLElement>(".eps")) {
+    const d: Data = JSON.parse(root.dataset.eps ?? "null");
+    if (!d || d.list.length < 2) continue;
+
+    const layers = [...root.querySelectorAll<HTMLAnchorElement>(".eps__slide")];
+    const num = root.querySelector<HTMLElement>(".eps__num")!;
+    const title = root.querySelector<HTMLElement>(".eps__title")!;
+    const btn = root.querySelector<HTMLButtonElement>(".eps__pause")!;
+    const sizes = layers[0].querySelector("img")?.sizes ?? "";
+
+    // Every episode once, in random order, before any repeats; the one the
+    // build put on screen goes last so it is not shown twice running.
+    let queue: Data["list"] = [];
+    const refill = (avoid: string) => {
+      queue = d.list.filter((e) => e[1] !== avoid);
+      for (let i = queue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [queue[i], queue[j]] = [queue[j], queue[i]];
+      }
+      queue.push(d.list.find((e) => e[1] === avoid)!);
+    };
+    let current = root.dataset.current ?? "";
+    refill(current);
+
+    /** Put an episode into a layer and resolve once its image is decoded. */
+    const fill = (layer: HTMLAnchorElement, [n, id, name]: Data["list"][number]) => {
+      let img = layer.querySelector("img");
+      if (!img) {
+        img = document.createElement("img");
+        img.width = 640;
+        img.height = 360;
+        img.decoding = "async";
+        img.sizes = sizes;
+        layer.append(img);
+      }
+      img.srcset = d.widths.map((w) => `${d.base}${id}-${w}.webp ${w}w`).join(", ");
+      img.src = `${d.base}${id}.jpg`;
+      img.alt = `${name} — ${d.series} episode ${n}, on YouTube`;
+      layer.href = `https://www.youtube.com/watch?v=${id}&list=${d.playlist}`;
+      layer.dataset.n = String(n);
+      layer.dataset.id = id;
+      layer.dataset.title = name;
+      return img.decode().catch(() => {});
+    };
+
+    let front = 0;
+    let ready: Promise<void> | null = null;
+    const prepare = () => {
+      if (!queue.length) refill(current);
+      ready = fill(layers[1 - front], queue.shift()!);
+    };
+
+    const flip = async () => {
+      if (!ready) prepare();
+      await ready;
+      const back = layers[1 - front];
+      const old = layers[front];
+      back.classList.add("is-on");
+      old.classList.remove("is-on");
+      // Only the slide on show is reachable; the one behind it is not.
+      back.removeAttribute("aria-hidden");
+      back.removeAttribute("tabindex");
+      old.setAttribute("aria-hidden", "true");
+      old.tabIndex = -1;
+      num.textContent = `E${back.dataset.n}`;
+      title.textContent = back.dataset.title ?? "";
+      current = back.dataset.id ?? current;
+      front = 1 - front;
+      ready = null;
+    };
+
+    // Running needs three things at once: not paused by the visitor, not
+    // being looked at closely (hover / keyboard focus — WCAG 2.2.2), and on
+    // screen in a visible tab. Rotating off screen only spends bandwidth.
+    let paused = reduce; // under reduced motion it waits for a deliberate play
+    let held = false;
+    let visible = false;
+    let timer = 0;
+
+    const tick = async () => {
+      timer = 0;
+      await flip();
+      schedule();
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = 0;
+      if (paused || held || !visible || document.hidden) return;
+      if (!ready) prepare(); // decode the next one during the hold
+      timer = window.setTimeout(tick, HOLD_MS);
+    };
+
+    const sync = () => {
+      btn.setAttribute("aria-pressed", String(paused));
+      btn.querySelector(".sr-only")!.textContent = paused
+        ? "Play episode slideshow"
+        : "Pause episode slideshow";
+    };
+
+    btn.hidden = false;
+    sync();
+    btn.addEventListener("click", () => {
+      paused = !paused;
+      sync();
+      // Pressing play under reduced motion shows the next episode at once,
+      // so the press visibly does something.
+      if (!paused && reduce) tick();
+      else schedule();
+    });
+
+    const frame = root.querySelector<HTMLElement>(".eps__frame")!;
+    frame.addEventListener("pointerenter", () => { held = true; schedule(); });
+    frame.addEventListener("pointerleave", () => { held = false; schedule(); });
+    frame.addEventListener("focusin", () => { held = true; schedule(); });
+    frame.addEventListener("focusout", () => { held = false; schedule(); });
+    document.addEventListener("visibilitychange", schedule);
+
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      schedule();
+    }).observe(root);
+  }
+</script>
+
+<style>
+  .eps {
+    width: 100%;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  /* The frame carries the pill's border and hard shadow; overflow clips the
+     slides to its radius. The two layers are stacked in one grid cell. */
+  .eps__frame {
+    position: relative;
+    display: grid;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--color-brick);
+    border-radius: var(--radius-thumb);
+    background: var(--color-sky);
+    box-shadow: 4px 4px 0 var(--color-brick);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .eps__frame:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--color-brick);
+  }
+
+  .eps__frame:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--color-brick);
+    transition-duration: 0.05s;
+  }
+
+  .eps__slide {
+    grid-area: 1 / 1;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .eps__slide.is-on { opacity: 1; }
+
+  .eps__slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .eps__slide:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -4px;
+    border-radius: calc(var(--radius-thumb) - 2px);
+  }
+
+  /* Episode number, name, and the pause control on one line. The name is
+     truncated rather than wrapped, so the caption never changes height as
+     the slides change. */
+  .eps__cap {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+
+  .eps__num {
+    flex: none;
+    min-width: 2.25rem;
+  }
+
+  .eps__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.875rem;
+    color: var(--color-ink-soft);
+  }
+
+  .eps__pause {
+    all: unset;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .eps__pause[hidden] { display: none; }
+  .eps__pause:hover { background: var(--color-paper-alt); }
+
+  .eps__pause:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .eps__icon-play { display: none; }
+  .eps__pause[aria-pressed="true"] .eps__icon-play { display: block; }
+  .eps__pause[aria-pressed="true"] .eps__icon-pause { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eps__frame,
+    .eps__slide { transition: none; }
+    .eps__frame:hover,
+    .eps__frame:active { transform: none; }
+  }
+</style>

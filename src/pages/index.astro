@@ -108,7 +108,7 @@ const photoArt = cover(
       <div class="gate__meta">
         <a href={about.href}>{about.label}</a>
         <span class="gate__dot" aria-hidden="true"></span>
-        <a href={about.href}>Contact</a>
+        <a href={`${about.href}#contact`}>Contact</a>
       </div>
     </div>
   </section>
@@ -205,6 +205,52 @@ const photoArt = cover(
     );
   }
 
+  /* ── Label scrim — a second, fixed layer behind each label ──────
+     The diagonal scrim above tops out at 0.44, and the labels sit on the
+     palest part of each half (the cyan backdrop, the fog): measured, the
+     11px kicker bottomed out at 1.94:1 and the 13px count at 2.34:1, against
+     a 4.5 floor. This radial darkens only the label's own corner.
+
+     It is NOT folded into .gate__scrim, because hover lifts 30% of that
+     layer — text that passes at rest would fail under the pointer.
+
+     ::after rather than ::before, and the label lifted to z-index 1: the
+     art carries a transform, which paints it as a positioned element in
+     DOM order, so a ::before would sit underneath the picture.
+
+     Sized in rem so it follows the label, not the viewport; the portrait
+     layout below gets its own, narrower shape. Stops measured, not chosen
+     (composited pixels in each text line box, glyphs hidden, minimum ratio,
+     at 360/390/640/1440): worst case 5.68:1 for the small text and 3.84:1
+     for the titles at rest, 5.03:1 and 3.13:1 with the route hovered — the
+     binding case is "Photography" at 1440, which runs far from its corner.
+     Re-measure if a cover, a label or these stops change, and measure
+     hovered as well as at rest. */
+  .gate__route::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .gate__route--design::after {
+    background: radial-gradient(
+      ellipse 58rem 30rem at 0 0,
+      rgba(26, 25, 23, 0.7) 0%,
+      rgba(26, 25, 23, 0.62) 55%,
+      rgba(26, 25, 23, 0) 100%
+    );
+  }
+
+  .gate__route--photo::after {
+    background: radial-gradient(
+      ellipse 58rem 30rem at 100% 100%,
+      rgba(26, 25, 23, 0.7) 0%,
+      rgba(26, 25, 23, 0.62) 55%,
+      rgba(26, 25, 23, 0) 100%
+    );
+  }
+
   /* ── Route labels — each in the fat corner of its own triangle ── */
   .gate__label {
     position: absolute;
@@ -213,6 +259,7 @@ const photoArt = cover(
     gap: 0.85rem;
     max-width: min(30rem, 68vw);
     color: var(--color-paper);
+    z-index: 1; /* above the label scrim (::after) — see above */
   }
 
   .gate__route--design .gate__label {
@@ -233,7 +280,7 @@ const photoArt = cover(
     font-weight: 500;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(250, 250, 248, 0.74);
+    color: var(--color-paper);
   }
 
   .gate__discipline {
@@ -255,7 +302,7 @@ const photoArt = cover(
     font-weight: 500;
     letter-spacing: var(--letter-spacing-caps);
     text-transform: uppercase;
-    color: rgba(250, 250, 248, 0.88);
+    color: var(--color-paper);
   }
 
   .gate__arrow {
@@ -276,6 +323,17 @@ const photoArt = cover(
   .gate__route:hover .gate__art,
   .gate__route:focus-visible .gate__art {
     transform: scale(1.03);
+  }
+
+  /* The keyboard's mark. The global focus ring cannot show here: it draws
+     outside the route's box, and the box is the whole viewport, clipped to
+     a triangle. Underlining the discipline marks the focused half on the
+     label itself, in the label's own colour — so it carries the title's
+     measured contrast — and, unlike the zoom, it survives reduced motion. */
+  .gate__route:focus-visible .gate__discipline {
+    text-decoration: underline;
+    text-decoration-thickness: max(2px, 0.05em);
+    text-underline-offset: 0.14em;
   }
 
   /* ── The cut ───────────────────────────────────────────────────── */
@@ -344,9 +402,14 @@ const photoArt = cover(
   .gate__role {
     margin: 0;
     font-family: var(--font-sans);
-    font-size: 0.625rem;
+    /* The only line on the first screen that says what Alexandre does —
+       it was 10px. */
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.26em;
+    /* 0.26em wrapped the three-part role onto two lines on desktop, which
+       grows the card into the Design label above it. 0.16em holds one line
+       down to the 900px breakpoint; the portrait layout wraps either way. */
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: rgba(250, 250, 248, 0.66);
   }
@@ -397,6 +460,27 @@ const photoArt = cover(
 
     .gate__seam-wide { display: none; }
     .gate__seam-narrow { display: inline; }
+
+    /* Label scrim for the portrait layout: the labels are smaller, so the
+       shape is too, and its width follows the viewport so the 640px stack
+       (52px titles) stays covered without darkening a whole phone screen. */
+    .gate__route--design::after {
+      background: radial-gradient(
+        ellipse max(26rem, 90vw) 22rem at 0 0,
+        rgba(26, 25, 23, 0.58) 0%,
+        rgba(26, 25, 23, 0.5) 65%,
+        rgba(26, 25, 23, 0) 100%
+      );
+    }
+
+    .gate__route--photo::after {
+      background: radial-gradient(
+        ellipse max(26rem, 90vw) 22rem at 100% 100%,
+        rgba(26, 25, 23, 0.58) 0%,
+        rgba(26, 25, 23, 0.5) 65%,
+        rgba(26, 25, 23, 0) 100%
+      );
+    }
 
     .gate__route--design .gate__label {
       top: clamp(3.5rem, 9vh, 5.5rem);

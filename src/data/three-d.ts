@@ -1,4 +1,13 @@
+import { mojoEpisodes } from "./mojo-episodes";
+
 export type ProductionCategory = "productions" | "product-visualisation";
+
+/** One episode of a series: its number, YouTube id and name. */
+export interface Episode {
+  n: number;
+  id: string;
+  title: string;
+}
 
 export interface Production {
   slug: string;
@@ -35,11 +44,42 @@ export interface Production {
   /** Start the showreel muted (the player's volume control unmutes it). */
   reelMuted?: boolean;
   /**
+   * Start the showreel on page open, muted, instead of behind its play
+   * button. Costs every visitor the reel's download, so opt in per project.
+   */
+  reelAutoplay?: boolean;
+  /**
    * Spec rows shown beside the featured project on the Productions index
    * (Role / Medium / Scope …). Optional — the block is omitted without them,
    * so a project with nothing precise to say simply says nothing.
    */
-  specs?: { label: string; value: string }[];
+  specs?: { label: string; value: string; href?: string }[];
+  /**
+   * Render the header as an identity card: one frosted card (the About
+   * card's language) with `description` centred across its top, `specs` as
+   * a column of rows on the left and the episodes panel on the right.
+   * `description` also feeds the meta tags and schema, so keep it a sentence.
+   */
+  identityCard?: boolean;
+  /** A pill beside the identity card linking out to the full series. */
+  watchLink?: { label: string; href: string };
+  /**
+   * The series' episodes, shown as a shuffled thumbnail slideshow under the
+   * watch link; each slide opens its episode on YouTube within `playlist`.
+   * Thumbnails must be self-hosted first (scripts/fetch-yt-thumbs.mjs).
+   * `label` is the small-caps heading over the panel ("On BBC CBeebies").
+   */
+  episodes?: { playlist: string; list: Episode[]; label?: string };
+  /**
+   * Put the gallery above the showreel instead of below it. The reel's
+   * poster then loads lazily and the gallery gets the eager slots.
+   */
+  galleryFirst?: boolean;
+  /**
+   * Credit lines under the project header's description (Director …). An
+   * `imdb` URL adds a linked IMDb mark beside the name.
+   */
+  credits?: { role: string; name: string; imdb?: string }[];
 }
 
 export const projects: Production[] = [
@@ -47,16 +87,34 @@ export const projects: Production[] = [
     slug: "mojo-swoptops",
     title: "Mojo SwopTops",
     description:
-      "3D modelling for Mojo SwopTops, a children’s animated series broadcast on the BBC — props, vehicles, and characters built over more than a year of production.",
+      "3D modelling for Mojo SwopTops, a children’s animated series broadcast on the BBC: props, vehicles and characters built over more than a year of production.",
     cover: "/productions/mojo-swoptops/cover.jpg",
     category: "productions",
     tags: ["3D Modelling", "TV / Animation"],
     specs: [
-      { label: "Role", value: "3D Modeller" },
-      { label: "Medium", value: "Broadcast series, BBC" },
+      { label: "Role", value: "3D Modeller & Texture Artist" },
+      { label: "Studio", value: "Blue Zoo, UK", href: "https://www.blue-zoo.co.uk/" },
+      {
+        label: "Commissioned by",
+        value: "BBC · CBeebies",
+        href: "https://www.bbc.co.uk/programmes/m0023kf8",
+      },
+      { label: "Series", value: "52 × 11-min, preschool" },
       { label: "Scope", value: "Props · Vehicles · Characters" },
       { label: "Duration", value: "Over a year of production" },
     ],
+    identityCard: true,
+    watchLink: {
+      label: "Watch all 52 episodes",
+      // Keep `sbp` — YouTube's /show/ page 404s without it.
+      href: "https://www.youtube.com/show/VLPLbCiQykgF4CIhr-GDX_Jdo5YM_GW5XbgS?sbp=QAE%253D",
+    },
+    episodes: {
+      playlist: "PLbCiQykgF4CIhr-GDX_Jdo5YM_GW5XbgS",
+      list: mojoEpisodes,
+      label: "On BBC CBeebies",
+    },
+    galleryFirst: true,
   },
   {
     slug: "azureus",
@@ -75,10 +133,18 @@ export const projects: Production[] = [
     ],
     reelCaption: "Door rig + roof tiles texturing",
     reelMuted: true,
+    reelAutoplay: true,
     specs: [
       { label: "Role", value: "Rigging & texturing" },
       { label: "Studio", value: "BlackSun Entertainment" },
       { label: "Supervision", value: "Mason Doran" },
+    ],
+    credits: [
+      {
+        role: "Director",
+        name: "DAVID WEINSTEIN",
+        imdb: "https://www.imdb.com/fr/name/nm1313488/?ref_=fn_t_3",
+      },
     ],
   },
   {

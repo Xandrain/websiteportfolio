@@ -83,6 +83,25 @@ full procedure in [UPDATING.md](UPDATING.md).
   (max-width + the 1.5/2/3rem gutter). A caller adds its own `padding-block`,
   and must use that longhand — the `padding` shorthand would silently reset
   the gutter the class just set.
+- **The project page layout is the identity card, and it is the default** —
+  the Mojo SwopTops page is the reference, documented for the owner in
+  UPDATING.md §7f (diagram + which field fills which slot). New projects get
+  `identityCard: true` + `specs`. The parts that look removable and are not:
+  - **The card is a band of its own, after the header**, and the gallery
+    and showreel render INSIDE it. One copy of that media markup serves both
+    layouts: without a card, `.project-card-band` and `.project-card-plain`
+    are `display: contents` and the sections lay out on the page as before.
+    Inside the card their `.editorial` geometry is cancelled — the card
+    already supplies the measure.
+  - **The facts column matches the episodes panel's height** by grid
+    stretch + `flex: 1` per row. It holds only while the rows' natural
+    height is the shorter of the two — one line each, label left / value
+    right. Two-line values break the match.
+  - **The footer row is `DisciplineSwitch` with a `lead` slot** carrying
+    the back link; that variant pulls the site footer up (negative
+    margin-bottom) so the row sits 2.5rem above it. Pages that pass no
+    `lead` keep the full 5rem / 7rem spacing.
+  - The sky/brick pair is Mojo's, not the layout's.
 - Node 22 (`.nvmrc`, CI, `engines >=22.12.0`).
 - Zero client JS: no framework, no islands, only small inline `<script>`s.
 

@@ -162,6 +162,8 @@ an existing project block and edit it. Three things to know:
 - If you want the cover picture to also appear as the first image on
   the project page (the product-visualisation projects do this), add
   the line `coverInGallery: true,` to the project block.
+- Give it the standard page layout: `identityCard: true` plus its facts
+  (`specs`). What goes where is in **7f** below.
 
 Then as always: `npm run images` → preview → publish.
 
@@ -275,6 +277,28 @@ channel:
 
 4. Preview, then publish.
 
+### Episode slideshow (a whole series)
+
+The thumbnails rotating under "Watch all 52 episodes" on Mojo SwopTops.
+Each slide opens its episode on YouTube. To set one up for another series:
+
+1. Make a list file like `src/data/mojo-episodes.ts` — one line per
+   episode with its number, video ID and name.
+2. Fetch the thumbnails (all the IDs, separated by spaces), then
+   regenerate the web copies:
+
+   ```
+   node scripts/fetch-yt-thumbs.mjs your-slug ID1 ID2 ID3 …
+   npm run images
+   ```
+
+   Already-downloaded ones are skipped, so adding an episode later only
+   fetches the new one.
+3. In `src/data/three-d.ts`, give the project
+   `episodes: { playlist: "<playlist ID>", list: yourEpisodes, label: "On <channel>" }`
+   (`label` is optional: the small heading over the episodes panel). It only
+   shows on a project with `identityCard: true`.
+
 ## 7d. Recipe: add a showreel to a project
 
 A showreel is different from the little looping animations: it is an
@@ -358,6 +382,81 @@ picture — the fix is in `src/components/Nav.astro` and
 `0.9`. Nudge those up. Going the other way — thinning them — has to be measured
 properly first; the method is written down in CLAUDE.md, under "The nav pills
 carry their own contrast".
+
+---
+
+## 7f. The project page layout (the default for every project)
+
+Every Graphic Design & 3D project page is built the same way, from top to
+bottom. The model is **Mojo SwopTops**; any new project should copy it.
+You never place anything by hand: you fill in the project block in
+`src/data/three-d.ts` and the page arranges it.
+
+```
+  [‹ Back to productions]                       ← fixed pill, top left
+
+  3D MODELLING    TV / ANIMATION                 ← tags
+  Project Title                                  ← big title, left
+
+  ┌──────────────────────── the card ──────────────────────────┐
+  │        One-sentence description, centred on the card        │
+  │                                                             │
+  │  ┌──── facts ───────────────┐   ┌──── episodes panel ────┐  │
+  │  │ ROLE            value    │   │       ON <CHANNEL>      │  │
+  │  │ STUDIO          value ↗  │   │  ┌───────────────────┐  │  │
+  │  │ COMMISSIONED BY value ↗  │   │  │  slideshow 16:9   │  │  │
+  │  │ SERIES          value    │   │  └───────────────────┘  │  │
+  │  │ SCOPE           value    │   │  E30  Episode title  ❚❚ │  │
+  │  │ DURATION        value    │   │  [ Watch all … ↗ ]      │  │
+  │  └──────────────────────────┘   └─────────────────────────┘  │
+  │                                                             │
+  │  the work: turnaround picker + stage, or the image grid     │
+  │                                                             │
+  │  showreel                                                   │
+  └─────────────────────────────────────────────────────────────┘
+
+  ← All projects ───────── ALSO EXPLORE  Photography → ─────────
+  ─────────────────────────── site footer ───────────────────────
+```
+
+**What fills each part**
+
+| Part | Comes from | Notes |
+|---|---|---|
+| Tags | `tags` | Small capitals above the title. |
+| Title | `title` | Always left-aligned, never centred. |
+| Description | `description` | One sentence. Centred across the top of the card. The same sentence is what Google shows, so write it as a sentence. |
+| Facts | `specs` | One rounded row per fact: label on the left, value on the right. Any order, any number (six reads best). |
+| A fact that links out | `href` on that fact | The whole row becomes the link and gets a ↗. Opens in a new tab. Example: `{ label: "Studio", value: "Blue Zoo, UK", href: "https://www.blue-zoo.co.uk/" }`. |
+| Episodes panel | `episodes` (+ `label`) and `watchLink` | Optional. The label sits on top, the slideshow in the middle, the watch button full width at the bottom. See 7c. |
+| The work | the numbered files in the project folder | All animations → picker + one big stage. Mixed or stills → the image grid. See 7b. |
+| Showreel | the `reel.*` files in the folder | Optional. See 7d. Comes **after** the work when `galleryFirst: true`, before it otherwise. |
+| Footer row | automatic | "← All projects" on the left, "Also explore" in the middle, on one line. |
+
+**The rules the layout keeps for you** (so you know what not to fight):
+
+- **One card holds everything** from the description down to the showreel.
+  Nothing about the project floats outside it. Only the tags and the title
+  sit above it.
+- **The facts column is exactly as tall as the episodes panel.** The rows
+  share the height out equally, so both panels end on the same line. Keep
+  each fact short enough to fit on one line next to its label; a long value
+  makes the column taller than the panel and the two stop lining up.
+- **No episodes panel?** The facts simply take the full width of the card.
+- **On a phone** (below 900px wide) the two panels stack: facts first, then
+  the episodes. Below 480px each fact puts its label above its value.
+- **The footer row** leaves no separate "back" line any more: the way back
+  and the way across share one row, sitting just above the site footer.
+
+**What is NOT part of the layout:** the sky-blue and brick-red of the watch
+button and the slideshow frame. Those are Mojo SwopTops' colours, sampled
+from the show's own thumbnails. Today they are fixed in the page's styles
+(`--color-sky` / `--color-brick`), so a second project with an episodes
+panel would need its own pair wired in first: ask for it, don't reuse Mojo's.
+
+**Turning it on** for a project: `identityCard: true` and a `specs` list.
+Without those two, the page falls back to the older layout (title,
+description paragraph, then the work below a hairline).
 
 ---
 
@@ -465,6 +564,7 @@ refresh" that skips your browser's memory).
 | Showreel (with sound) | `node scripts/gen-video.mjs --audio --mp4-crf=27 --out-dir=… <file>` |
 | Pick a nicer preview frame | `node scripts/poster-at.mjs <video> <seconds>` |
 | YouTube preview picture | `node scripts/fetch-yt-poster.mjs <slug> <id>` |
+| Episode slideshow thumbnails | `node scripts/fetch-yt-thumbs.mjs <slug> <id> <id> …` |
 | Publish | `git status` → `git add -A` → `git commit -m "note"` → `git push` |
 | Did it work? | `gh run list --limit 1` |
 

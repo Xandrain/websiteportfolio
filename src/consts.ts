@@ -3,7 +3,7 @@
  */
 export const SITE = {
   name: "Alexandre Haineaux",
-  role: "Graphic Designer & Photographer",
+  role: "Graphic Designer · 3D Artist · Photographer",
   tagline: "Light, form, and the space between.",
   description:
     "The portfolio of Alexandre Haineaux — photographer & graphic designer in Luxembourg. Photography, graphic design, and 3D; light, restraint, and considered form.",
@@ -20,8 +20,9 @@ export const NAV: { href: string; label: string; short?: string }[] = [
 /** Footer-only link to the legal notice page (not part of the main NAV). */
 export const LEGAL = { href: "/legal", label: "Legal Notice" };
 
-export const SOCIAL: { href: string; label: string }[] = [
-  { href: "https://www.instagram.com/haineaux_alexandre", label: "Instagram" },
+/** `handle` is shown beside the link on the About card; the footer ignores it. */
+export const SOCIAL: { href: string; label: string; handle?: string }[] = [
+  { href: "https://www.instagram.com/haineaux_alexandre", label: "Instagram", handle: "@haineaux_alexandre" },
   { href: "https://xandrain.artstation.com", label: "ArtStation" },
-  { href: `mailto:${SITE.email}`, label: "Email" },
+  { href: `mailto:${SITE.email}`, label: "Email", handle: SITE.email },
 ];

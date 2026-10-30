@@ -298,7 +298,8 @@ const { photos, collectionTitle } = Astro.props;
   .lightbox__caption {
     font-family: var(--font-sans);
     font-size: 0.75rem;
-    color: rgba(255,255,255,0.45);
+    /* 0.45 measured 4.47:1 against the dialog over paper — just under AA. */
+    color: rgba(255,255,255,0.62);
     letter-spacing: 0.03em;
     text-align: center;
   }
@@ -345,6 +346,16 @@ const { photos, collectionTitle } = Astro.props;
     background: rgba(255,255,255,0.1);
   }
 
+  /* `all: unset` above is unlayered, so it wipes the global :focus-visible
+     ring from @layer base — these buttons need their own. White, because
+     the dialog is near-black. */
+  .lightbox__close:focus-visible,
+  .lightbox__nav:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+
   .lightbox__nav:disabled { opacity: 0.2; pointer-events: none; }
 
   .lightbox__nav--prev { left: 1.25rem; }
@@ -358,7 +369,8 @@ const { photos, collectionTitle } = Astro.props;
     font-family: var(--font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.40);
+    /* 0.40 measured 3.38:1 — under AA for 11px text. */
+    color: rgba(255,255,255,0.55);
     display: flex;
     align-items: center;
     gap: 0.25rem;

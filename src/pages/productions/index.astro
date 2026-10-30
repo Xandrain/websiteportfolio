@@ -17,7 +17,9 @@ const productionsList = projects.filter((p) => p.category === "productions");
   <div class="subnav-spacer" aria-hidden="true"></div>
   <ProductionsSubNav active="productions" />
 
-  <!-- Chapters: one full-bleed band per project, the title set over the crop. -->
+  <!-- Chapters: one full-bleed band per project, the title set over the crop.
+       The cover's alt is empty on purpose: the <h2> inside the same link
+       already names it, and a screen reader would otherwise hear it twice. -->
   <section class="chapters" aria-label="Projects">
     {productionsList.map((project, i) => {
       const d = dims(project.cover);
@@ -27,7 +29,7 @@ const productionsList = projects.filter((p) => p.category === "productions");
             src={project.cover}
             srcset={srcset(project.cover)}
             sizes="100vw"
-            alt={`${project.title} — Graphic Design & 3D project`}
+            alt=""
             width={d?.w ?? 1600}
             height={d?.h ?? 1000}
             loading={i === 0 ? "eager" : "lazy"}

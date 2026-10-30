@@ -6,10 +6,15 @@ interface Props {
 }
 
 const { label, href, name } = Astro.props;
+// Optional `lead` slot: a link set at the row's left, before the first rule
+// (a project page's "← All projects"), so the page's way back and its way
+// across share one line instead of stacking as two footers.
+const hasLead = Astro.slots.has("lead");
 ---
 
-<aside class="discipline-switch editorial" aria-label="Explore another section">
+<aside class:list={["discipline-switch editorial", hasLead && "discipline-switch--lead"]} aria-label="Explore another section">
   <div class="discipline-switch__inner">
+    {hasLead && <div class="discipline-switch__lead"><slot name="lead" /></div>}
     <div class="discipline-switch__rule" aria-hidden="true"></div>
     <a href={href} class="discipline-switch__link">
       <span class="discipline-switch__label">{label}</span>
@@ -32,6 +37,16 @@ const { label, href, name } = Astro.props;
     gap: 2rem;
   }
 
+  /* With a lead link the row follows straight on from the content above,
+     so it does not need the full 5rem of air an index page gives it. */
+  /* And the site footer (Footer.astro, margin-top: 7rem) is drawn up to sit
+     2.5rem under the row, so the row reads as the footer's own top line
+     rather than a stray band floating above it. Local to this variant: the
+     footer's 7rem stays right for every other page. */
+  .discipline-switch--lead { padding-block: 3.5rem 0; margin-bottom: -4.5rem; }
+
+  .discipline-switch__lead { flex-shrink: 0; }
+
   .discipline-switch__rule {
     flex: 1;
     height: 1px;
@@ -53,7 +68,7 @@ const { label, href, name } = Astro.props;
   }
 
   .discipline-switch__label {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -99,5 +114,10 @@ const { label, href, name } = Astro.props;
       text-align: center;
     }
     .discipline-switch__name { font-size: 1.25rem; }
+
+    /* No room for three things on one line: the lead link takes its own
+       row above, and the rules + link keep theirs. */
+    .discipline-switch--lead .discipline-switch__inner { flex-wrap: wrap; row-gap: 1.5rem; }
+    .discipline-switch--lead .discipline-switch__lead { flex-basis: 100%; }
   }
 </style>

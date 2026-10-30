@@ -53,12 +53,12 @@ export const collections: Collection[] = [
     ],
   },
   {
-    slug: "concrete-and-glass",
-    title: "Concrete & Glass",
+    slug: "lad-project",
+    title: "LAD project",
     description:
       "Architecture as light trap. Buildings photographed for the geometry they make of the sky — angles, voids, and the slow passage of shadows.",
     cover: "/photography/arch-cover.jpg",
-    category: "Architecture",
+    category: "Luxembourgish Art and Design",
     photos: [
       { src: "/photography/ar1.jpg", alt: "Looking up through a concrete atrium" },
       { src: "/photography/ar2.jpg", alt: "Glazed facade reflecting an overcast sky" },

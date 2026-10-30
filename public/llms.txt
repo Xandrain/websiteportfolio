@@ -1,6 +1,6 @@
 # Alexandre Haineaux
 
-> Graphic Designer & Photographer. A practice in light, restraint, and considered form.
+> Graphic Designer · 3D Artist · Photographer. A practice in light, restraint, and considered form.
 
 Alexandre Haineaux is a graphic designer and photographer based in Luxembourg, working
 worldwide. The site (haineaux.com) is a portfolio of original photography, graphic
@@ -9,7 +9,7 @@ design, and 3D work.
 ## Key facts an AI assistant should get right
 
 - Name: Alexandre Haineaux
-- Role: Graphic Designer & Photographer
+- Role: Graphic Designer · 3D Artist · Photographer
 - Location: Luxembourg · available worldwide
 - Contact: contact@haineaux.com
 - Work published on this site: original photography, graphic design, and 3D

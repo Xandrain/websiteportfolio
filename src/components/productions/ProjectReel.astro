@@ -30,9 +30,17 @@ interface Props {
   caption?: string;
   /** Start with the sound off; the player's own volume control turns it on. */
   muted?: boolean;
+  /**
+   * Build the player on page open and start it muted — browsers only allow
+   * autoplay without sound. Skipped under prefers-reduced-motion, which keeps
+   * the click-to-play facade, as the gallery's looping clips start paused.
+   */
+  autoplay?: boolean;
+  /** The reel sits below other media, so its poster is not the LCP candidate. */
+  belowFold?: boolean;
 }
 
-const { title, webm, mp4, poster, w, h, caption = "Showreel", muted = false } = Astro.props;
+const { title, webm, mp4, poster, w, h, caption = "Showreel", muted = false, autoplay = false, belowFold = false } = Astro.props;
 const d = poster ? dims(poster) : undefined;
 const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 / 9";
 ---
@@ -48,6 +56,7 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
   data-title={title}
   data-caption={caption}
   data-muted={muted ? "" : undefined}
+  data-autoplay={autoplay ? "" : undefined}
 >
   <button type="button" class="reel__btn" aria-label={`Play ${title} — ${caption}`}>
     {poster && d && (
@@ -58,8 +67,8 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
         alt=""
         width={d.w}
         height={d.h}
-        loading="eager"
-        fetchpriority="high"
+        loading={belowFold ? "lazy" : "eager"}
+        fetchpriority={belowFold ? undefined : "high"}
         decoding="async"
         class="reel__poster"
       />
@@ -74,9 +83,12 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
 
 <script>
   // Build the real player on demand. The click is the user gesture that lets
-  // it start with sound; without one, browsers would force it muted.
+  // it start with sound; without one, browsers would force it muted — which
+  // is why an autoplaying reel is always muted, whatever data-muted says.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   document.querySelectorAll<HTMLElement>(".reel").forEach((el) => {
-    el.querySelector("button")?.addEventListener("click", () => {
+    const build = (auto: boolean) => {
       const video = document.createElement("video");
       video.className = "reel__video";
       video.controls = true;
@@ -97,7 +109,7 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
       video.disableRemotePlayback = true;
       if (el.dataset.poster) video.poster = el.dataset.poster;
       video.setAttribute("aria-label", `${el.dataset.title ?? "Project"} — ${el.dataset.caption ?? "showreel"}`);
-      video.muted = el.dataset.muted !== undefined;
+      video.muted = auto || el.dataset.muted !== undefined;
 
       for (const [src, type] of [
         [el.dataset.webm, "video/webm"],
@@ -111,11 +123,16 @@ const ratio = (w ?? d?.w) && (h ?? d?.h) ? `${w ?? d!.w} / ${h ?? d!.h}` : "16 /
       }
 
       el.replaceChildren(video);
-      video.focus(); // keyboard users land on the controls they just summoned
+      // Keyboard users land on the controls they just summoned — but only
+      // when they summoned them; on page open, focus stays where it was.
+      if (!auto) video.focus();
       video.play().catch(() => {
         /* blocked or unsupported: the controls are there to press */
       });
-    });
+    };
+
+    if (el.dataset.autoplay !== undefined && !reduce) build(true);
+    else el.querySelector("button")?.addEventListener("click", () => build(false));
   });
 </script>
 

@@ -9,7 +9,7 @@
  * immediately. The only JS is the small inlined copy-email script below; the
  * email row stays a plain mailto link without it.
  */
-import { SITE } from "../../consts";
+import { SITE, SOCIAL } from "../../consts";
 
 type Highlight = { title: string; description: string };
 type Social = { label: string; handle?: string; href: string; icon: string; copy?: boolean };
@@ -43,10 +43,17 @@ const iconBox = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const iconMail = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`;
 const arrow = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>`;
 
+// Links and handles come from SOCIAL (consts.ts); only the icon, the order and
+// the copy button are this card's own.
+const link = (label: string) => {
+  const s = SOCIAL.find((x) => x.label === label);
+  if (!s) throw new Error(`About card: SOCIAL has no "${label}" entry`);
+  return s;
+};
 const social: Social[] = [
-  { label: "Email", handle: SITE.email, href: `mailto:${SITE.email}`, icon: iconMail, copy: true },
-  { label: "ArtStation", href: "https://xandrain.artstation.com", icon: iconBox },
-  { label: "Instagram", handle: "@haineaux_alexandre", href: "https://www.instagram.com/haineaux_alexandre", icon: iconCamera },
+  { ...link("Email"), icon: iconMail, copy: true },
+  { ...link("ArtStation"), icon: iconBox },
+  { ...link("Instagram"), icon: iconCamera },
 ];
 ---
 
@@ -58,10 +65,7 @@ const social: Social[] = [
       <div class="about__grid">
         <!-- ── Left column ─────────────────────────────── -->
         <div class="about__left">
-          <span class="about__eyebrow">Graphic Designer · 3D Artist · Photographer</span>
-
           <div class="about__intro">
-            <h2 class="about__name">{SITE.name}</h2>
             <p class="about__bio">
               A practice working between the still image and the rendered form.
               The two disciplines share one sensibility: restraint, attention to
@@ -110,20 +114,20 @@ const social: Social[] = [
                 />
               </div>
 
-              <h3 class="about__profile-name">{SITE.name}</h3>
-              <p class="about__profile-role">Graphic Designer · 3D Artist · Photographer</p>
+              <h2 class="about__profile-name">{SITE.name}</h2>
+              <p class="about__profile-role">{SITE.role}</p>
               <p class="about__profile-bio">
                 Working between the still image and the rendered form.
                 {" "}{SITE.location}.
               </p>
             </div>
 
-            <ul class="about__social" role="list">
+            <ul class="about__social" id="contact" role="list">
               {social.map((s) =>
                 s.copy ? (
                   <li>
                     <div class="about__social-link about__social-link--copy">
-                      <a class="about__social-mail" href={s.href} aria-label={s.label}>
+                      <a class="about__social-mail" href={s.href}>
                         <span class="about__social-icon" set:html={s.icon} />
                         <span class="about__social-text">
                           <span class="about__social-handle">{s.handle}</span>
@@ -133,6 +137,10 @@ const social: Social[] = [
                         <span data-copy-label>Copy email</span>
                         <span data-copy-done hidden>Copied!</span>
                       </button>
+                      {/* The visible "Copied!" swaps inside the button, which a
+                          screen reader does not announce. This live region is
+                          present from load and only has its text set. */}
+                      <span class="sr-only" role="status" data-copy-status></span>
                     </div>
                   </li>
                 ) : (
@@ -215,29 +223,7 @@ const social: Social[] = [
     min-width: 0; /* let the grid track shrink instead of blowing past the card */
   }
 
-  .about__eyebrow {
-    align-self: flex-start;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--color-line);
-    background: rgba(250, 250, 248, 0.80);
-    padding: 0.3rem 1rem;
-    font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-  }
-
   .about__intro { display: flex; flex-direction: column; gap: 0.875rem; }
-
-  .about__name {
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-    color: var(--color-ink);
-  }
 
   .about__bio {
     font-size: 1rem;
@@ -260,17 +246,10 @@ const social: Social[] = [
     border: 1px solid var(--color-line);
     background: rgba(250, 250, 248, 0.80);
     padding: 1.125rem 1.25rem;
-    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-  }
-
-  .about__highlight:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 2px 12px rgba(26, 25, 23, 0.05);
-    border-color: rgba(26, 25, 23, 0.14);
   }
 
   .about__highlight-title {
-    font-size: 0.5625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -329,8 +308,9 @@ const social: Social[] = [
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    /* Hugs its content. It used to stretch to the left column's height with
+       space-between, which opened a ~140px hole between the bio and the
+       links at desktop width. */
     overflow: hidden;
     border-radius: 1.75rem;
     border: 1px solid var(--color-line);
@@ -379,7 +359,7 @@ const social: Social[] = [
   }
 
   .about__profile-role {
-    font-size: 0.5625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -395,7 +375,10 @@ const social: Social[] = [
   }
 
   /* ── Social links ────────────────────────────────────────── */
+  /* #contact is where every "Contact" link on the site lands (the gate, the
+     floating pill). The margin keeps it clear of the fixed nav pill. */
   .about__social {
+    scroll-margin-top: 6rem;
     margin-top: 2rem;
     display: flex;
     flex-direction: column;
@@ -525,12 +508,6 @@ const social: Social[] = [
     .about__grid { gap: 2rem; }
     .about__left { gap: 1.5rem; }
 
-    .about__eyebrow {
-      letter-spacing: 0.16em;
-      padding: 0.3rem 0.75rem;
-      line-height: 1.5;
-    }
-
     /* CTAs stack into a clean, full-width tappable column. */
     .about__ctas { flex-direction: column; }
     .about__cta {
@@ -558,7 +535,6 @@ const social: Social[] = [
   @media (prefers-reduced-motion: no-preference) {
     .about__card { animation: about-rise 0.65s var(--ease-out-expo) both; }
 
-    .about__eyebrow,
     .about__intro,
     .about__highlight,
     .about__ctas,
@@ -570,6 +546,15 @@ const social: Social[] = [
     .about__highlight:nth-child(4) { animation-delay: 0.34s; }
     .about__ctas { animation-delay: 0.30s; }
     .about__profile { animation-delay: 0.15s; }
+
+    /* Arriving at #contact skips the entrance. The browser picks the scroll
+       position while the card is still translated 56px down by the rise,
+       then the rise carries the links up under the fixed nav pill. */
+    .about__card:has(#contact:target),
+    .about__card:has(#contact:target) :is(.about__intro, .about__highlight, .about__ctas, .about__profile) {
+      animation: none;
+      opacity: 1;
+    }
   }
 
   @keyframes about-rise {
@@ -590,17 +575,20 @@ const social: Social[] = [
   if (btn) {
     const label = btn.querySelector<HTMLElement>("[data-copy-label]")!;
     const doneEl = btn.querySelector<HTMLElement>("[data-copy-done]")!;
+    const status = document.querySelector<HTMLElement>("[data-copy-status]");
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const done = () => {
       btn.classList.add("is-copied");
       label.hidden = true;
       doneEl.hidden = false;
+      if (status) status.textContent = "Email address copied";
       clearTimeout(timer);
       timer = setTimeout(() => {
         label.hidden = false;
         doneEl.hidden = true;
         btn.classList.remove("is-copied");
+        if (status) status.textContent = "";
       }, 2000);
     };
 
