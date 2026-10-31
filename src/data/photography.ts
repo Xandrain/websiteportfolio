@@ -56,7 +56,7 @@ export const collections: Collection[] = [
     slug: "lad-project",
     title: "LAD — Luxembourgish Art & Design",
     description:
-      "I built LAD’s website, lad.lu, and digitize the original artworks behind its limited-edition fine-art prints.",
+      "I built LAD’s website, lad.lu, and lead the digitization of the original artworks behind its limited-edition fine-art prints.",
     cover: "/photography/lad/cover.jpg",
     category: "Digital & Brand Lead",
     photos: [],
