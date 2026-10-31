@@ -158,9 +158,9 @@ import { SITE } from "../consts";
 
   .legal h1 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     font-size: clamp(2rem, 5vw, 2.75rem);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     color: var(--color-ink);
     margin-top: 1rem;
   }
@@ -181,7 +181,10 @@ import { SITE } from "../consts";
     margin-bottom: 0.875rem;
   }
 
+  /* A ch is Figtree's zero, about 1.6 characters of running text, so 46ch
+     holds a line near 72. The 42rem column alone ran past 90. */
   .legal p {
+    max-width: 44ch;
     font-size: 0.9375rem;
     line-height: 1.75;
     color: var(--color-ink-soft);

@@ -200,16 +200,20 @@
     "h": 2276
   },
   "/productions/crown-reinterpretation/01.jpg": {
-    "w": 1920,
+    "w": 3840,
+    "h": 2160
+  },
+  "/productions/crown-reinterpretation/02-poster.jpg": {
+    "w": 1036,
+    "h": 1984
+  },
+  "/productions/crown-reinterpretation/03-poster.jpg": {
+    "w": 1080,
     "h": 1080
   },
-  "/productions/crown-reinterpretation/02.jpg": {
-    "w": 720,
-    "h": 405
-  },
-  "/productions/crown-reinterpretation/03.jpg": {
+  "/productions/crown-reinterpretation/04-poster.jpg": {
     "w": 1920,
-    "h": 1080
+    "h": 1920
   },
   "/productions/crown-reinterpretation/cover.jpg": {
     "w": 1249,

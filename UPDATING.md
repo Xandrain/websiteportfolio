@@ -153,6 +153,12 @@ an existing project block and edit it. Three things to know:
 - `category` must be exactly `"productions"` or
   `"product-visualisation"` — it decides which of the two tabs the
   project appears under.
+- On the **Productions** tab, the first project in the file gets the big
+  tile and the others sit beside it as squares. To change which project
+  leads, move its block to the top of the list.
+- Covers are shown **square and uncropped** on the Productions tab. Export
+  `cover.jpg` square, at least 1200 × 1200 (1600 × 1600 stays sharp on
+  high-density screens). A non-square cover is cropped to its centre.
 - Its images live in their own folder:
   `public/productions/your-slug/` with the files named `cover.jpg`,
   `01.jpg`, `02.jpg`, … **You never list them in the text file** — the
@@ -358,8 +364,8 @@ nobody downloads a minute of video just for passing by.
 ## 7e. Recipe: check the menu still reads over a new cover
 
 Only for **Graphic Design & 3D** covers (`cover.*`), and only because that page
-is unusual: on `/productions` the pictures run the full width of the screen and
-slide up **underneath** the menu as you scroll. Nothing sits between them any
+is unusual: on `/productions` the cover tiles slide up **underneath** the menu
+as you scroll. Nothing sits between them any
 more — no white strip, on purpose. The menu bar and the Productions / Product
 Visualisation bar are frosted glass, and that frost is the only thing keeping
 the words readable.

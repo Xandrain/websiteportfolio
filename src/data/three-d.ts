@@ -84,6 +84,18 @@ export interface Production {
    */
   galleryFirst?: boolean;
   /**
+   * Gallery positions (1 = the first item) whose still zooms in place on
+   * click: magnified inside its own frame and panned by the pointer, with a
+   * magnifier badge to say so. For renders whose detail is lost at the
+   * page's width — ship the still at full resolution for it to pay off.
+   */
+  zoom?: number[];
+  /**
+   * Spotlight only: gallery positions (1 = the first item) the "Random pick"
+   * button may land on. Omit to let it pick from the whole set.
+   */
+  randomPool?: number[];
+  /**
    * Credit lines under the project header's description (Director …). An
    * `imdb` URL adds a linked IMDb mark beside the name.
    */
@@ -112,6 +124,7 @@ export const projects: Production[] = [
       { label: "Duration", value: "Over a year of production" },
     ],
     identityCard: true,
+    randomPool: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 23, 25, 26, 29],
     watchLink: {
       label: "Watch all 52 episodes",
       // Keep `sbp` — YouTube's /show/ page 404s without it.
@@ -169,6 +182,8 @@ export const projects: Production[] = [
       { label: "Scope", value: "Deformation-ready topology" },
       { label: "Detail", value: "Scattered instancing" },
     ],
+    identityCard: true,
+    zoom: [1],
   },
   {
     slug: "rambochador",
@@ -192,6 +207,13 @@ export const projects: Production[] = [
     cover: "/productions/chance-parfume/cover.jpg",
     category: "product-visualisation",
     tags: ["Product Visualisation"],
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Chance Eau Vive" },
+      { label: "Brand", value: "Chanel" },
+      { label: "Type", value: "Fragrance" },
+    ],
+    identityCard: true,
   },
 
   // ── Product Visualisation — product renders (bottles, labels, packaging) ──
@@ -204,6 +226,14 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "El néctar de Los Guardas" },
+      { label: "Brand", value: "Emi Renzi" },
+      { label: "Type", value: "Vermouth" },
+      { label: "Renders", value: "Bottle · Label · Environment" },
+    ],
+    identityCard: true,
   },
   {
     slug: "half-moon-eau-de-parfum",
@@ -214,6 +244,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "Packaging"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Half Moon eau de parfum" },
+      { label: "Type", value: "Fragrance" },
+      { label: "Renders", value: "Studio · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "avocado-lms-bio",
@@ -224,6 +261,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Avocado LMS Bio" },
+      { label: "Type", value: "Bottle" },
+      { label: "Renders", value: "Studio · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "emperor-orange-lime",
@@ -234,6 +278,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Emperor Orange-Lime" },
+      { label: "Type", value: "Beverage" },
+      { label: "Renders", value: "Beauty · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "lulu-acidoactive",
@@ -244,6 +295,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Lulu AcidoActive" },
+      { label: "Type", value: "Cosmetics" },
+      { label: "Renders", value: "Studio · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "riesling-luxembourg",
@@ -254,6 +312,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Luxembourg Riesling" },
+      { label: "Type", value: "Wine" },
+      { label: "Renders", value: "Beauty · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "l-u-x-proaging",
@@ -264,6 +329,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "L.U.X ProAging" },
+      { label: "Type", value: "Skincare" },
+      { label: "Renders", value: "Studio · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "natuargua-collection-844",
@@ -274,6 +346,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "3D Render"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "Natuargua Collection 844" },
+      { label: "Type", value: "Bottle" },
+      { label: "Renders", value: "Studio · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "91-1-herbal-serum",
@@ -284,6 +363,13 @@ export const projects: Production[] = [
     category: "product-visualisation",
     tags: ["Product Visualisation", "Cosmetics"],
     coverInGallery: true,
+    specs: [
+      { label: "Role", value: "Product visualisation" },
+      { label: "Product", value: "91.1 Herbal Serum" },
+      { label: "Type", value: "Serum" },
+      { label: "Renders", value: "Beauty · Wireframe" },
+    ],
+    identityCard: true,
   },
   {
     slug: "carl-fredricksen",

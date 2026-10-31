@@ -144,12 +144,11 @@ const jsonLd = {
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={pageTitle} />
 
-    <!-- Preload the three above-the-fold fonts (display headings, body, nav
-         labels) so they don't wait on the CSS to be parsed first. The other
-         weights load on demand via @font-face as usual. -->
-    <link rel="preload" href="/fonts/bodoni-moda-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/jost-400-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/jost-500-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Preload both fonts so they don't wait on the CSS to be parsed first.
+         Each is a variable file covering every weight, so these two are the
+         only font requests the site makes. -->
+    <link rel="preload" href="/fonts/bricolage-grotesque-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/figtree-var-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

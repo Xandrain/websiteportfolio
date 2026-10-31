@@ -1,64 +1,35 @@
 /**
- * Self-hosted fonts — Bodoni Moda (display) + Jost (sans/body).
+ * Self-hosted fonts — Bricolage Grotesque (display) + Figtree (sans/body).
  * Served from /fonts (public/fonts/*.woff2), latin subset.
  * Self-hosted (not Google Fonts <link>) so the site works under a strict CSP
  * with no third-party font origin, and avoids a second network round-trip.
+ *
+ * Both are variable fonts: ONE file per family serves every weight in the
+ * declared range, so there is no per-weight file to add when a component
+ * reaches for 600. Neither family ships an italic — a `font-style: italic`
+ * on either would be a browser-synthesised slant, so the site sets none.
+ * Both files carry a single `wght` axis and nothing else — this Bricolage
+ * subset has NO optical-size (or width) axis, so `font-optical-sizing` does
+ * nothing here and every size draws the same outlines. Display tightening
+ * is done by hand, with negative letter-spacing on the large titles.
+ * Trimming the weight range was measured and declined: 400–600 only saves
+ * ~4 KB of 41 and would end "any weight is free".
  */
 
-/* ── Jost — sans / body ──────────────────────────────────────── */
+/* ── Figtree — sans / body ───────────────────────────────────── */
 @font-face {
-  font-family: "Jost";
+  font-family: "Figtree";
   font-style: normal;
-  font-weight: 300;
+  font-weight: 300 900;
   font-display: swap;
-  src: url("/fonts/jost-300-latin.woff2") format("woff2");
+  src: url("/fonts/figtree-var-latin.woff2") format("woff2");
 }
 
+/* ── Bricolage Grotesque — display / headings ────────────────── */
 @font-face {
-  font-family: "Jost";
+  font-family: "Bricolage Grotesque";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200 800;
   font-display: swap;
-  src: url("/fonts/jost-400-latin.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Jost";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/jost-500-latin.woff2") format("woff2");
-}
-
-/* ── Bodoni Moda — display / headings ────────────────────────── */
-@font-face {
-  font-family: "Bodoni Moda";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/bodoni-moda-400-latin.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Bodoni Moda";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/bodoni-moda-500-latin.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Bodoni Moda";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/bodoni-moda-700-latin.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Bodoni Moda";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/bodoni-moda-400-italic-latin.woff2") format("woff2");
+  src: url("/fonts/bricolage-grotesque-var-latin.woff2") format("woff2");
 }

@@ -46,8 +46,8 @@
   --color-brick:        #CF4330;  /* that pill's border + hard shadow */
 
   /* ── Typography ─────────────────────────────────────────────── */
-  --font-display: 'Bodoni Moda', Georgia, serif;
-  --font-sans:    'Jost', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans:    'Figtree', system-ui, sans-serif;
 
   /* ── Layout tokens ───────────────────────────────────────────── */
   --max-width-editorial: 75rem;
@@ -120,6 +120,10 @@
   /* Headings are sized by whichever component renders them, never by the
      user-agent stylesheet. */
   h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+
+  /* Running text avoids a lone word on its last line. Components that want
+     `balance` (titles, centred ledes) set it unlayered and win. */
+  p { text-wrap: pretty; }
 
   a { color: inherit; text-decoration: inherit; }
 

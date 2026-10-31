@@ -12,8 +12,18 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const FONTS = path.join(ROOT, "public", "fonts");
-GlobalFonts.registerFromPath(path.join(FONTS, "bodoni-moda-400-latin.woff2"), "Bodoni Moda");
-GlobalFonts.registerFromPath(path.join(FONTS, "jost-500-latin.woff2"), "Jost");
+GlobalFonts.registerFromPath(path.join(FONTS, "bricolage-grotesque-var-latin.woff2"), "Bricolage Grotesque");
+GlobalFonts.registerFromPath(path.join(FONTS, "figtree-var-latin.woff2"), "Figtree");
+
+// Both fonts are variable, and Skia draws a variable file's DEFAULT instance
+// whatever weight `ctx.font` names — Bricolage came out near-black, Figtree
+// hairline. So the axis is set explicitly, as the browser would. `wght` is
+// the only axis either self-hosted file carries — the Bricolage subset has no
+// `opsz`, so there is no optical size to match.
+function setFont(ctx, weight, px, family) {
+  ctx.font = `${weight} ${px}px "${family}"`;
+  ctx.fontVariationSettings = `"wght" ${weight}`;
+}
 
 const PAPER = "#FAFAF8";
 const INK = "#1A1917";
@@ -50,17 +60,17 @@ async function makeOG() {
 
   // Role eyebrow
   ctx.fillStyle = INK_MUTED;
-  ctx.font = '500 22px Jost';
+  setFont(ctx, 500, 22, "Figtree");
   tracked(ctx, "GRAPHIC DESIGNER & PHOTOGRAPHER", W / 2, 250, 5);
 
   // Wordmark
   ctx.fillStyle = INK;
-  ctx.font = '400 92px "Bodoni Moda"';
+  setFont(ctx, 400, 92, "Bricolage Grotesque");
   ctx.fillText("Alexandre Haineaux", W / 2, 355);
 
   // Emerald full-stop dot after the tagline
   ctx.fillStyle = INK_MUTED;
-  ctx.font = '400 27px Jost';
+  setFont(ctx, 400, 27, "Figtree");
   const tag = "Light, form, and the space between";
   ctx.fillText(tag, W / 2, 430);
   const tagW = ctx.measureText(tag).width;
@@ -81,7 +91,7 @@ async function makeIcon() {
   ctx.fillRect(0, 0, S, S);
 
   ctx.fillStyle = PAPER;
-  ctx.font = '400 96px "Bodoni Moda"';
+  setFont(ctx, 400, 96, "Bricolage Grotesque");
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("AH", S / 2, S / 2 - 4);

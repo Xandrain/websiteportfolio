@@ -432,9 +432,9 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
   .collection-header__title {
     font-family: var(--font-display);
     font-size: clamp(3rem, 6vw, 6rem);
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.0;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
     margin-bottom: 1.125rem;
   }
@@ -468,8 +468,9 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
   .case-title {
     font-family: var(--font-display);
     font-size: clamp(2.375rem, 4.4vw, 3.25rem);
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.0;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
     margin-bottom: 1.125rem;
     text-wrap: balance;
@@ -511,8 +512,10 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
     .project-id-card { padding: 1.5rem 1.25rem; border-radius: 1.25rem; gap: 1.5rem; }
   }
 
+  /* 46ch, not 60: a ch is Figtree's zero, about 1.6 characters of running
+     text, so 60ch set 78 a line at 1440. 46ch holds it near 72. */
   .project-id__lede {
-    max-width: 60ch;
+    max-width: 46ch;
     margin-inline: auto;
     text-align: center;
     text-wrap: balance;
@@ -712,7 +715,7 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
     margin-bottom: 1.5rem;
     font-family: var(--font-display);
     font-size: 1.75rem;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.1;
     color: var(--color-ink);
   }
@@ -738,19 +741,18 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
     background: var(--color-paper-alt);
   }
 
-  /* The card titles' italic, so a block reads as one of the site's tiles. */
+  /* The card titles' face and size, so a block reads as one of the site's tiles. */
   .case-block__title {
     margin: 1.25rem 0 0.625rem;
     font-family: var(--font-display);
-    font-style: italic;
     font-size: 1.375rem;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.2;
     color: var(--color-ink);
   }
 
   .case-block__text {
-    max-width: 60ch;
+    max-width: 46ch;
     font-size: 0.9375rem;
     line-height: 1.75;
     color: var(--color-ink-soft);
@@ -805,6 +807,11 @@ const SIZES_ROLE = "(min-width: 1280px) 488px, (min-width: 900px) calc(50vw - 7r
   }
 
   .project-id-card--accent .project-id__value a svg { color: var(--color-ink); }
+
+  /* The key's muted grey is tuned for paper. On a light accent it fell to
+     3.1:1 (#736E68 on LAD's #F3C42C), and even --color-ink-soft only reaches
+     ~4.2 — so on the filled row the key takes the ink the value already uses. */
+  .project-id-card--accent .project-id__row--link .project-id__key { color: var(--color-ink); }
 
   .project-id-card--accent .case-cta:hover {
     background: color-mix(in srgb, var(--case-accent) 88%, var(--color-ink));

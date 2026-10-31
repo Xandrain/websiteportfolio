@@ -10,6 +10,7 @@
  * email row stays a plain mailto link without it.
  */
 import { SITE, SOCIAL } from "../../consts";
+import { wrapAtSeparators } from "../../lib/text";
 
 type Highlight = { title: string; description: string };
 type Social = { label: string; handle?: string; href: string; icon: string; copy?: boolean };
@@ -115,7 +116,7 @@ const social: Social[] = [
               </div>
 
               <h2 class="about__profile-name">{SITE.name}</h2>
-              <p class="about__profile-role">{SITE.role}</p>
+              <p class="about__profile-role">{wrapAtSeparators(SITE.role)}</p>
               <p class="about__profile-bio">
                 Working between the still image and the rendered form.
                 {" "}{SITE.location}.
@@ -352,7 +353,7 @@ const social: Social[] = [
   .about__profile-name {
     font-family: var(--font-display);
     font-size: 1.625rem;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.01em;
     color: var(--color-ink);
     margin-bottom: 0.3rem;

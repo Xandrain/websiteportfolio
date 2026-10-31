@@ -921,40 +921,58 @@
       "src": "/productions/crown-reinterpretation/01-1600.webp"
     },
     {
-      "w": 1920,
-      "src": "/productions/crown-reinterpretation/01-1920.webp"
+      "w": 3840,
+      "src": "/productions/crown-reinterpretation/01-3840.webp"
     }
   ],
-  "/productions/crown-reinterpretation/02.jpg": [
+  "/productions/crown-reinterpretation/02-poster.jpg": [
     {
       "w": 400,
-      "src": "/productions/crown-reinterpretation/02-400.webp"
-    },
-    {
-      "w": 720,
-      "src": "/productions/crown-reinterpretation/02-720.webp"
-    }
-  ],
-  "/productions/crown-reinterpretation/03.jpg": [
-    {
-      "w": 400,
-      "src": "/productions/crown-reinterpretation/03-400.webp"
+      "src": "/productions/crown-reinterpretation/02-poster-400.webp"
     },
     {
       "w": 800,
-      "src": "/productions/crown-reinterpretation/03-800.webp"
+      "src": "/productions/crown-reinterpretation/02-poster-800.webp"
+    },
+    {
+      "w": 1036,
+      "src": "/productions/crown-reinterpretation/02-poster-1036.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/03-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/03-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/crown-reinterpretation/03-poster-800.webp"
+    },
+    {
+      "w": 1080,
+      "src": "/productions/crown-reinterpretation/03-poster-1080.webp"
+    }
+  ],
+  "/productions/crown-reinterpretation/04-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/productions/crown-reinterpretation/04-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/productions/crown-reinterpretation/04-poster-800.webp"
     },
     {
       "w": 1200,
-      "src": "/productions/crown-reinterpretation/03-1200.webp"
+      "src": "/productions/crown-reinterpretation/04-poster-1200.webp"
     },
     {
       "w": 1600,
-      "src": "/productions/crown-reinterpretation/03-1600.webp"
+      "src": "/productions/crown-reinterpretation/04-poster-1600.webp"
     },
     {
       "w": 1920,
-      "src": "/productions/crown-reinterpretation/03-1920.webp"
+      "src": "/productions/crown-reinterpretation/04-poster-1920.webp"
     }
   ],
   "/productions/crown-reinterpretation/cover.jpg": [

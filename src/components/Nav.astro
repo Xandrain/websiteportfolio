@@ -92,8 +92,10 @@ const isActive = (href: string) => path.startsWith(href);
   .site-nav__brand {
     font-family: var(--font-display);
     font-size: 1.0625rem;
-    font-weight: 400;
-    letter-spacing: 0.04em;
+    font-weight: 500;
+    /* Untracked. The +0.04em this carried was air for Bodoni's hairlines;
+       on a grotesque it only spaces the name apart. */
+    letter-spacing: 0;
     text-decoration: none;
     color: var(--color-ink);
     transition: opacity 0.25s;
@@ -181,13 +183,29 @@ const isActive = (href: string) => path.startsWith(href);
     .site-nav__brand-initials {
       display: inline;
       font-size: 0.9375rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.04em;
     }
 
     .site-nav__links { gap: 1.375rem; }
 
     .site-nav__link.has-short .site-nav__label-full { display: none; }
     .site-nav__link.has-short .site-nav__label-short { display: inline; }
+  }
+
+  /* Centring the links on-screen only works while the row is narrow enough to
+     clear the initials. Figtree sets ~6% wider than Jost did, and at 360px the
+     row started 9px after "AH" — close enough to read as "AH Design & 3D". On
+     the narrowest phones the initials go back into flow and the links sit
+     right, so the brand keeps a clear gap of its own. */
+  @media (max-width: 400px) {
+    .site-nav { justify-content: space-between; }
+
+    .site-nav__brand {
+      position: static;
+      transform: none;
+    }
+
+    .site-nav__links { gap: 1.125rem; }
   }
 
   /* Reduced transparency asks for a surface, not a layer. With no page-level

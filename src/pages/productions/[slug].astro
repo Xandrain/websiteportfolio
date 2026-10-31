@@ -62,9 +62,24 @@ const showreel = reel(project);
 // left half-empty — unless it's a portrait, which would grow far too tall.
 const ratio = (it: GalleryItem) => (it.w && it.h ? it.w / it.h : 1);
 const spans = items.map((it) => (ratio(it) >= 1.25 ? 2 : 1));
+const squarish = (it: GalleryItem) => ratio(it) >= 0.9 && ratio(it) < 1.25;
+// A tall portrait followed by two squarish items becomes a mosaic: the
+// portrait spans both rows on the left, the two stack on the right, and with
+// equal columns the three form one square. Next to a single square a 1:2
+// portrait otherwise leaves half a column empty beneath it. The portrait's
+// frame stretches to the two rows and its media is cropped to fit (cover).
+const tall = new Set<number>();
+for (let i = 0; i + 2 < items.length; i++) {
+  if (spans[i] === 1 && ratio(items[i]) <= 0.6 && squarish(items[i + 1]) && squarish(items[i + 2])) {
+    tall.add(i);
+    i += 2;
+  }
+}
+// The mosaic's three items fill their rows exactly, so they end a run.
+const inMosaic = (i: number) => tall.has(i) || tall.has(i - 1) || tall.has(i - 2);
 let runStart = -1;
 for (let i = 0; i <= spans.length; i++) {
-  if (i < spans.length && spans[i] === 1) {
+  if (i < spans.length && spans[i] === 1 && !inMosaic(i)) {
     if (runStart < 0) runStart = i;
     continue;
   }
@@ -325,6 +340,7 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
                 data-anim={item.src}
                 data-still={item.poster}
                 data-alt={`${project.title} — animation ${i + 1}`}
+                data-random={!project.randomPool || project.randomPool.includes(i + 1) ? "" : undefined}
               >
                 <img src={item.poster} alt="" width={item.w ?? 1024} height={item.h ?? 1024} loading="lazy" decoding="async" />
                 <span class="sr-only">{`Show animation ${i + 1}`}</span>
@@ -354,6 +370,10 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
               />
               <span class="sr-only">Pause this animation</span>
             </button>
+            {/* A sibling of the pause button, not inside it — a button cannot
+                hold another. Hidden until the script wires it: with JS off
+                the picker is inert, and so would this be. */}
+            <button type="button" class="spot__random" hidden>Random pick</button>
           </div>
         </div>
       )}
@@ -361,9 +381,12 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
       <div class="project-images__grid">
         {items.map((item, i) => {
           const span2 = spans[i] === 2;
-          const ar = item.w && item.h ? `aspect-ratio:${item.w}/${item.h}` : undefined;
+          // A variable rather than the property itself, so the mosaic's tall
+          // item can drop its ratio from the stylesheet at two-up widths.
+          const ar = item.w && item.h ? `--ar:${item.w}/${item.h}` : undefined;
+          const zoomable = item.kind === "image" && !!project.zoom?.includes(i + 1);
           return (
-            <div class:list={["project-image-wrap", span2 && "span-2", item.kind === "animation" && "is-alpha"]} style={ar}>
+            <div class:list={["project-image-wrap", span2 && "span-2", tall.has(i) && "is-tall", item.kind === "animation" && "is-alpha", zoomable && "is-zoomable"]} style={ar}>
               {item.kind === "video" ? (
                 /* The pause control is a real <button> wrapping the media, not
                    tabindex on the media itself. An <img>/<video> given
@@ -411,6 +434,7 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
                   <span class="sr-only">Pause this animation</span>
                 </button>
               ) : (
+                <>
                 <img
                   src={item.src}
                   srcset={srcset(item.src)}
@@ -423,6 +447,21 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
                   decoding="async"
                   class="project-image"
                 />
+                {/* The zoom control lies OVER the image rather than wrapping
+                    it, so the image markup stays the one copy above. */}
+                {zoomable && (
+                  <button type="button" class="project-zoom" aria-pressed="false">
+                    <span class="project-zoom__hint" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+                        <path d="M11.5 11.5 16 16M5 7.5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                        <path class="project-zoom__plus" d="M7.5 5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                      </svg>
+                    </span>
+                    <span class="sr-only">{`Zoom into ${project.title} — view ${i + 1}`}</span>
+                  </button>
+                )}
+                </>
               )}
             </div>
           );
@@ -506,6 +545,47 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
     onActivate(v, () => {
       if (v.paused) v.play(); else v.pause();
       return v.paused;
+    });
+  }
+
+  // ── Zoom in place (opt-in per project: `zoom` in three-d.ts) ─────────
+  // A click magnifies the still inside its own frame, centred on the point
+  // clicked, and the pointer then pans by moving the transform-origin. Out
+  // again on a second click, Escape, or a mouse leaving the frame — not a
+  // finger lifting, which also fires pointerleave. Keyboard activation has
+  // no point (detail 0), so it zooms on the centre.
+  const ZOOM = 3;
+  for (const btn of document.querySelectorAll<HTMLButtonElement>(".project-zoom")) {
+    const wrap = btn.parentElement!;
+    const img = wrap.querySelector<HTMLImageElement>(".project-image")!;
+    const aim = (x: number, y: number) => {
+      wrap.style.setProperty("--zoom-x", `${x * 100}%`);
+      wrap.style.setProperty("--zoom-y", `${y * 100}%`);
+    };
+    const aimAt = (e: MouseEvent) => {
+      const r = wrap.getBoundingClientRect();
+      aim((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+    };
+    const set = (on: boolean) => {
+      // Ask the srcset for a variant sharp at the magnified size; the
+      // browser swaps it in once loaded and keeps it after zooming out.
+      if (on) img.sizes = `${Math.ceil(wrap.clientWidth * ZOOM)}px`;
+      wrap.classList.toggle("is-zoomed", on);
+      btn.setAttribute("aria-pressed", String(on));
+    };
+    btn.addEventListener("click", (e) => {
+      const on = !wrap.classList.contains("is-zoomed");
+      if (on) e.detail ? aimAt(e) : aim(0.5, 0.5);
+      set(on);
+    });
+    btn.addEventListener("pointermove", (e) => {
+      if (wrap.classList.contains("is-zoomed")) aimAt(e);
+    });
+    btn.addEventListener("pointerleave", (e) => {
+      if (e.pointerType === "mouse") set(false);
+    });
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") set(false);
     });
   }
 
@@ -672,6 +752,29 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
         stage.alt = b.dataset.alt ?? stage.alt;
         for (const o of thumbs) o.setAttribute("aria-pressed", String(o === b));
         show();
+      });
+    }
+
+    // Random pick goes through the thumb's own click, so the strip reveals
+    // it and the stage swaps exactly as a manual pick would. Never the model
+    // already up — a "random" press that changes nothing reads as broken.
+    // Only thumbs in the project's `randomPool` carry data-random.
+    // The draw comes from crypto.getRandomValues rather than Math.random,
+    // rejecting the top sliver of the 32-bit range so every index is exactly
+    // as likely (a plain modulo would favour the low ones, if only slightly).
+    const randomIndex = (n: number) => {
+      const limit = 2 ** 32 - (2 ** 32 % n);
+      const buf = new Uint32Array(1);
+      do crypto.getRandomValues(buf); while (buf[0] >= limit);
+      return buf[0] % n;
+    };
+    const random = document.querySelector<HTMLButtonElement>(".spot__random");
+    const pool = thumbs.filter((b) => b.dataset.random !== undefined);
+    if (random && pool.length > 1) {
+      random.hidden = false;
+      random.addEventListener("click", () => {
+        const others = pool.filter((b) => b.getAttribute("aria-pressed") !== "true");
+        others[randomIndex(others.length)].click();
       });
     }
   }
@@ -1075,8 +1178,9 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
   .project-header__title {
     font-family: var(--font-display);
     font-size: clamp(2.375rem, 4.4vw, 3.25rem);
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.0;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
     margin-bottom: 1.125rem;
     text-wrap: balance;
@@ -1157,8 +1261,10 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
     .project-id-card { padding: 1.5rem 1.25rem; border-radius: 1.25rem; gap: 1.5rem; }
   }
 
+  /* 46ch, not 60: a ch is Figtree's zero, about 1.6 characters of running
+     text, so 60ch set 78 a line at 1440. 46ch holds it near 72. */
   .project-id__lede {
-    max-width: 60ch;
+    max-width: 46ch;
     margin-inline: auto;
     text-align: center;
     text-wrap: balance;
@@ -1396,9 +1502,29 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
   @media (min-width: 640px) {
     .project-images__grid { grid-template-columns: repeat(2, 1fr); }
     .project-image-wrap.span-2 { grid-column: span 2; }
+
+    /* The mosaic's portrait: two rows tall, its height taken from the two
+       squares beside it rather than from its own ratio. contain: size stops
+       its media's intrinsic height feeding back into the row sizing, so the
+       stretch is exact and the three always close into a square. */
+    .project-image-wrap.is-tall {
+      grid-row: span 2;
+      align-self: stretch;
+      aspect-ratio: auto;
+      contain: size;
+    }
   }
 
-  .project-image-wrap { overflow: hidden; background: var(--color-paper-alt); }
+  .project-image-wrap {
+    aspect-ratio: var(--ar, auto);
+    overflow: hidden;
+    background: var(--color-paper-alt);
+  }
+
+  /* Inside the identity card the media are slightly rounded, like the
+     episode band's player. The wrap's overflow:hidden clips images and
+     videos to it. Plain pages keep their square edges. */
+  .project-id-card .project-image-wrap { border-radius: var(--radius-card); }
 
   /* Transparent media (the animated-WebP turnarounds) get no tint of their
      own — the page's own background is what should show through the alpha, so
@@ -1416,6 +1542,73 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
 
   .project-image:hover { filter: grayscale(0%); }
 
+  /* ── Zoom in place ── The button lies over the image, so the image never
+     sees the hover: the wrap carries it instead. Panning moves the origin
+     and is instant; only the scale itself is eased. */
+  .project-image-wrap.is-zoomable { position: relative; }
+
+  .is-zoomable:hover .project-image,
+  .is-zoomed .project-image { filter: grayscale(0%); }
+
+  .is-zoomable .project-image {
+    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+    transition: transform 0.35s ease, filter 0.5s;
+  }
+
+  /* Keep in step with ZOOM in the script, which sizes the srcset pick. */
+  .is-zoomed .project-image { transform: scale(3); }
+
+  .project-zoom {
+    all: unset;
+    position: absolute;
+    inset: 0;
+    cursor: zoom-in;
+  }
+
+  /* Zoomed, a drag on a touch screen pans the render instead of the page. */
+  .project-zoom[aria-pressed="true"] { cursor: zoom-out; touch-action: none; }
+
+  .project-zoom:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+
+  /* The badge: the nav pill's frosted paper, round. */
+  .project-zoom__hint {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-ink);
+    background: rgba(250, 250, 248, 0.86);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 4px 14px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .is-zoomable:hover .project-zoom__hint { transform: scale(1.08); }
+
+  /* Zoomed, the + loses its upright and reads as − : click to zoom out. */
+  .project-zoom[aria-pressed="true"] .project-zoom__plus { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-zoomable .project-image,
+    .project-zoom__hint { transition: none; }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .project-zoom__hint {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--color-paper);
+    }
+  }
+
   .project-video {
     width: 100%;
     height: 100%;
@@ -1426,7 +1619,7 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
 
   /* The pause control. `all: unset` is the reset this codebase already uses on
      .gallery-item and .yt-facade__btn. It must fill the wrap: the media inside
-     is height:100%, and the wrap's height comes from its inline aspect-ratio,
+     is height:100%, and the wrap's height comes from its aspect-ratio (--ar),
      so a button that did not stretch would collapse that chain and the media
      with it. -2px offset keeps the ring inside the wrap's overflow:hidden. */
   .project-media-btn {
@@ -1468,9 +1661,55 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
 
   /* Transparent like the grid's turnarounds: the page shows through. */
   .spot__stage {
+    position: relative;
     aspect-ratio: 1;
     width: min(100%, 70svh);
     justify-self: center;
+  }
+
+  /* On the stage's right edge, its centre 85% of the way up, inside the stage
+     so it never runs into the gutter on a phone, where the stage is the full
+     measure. Frosted paper like the Contact pill: it sits over the model itself. */
+  .spot__random {
+    all: unset;
+    position: absolute;
+    top: 15%;
+    right: 0;
+    translate: 0 -50%;
+    padding: 0.715rem 1.43rem;
+    border-radius: var(--radius-pill);
+    background: rgba(250, 250, 248, 0.86);
+    /* Standard LAST — see Nav.astro. */
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 1px 2px rgba(26, 25, 23, 0.06), inset 0 0 0 1px rgba(26, 25, 23, 0.09);
+    font-family: var(--font-sans);
+    font-size: 1.1375rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.2s, background 0.25s;
+  }
+
+  .spot__random[hidden] { display: none; }
+
+  .spot__random:hover {
+    color: var(--color-accent-ink);
+    background: var(--color-paper);
+  }
+
+  .spot__random:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .spot__random {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--color-paper);
+    }
   }
 
   .spot__bar {
@@ -1616,7 +1855,7 @@ const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
   .project-yt-band__title {
     font-family: var(--font-display);
     font-size: clamp(1.75rem, 3vw, 2.75rem);
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.01em;
     color: var(--color-ink);

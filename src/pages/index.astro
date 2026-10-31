@@ -4,6 +4,7 @@ import { SITE, NAV } from "../consts";
 import { collections } from "../data/photography";
 import { projects } from "../data/three-d";
 import { srcset, dims } from "../lib/responsive";
+import { wrapAtSeparators } from "../lib/text";
 
 // The gate is a two-way splitter and nothing else: one screen, no scroll, the
 // two disciplines carrying exactly half the viewport each. Routes and labels
@@ -104,7 +105,7 @@ const photoArt = cover(
 
     <div class="gate__id">
       <h1 class="gate__name">{SITE.name}</h1>
-      <p class="gate__role">{SITE.role}</p>
+      <p class="gate__role">{wrapAtSeparators(SITE.role)}</p>
       <div class="gate__meta">
         <a href={about.href}>{about.label}</a>
         <span class="gate__dot" aria-hidden="true"></span>
@@ -285,7 +286,7 @@ const photoArt = cover(
 
   .gate__discipline {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     font-size: clamp(2.5rem, 6.4vw, 5rem);
     line-height: 0.98;
     letter-spacing: -0.015em;
@@ -386,7 +387,7 @@ const photoArt = cover(
   .gate__name {
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     font-size: clamp(1.35rem, 3.2vw, 1.85rem);
     line-height: 1;
     letter-spacing: -0.01em;

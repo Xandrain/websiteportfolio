@@ -69,6 +69,21 @@ full procedure in [UPDATING.md](UPDATING.md).
   (`gen-anim.mjs --cadence=150 --total-ms=3300`). The project page starts them
   on a shared beat and can only hold loops that agree on how long a lap lasts.
 - No dates anywhere except the footer copyright and `/legal`.
+- Type is **Bricolage Grotesque** (`--font-display`) + **Figtree** (`--font-sans`),
+  self-hosted as ONE variable woff2 per family — any weight is free, no file to
+  add. **Neither family has an italic**: `font-style: italic` gets a fake browser
+  slant, so the site uses none (the card titles that were italic under Bodoni are
+  now upright). `scripts/gen-brand-assets.mjs` must set `fontVariationSettings`:
+  Skia ignores the weight in `ctx.font` and draws a variable font's default
+  instance, which rendered the share-card wordmark near-black.
+  Both files carry a **`wght` axis only** — no optical size, no width — so
+  display tightening is negative letter-spacing by hand (-0.02em on the big
+  titles), and Bricolage is never tracked positive: the +0.02–0.08em left over
+  from Bodoni just spaced the words apart. Bricolage headings are **500**, so
+  two sans faces still separate by weight as well as size.
+  **`ch` is not a character count here.** It is the width of Figtree's zero,
+  ~1.6 characters of running text, so a 60ch measure set ~90 a line.
+  Body measures are ~44–46ch for ~70 characters.
 - CSS custom properties are kebab-case with a category prefix (`--color-*`,
   `--font-*`, `--max-width-*`, `--radius-*`), declared in `global.css`'s `:root`.
 - **No CSS framework.** Tailwind was removed: it shipped ~14 KB into every one
@@ -175,8 +190,8 @@ full procedure in [UPDATING.md](UPDATING.md).
   a page-wide figure now proves nothing in either direction.
 - **The nav pills carry their own contrast — there is no scrim under them.**
   Both pills are translucent so they can sit over content, and `/productions`
-  bleeds artwork straight under them: its chapter bands are full-bleed and
-  scroll up through the chrome with nothing in between. That used to be
+  bleeds artwork straight under them: its cover tiles scroll up through the
+  chrome with nothing in between. That used to be
   handled by two fixed sibling layers on `productions/index.astro`
   (`.masthead-lens` + `.masthead-fade`), a 166px frosted strip across the top
   of the viewport. **It is gone, and it should not come back.** It read as a
@@ -186,8 +201,10 @@ full procedure in [UPDATING.md](UPDATING.md).
   floor it was supposed to protect.
   What replaces it is density in the pills themselves — `Nav.astro` at
   `rgba(250,250,248,0.86)`, `SubNav.astro` at `0.9`, each over a 20px blur and
-  lifted off the crop by a two-part drop shadow. Worst case is now **4.92:1**
-  across the whole scroll. Those numbers are the entire contrast story, so
+  lifted off the crop by a two-part drop shadow. Worst case is **4.97:1**
+  across the whole scroll (the "Photography" link at 390/640, re-measured
+  over the bento grid with Figtree/Bricolage). Those numbers are the entire
+  contrast story, so
   **thinning either pill means re-measuring**, and so does any new page that
   bleeds artwork upward.
   Measure it properly or not at all. Sample the **composited pixels** in each
@@ -206,14 +223,23 @@ full procedure in [UPDATING.md](UPDATING.md).
   fully opaque — with no scrim left, 0.86 paper over a live crop is not a
   surface.
 
-- **Swapping a `/productions` cover means re-measuring the band contrast.**
-  The index sets white type straight over each crop, and the scrim stops in
-  `productions/index.astro` are measured, not chosen: the palest covers
-  (Crown, Rambochador) sit at roughly 4.5:1 against a 3:1 floor for the
-  titles, and the phone breakpoint is tighter still because the text stacks
-  against the bottom edge. A paler, brighter or busier cover can push a
+- **Swapping a `/productions` cover means re-measuring the tile contrast.**
+  The index is a bento grid: the first `productions` project in
+  `three-d.ts` leads at 2×2, the rest are uncropped squares, and white type
+  sits straight over the bottom of each one. The scrim stops in
+  `productions/index.astro` are measured, not chosen. The small tiles'
+  titles are under 24px, so their floor is **4.5:1**, not 3:1: Crown is the
+  tightest of the set at **5.68** at 1024 (6.07 at 1440), re-measured after
+  the Bricolage swap; the 11px tags bottom out at **4.83**, ink-muted on paper
+  below 640. Hide the floating Contact pill while sampling — it sits over the
+  bottom-right tile wherever that tile meets the viewport edge and reads as a
+  1.6:1 failure that is not the tile's.
+  Below 640px the small tiles drop the overlay and set their caption under
+  the image in ink — a three-line title in a ~160px square measured
+  **1.6:1** over the gradient. Do not move them back over the image on a
+  phone without re-measuring. A paler, brighter or busier cover can push a
   title under the floor with nothing on screen to announce it. Sample the
-  composited pixels behind the text at 360/390/640/1440 and compare against
+  composited pixels behind the text at 360/390/640/1024/1440 and compare against
   the element's real `color` alpha — do not eyeball it, and clip the capture
   to the viewport: a full-page screenshot flattens the fixed chrome over the
   whole image and reports failures that are not there.
