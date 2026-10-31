@@ -55,6 +55,26 @@
     "w": 1600,
     "h": 1067
   },
+  "/photography/lad/cover.jpg": {
+    "w": 1600,
+    "h": 1199
+  },
+  "/photography/lad/digitization.jpg": {
+    "w": 2560,
+    "h": 1600
+  },
+  "/photography/lad/logo.png": {
+    "w": 512,
+    "h": 512
+  },
+  "/photography/lad/setup-poster.jpg": {
+    "w": 1920,
+    "h": 1080
+  },
+  "/photography/lad/website.jpg": {
+    "w": 2560,
+    "h": 1600
+  },
   "/photography/nl-cover.jpg": {
     "w": 1600,
     "h": 1067

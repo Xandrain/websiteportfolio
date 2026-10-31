@@ -425,10 +425,12 @@ You never place anything by hand: you fill in the project block in
 |---|---|---|
 | Tags | `tags` | Small capitals above the title. |
 | Title | `title` | Always left-aligned, never centred. |
+| Small line under the title | `subtitle` | Optional. For a long title, put its end here (AZUREUS: `subtitle: "The Animated Series"`): only the name stays big, the rest becomes a small spaced line. It must match the end of `title` exactly. `title` stays whole, because the project cards and Google use it. |
 | Description | `description` | One sentence. Centred across the top of the card. The same sentence is what Google shows, so write it as a sentence. |
 | Facts | `specs` | One rounded row per fact: label on the left, value on the right. Any order, any number (six reads best). |
 | A fact that links out | `href` on that fact | The whole row becomes the link and gets a ↗. Opens in a new tab. Example: `{ label: "Studio", value: "Blue Zoo, UK", href: "https://www.blue-zoo.co.uk/" }`. |
 | Episodes panel | `episodes` (+ `label`) and `watchLink` | Optional. The label sits on top, the slideshow in the middle, the watch button full width at the bottom. See 7c. |
+| …or one video in that panel | a `youtube` entry with a `heading` | Used when there is no `episodes` list (today: AZUREUS). The `heading` becomes the label, the player sits in the middle, "Watch on YouTube" full width at the bottom. |
 | The work | the numbered files in the project folder | All animations → picker + one big stage. Mixed or stills → the image grid. See 7b. |
 | Showreel | the `reel.*` files in the folder | Optional. See 7d. Comes **after** the work when `galleryFirst: true`, before it otherwise. |
 | Footer row | automatic | "← All projects" on the left, "Also explore" in the middle, on one line. |

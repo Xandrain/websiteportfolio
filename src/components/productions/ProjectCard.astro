@@ -3,7 +3,7 @@ import type { Production } from "../../data/three-d";
 import { srcset, dims } from "../../lib/responsive";
 
 interface Props {
-  project: Production;
+  project: Pick<Production, "slug" | "title" | "cover" | "tags">;
   /** True for above-the-fold cards: load eagerly so the LCP image isn't lazy. */
   eager?: boolean;
   /**
@@ -16,15 +16,33 @@ interface Props {
   variant?: "overlay" | "plate";
   /** Ordinal shown on a plate. Omit and the plate carries no number. */
   index?: number;
+  /**
+   * The three below let the card serve outside /productions — the LAD case
+   * study leads the Photography grid with it. Each defaults to what a
+   * productions project needs.
+   */
+  href?: string;
+  /** Cover alt. */
+  alt?: string;
+  /** Cover `sizes`. The default fits the three-column Product Visualisation grid. */
+  sizes?: string;
 }
 
-const { project, eager = false, variant = "overlay", index } = Astro.props;
+const {
+  project,
+  eager = false,
+  variant = "overlay",
+  index,
+  href = `/productions/${project.slug}`,
+  alt = `${project.title} — Graphic Design & 3D project`,
+  sizes = "(min-width: 1024px) 380px, (min-width: 640px) 46vw, 100vw",
+} = Astro.props;
 const d = dims(project.cover);
 const meta = project.tags.slice(0, 2).join(" · ");
 ---
 
 <a
-  href={`/productions/${project.slug}`}
+  href={href}
   class:list={["project-card", variant === "plate" && "project-card--plate"]}
   aria-label={project.title}
 >
@@ -32,8 +50,8 @@ const meta = project.tags.slice(0, 2).join(" · ");
     <img
       src={project.cover}
       srcset={srcset(project.cover)}
-      sizes="(min-width: 1024px) 380px, (min-width: 640px) 46vw, 100vw"
-      alt={`${project.title} — Graphic Design & 3D project`}
+      sizes={sizes}
+      alt={alt}
       width={d?.w ?? 1600}
       height={d?.h ?? 600}
       loading={eager ? "eager" : "lazy"}

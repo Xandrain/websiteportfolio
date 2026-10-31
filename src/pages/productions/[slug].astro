@@ -96,10 +96,23 @@ const SIZES_BAND = "(min-width: 1280px) 331px, (min-width: 768px) 30vw, 100vw";
 
 // A video with a heading renders as a band (heading left, player right);
 // the rest stack full-width after the gallery as before.
-const ytBands = (project.youtube ?? []).filter((v) => v.heading);
-const ytPlain = (project.youtube ?? []).filter((v) => !v.heading);
-
 const idCard = !!(project.identityCard && project.specs);
+
+// The heading splits a long title into the name and a small line under it.
+// The subtitle has to be the end of the title, so the h1 still reads as the
+// whole title (the separator survives as sr-only text) and nothing is lost.
+const sub = project.subtitle && project.title.endsWith(project.subtitle) ? project.subtitle : undefined;
+const titleName = sub ? project.title.slice(0, -sub.length).replace(/[\s:–—-]+$/, "") : project.title;
+
+// On a card page the first band video moves into the card's right-hand panel,
+// so nothing about the project sits between the title and the card. A project
+// with an episodes slideshow already has that panel filled, so keeps its band.
+const allBands = (project.youtube ?? []).filter((v) => v.heading);
+const panelVideo = idCard && !project.episodes ? allBands[0] : undefined;
+const ytBands = allBands.filter((v) => v !== panelVideo);
+const ytPlain = (project.youtube ?? []).filter((v) => !v.heading);
+// The panel is the 1fr column of the card's 1.15fr/1fr grid, less its padding.
+const SIZES_PANEL = "(min-width: 1280px) 410px, (min-width: 900px) 40vw, 100vw";
 ---
 
 <BaseLayout title={project.title} description={project.description} image={project.cover} schema={schema}>
@@ -128,7 +141,9 @@ const idCard = !!(project.identityCard && project.specs);
         <div class="project-header__meta">
           {project.tags.map((t) => <span class="label">{t}</span>)}
         </div>
-        <h1 class="project-header__title">{project.title}</h1>
+        <h1 class="project-header__title">
+          {titleName}{sub && <><span class="sr-only">: </span><span class="project-header__sub">{sub}</span></>}
+        </h1>
         {!idCard && <p class="project-header__desc">{project.description}</p>}
         {project.credits?.map((c) => (
           <p class="project-credit">
@@ -214,6 +229,26 @@ const idCard = !!(project.identityCard && project.specs);
                 </div>
               ))}
             </dl>
+            {panelVideo && (
+            <div class="project-id__aside">
+              <p class="label project-id__aside-label">{panelVideo.heading}</p>
+              <div class="project-id__player">
+                <YouTubeEmbed slug={project.slug} id={panelVideo.id} title={panelVideo.title} sizes={SIZES_PANEL} minimal />
+              </div>
+              <a
+                class="yt-action project-id__cta"
+                href={`https://www.youtube.com/watch?v=${panelVideo.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Watch on YouTube
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M4 2h6v6M10 2 2 10" stroke="currentColor" stroke-width="1.25"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+            )}
             {(project.watchLink || project.episodes) && (
             <div class="project-id__aside">
             {project.episodes?.label && (
@@ -1034,15 +1069,32 @@ const idCard = !!(project.identityCard && project.specs);
     margin-bottom: 0.875rem;
   }
 
+  /* Capped at 52px. It ran to 6.5rem (~86px on a laptop, five times the
+     card's lede) and broke a long title over two lines. A long title now
+     keeps only its name at this size; the rest is .project-header__sub. */
   .project-header__title {
     font-family: var(--font-display);
-    font-size: clamp(3rem, 6vw, 6.5rem);
+    font-size: clamp(2.375rem, 4.4vw, 3.25rem);
     font-weight: 400;
     line-height: 1.0;
-    letter-spacing: -0.01em;
     color: var(--color-ink);
     margin-bottom: 1.125rem;
+    text-wrap: balance;
   }
+
+  .project-header__sub {
+    display: block;
+    margin-top: 0.625rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+
+  @media (max-width: 480px) { .project-header__sub { font-size: 0.71875rem; } }
 
   .project-header__desc {
     max-width: 55ch;
@@ -1150,6 +1202,18 @@ const idCard = !!(project.identityCard && project.specs);
   @media (max-width: 640px) { .project-id__aside { padding: 1.25rem; border-radius: 1.25rem; } }
 
   .project-id__aside-label { text-align: center; }
+
+  /* A single video in the panel (no episodes slideshow): the slideshow's
+     frame radius, and the shared outlined pill at full width. Mojo's sky and
+     brick belong to Mojo, so this one stays ink on paper. Doubled class for
+     the same reason as below: .yt-action is declared further down. */
+  .project-id__player :global(.yt-facade) { border-radius: var(--radius-thumb); }
+
+  .yt-action.project-id__cta {
+    flex: none;
+    align-self: stretch;
+    justify-content: center;
+  }
 
   /* Tweaks on the shared .yt-action pill: filled sky blue rather than
      outlined, so it reads as the page's one call to action next to a quiet

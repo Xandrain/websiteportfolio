@@ -1,9 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import CollectionCard from "../../components/photography/CollectionCard.astro";
+import ProjectCard from "../../components/productions/ProjectCard.astro";
 import DisciplineSwitch from "../../components/shared/DisciplineSwitch.astro";
 import PhotographySubNav from "../../components/photography/PhotographySubNav.astro";
 import { collections } from "../../data/photography";
+
+// One column on a phone, two from 640px, capped by the editorial measure.
+const CARD_SIZES = "(min-width: 1280px) 570px, (min-width: 640px) 46vw, 100vw";
 ---
 
 <BaseLayout
@@ -18,7 +22,22 @@ import { collections } from "../../data/photography";
   <!-- Collections grid -->
   <section class="collections-section editorial" aria-label="Photography collections">
     <div class="collections-grid">
-      {collections.map((collection, i) => (
+      {/* A case study (LAD) is a role, not a set of photographs, so it takes
+          the Graphic Design & 3D card rather than the photo card. */}
+      {collections.map((collection, i) => collection.caseStudy ? (
+        <ProjectCard
+          project={{
+            slug: collection.slug,
+            title: collection.title,
+            cover: collection.cover,
+            tags: collection.caseStudy.tags,
+          }}
+          href={`/photography/${collection.slug}`}
+          alt={collection.caseStudy.coverAlt}
+          sizes={CARD_SIZES}
+          eager={i < 2}
+        />
+      ) : (
         <CollectionCard collection={collection} eager={i < 2} />
       ))}
     </div>

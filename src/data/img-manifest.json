@@ -235,6 +235,100 @@
       "src": "/photography/fn6-1600.webp"
     }
   ],
+  "/photography/lad/cover.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/lad/cover-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/lad/cover-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/lad/cover-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/lad/cover-1600.webp"
+    }
+  ],
+  "/photography/lad/digitization.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/lad/digitization-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/lad/digitization-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/lad/digitization-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/lad/digitization-1600.webp"
+    },
+    {
+      "w": 2560,
+      "src": "/photography/lad/digitization-2560.webp"
+    }
+  ],
+  "/photography/lad/logo.png": [
+    {
+      "w": 400,
+      "src": "/photography/lad/logo-400.webp"
+    },
+    {
+      "w": 512,
+      "src": "/photography/lad/logo-512.webp"
+    }
+  ],
+  "/photography/lad/setup-poster.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/lad/setup-poster-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/lad/setup-poster-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/lad/setup-poster-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/lad/setup-poster-1600.webp"
+    },
+    {
+      "w": 1920,
+      "src": "/photography/lad/setup-poster-1920.webp"
+    }
+  ],
+  "/photography/lad/website.jpg": [
+    {
+      "w": 400,
+      "src": "/photography/lad/website-400.webp"
+    },
+    {
+      "w": 800,
+      "src": "/photography/lad/website-800.webp"
+    },
+    {
+      "w": 1200,
+      "src": "/photography/lad/website-1200.webp"
+    },
+    {
+      "w": 1600,
+      "src": "/photography/lad/website-1600.webp"
+    },
+    {
+      "w": 2560,
+      "src": "/photography/lad/website-2560.webp"
+    }
+  ],
   "/photography/nl-cover.jpg": [
     {
       "w": 400,

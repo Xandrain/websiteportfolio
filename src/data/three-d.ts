@@ -12,6 +12,12 @@ export interface Episode {
 export interface Production {
   slug: string;
   title: string;
+  /**
+   * The trailing part of `title` to set as a small line under the name on
+   * the project page ("The Animated Series"), so only the name itself takes
+   * the display size. `title` stays whole: cards, meta and schema use it.
+   */
+  subtitle?: string;
   description: string;
   cover: string;
   tags: string[];
@@ -32,7 +38,9 @@ export interface Production {
    * run `node scripts/fetch-yt-poster.mjs <slug> <id>` to download it.
    * Example: youtube: [{ id: "dQw4w9WgXcQ", title: "360° turnaround" }],
    * Give an entry a `heading` to render it as a band instead — the heading
-   * on the left, the player on the right (stacked on a phone).
+   * on the left, the player on the right (stacked on a phone). On an
+   * `identityCard` page the first such entry fills the card's right-hand
+   * panel instead, its `heading` as the panel's label.
    */
   youtube?: { id: string; title: string; heading?: string }[];
   /**
@@ -119,6 +127,7 @@ export const projects: Production[] = [
   {
     slug: "azureus",
     title: "AZUREUS: The Animated Series",
+    subtitle: "The Animated Series",
     description:
       "Rigging and texturing on AZUREUS, an animated series produced by BlackSun Entertainment under the supervision of Mason Doran.",
     cover: "/productions/azureus/cover.jpg",
@@ -137,15 +146,14 @@ export const projects: Production[] = [
     specs: [
       { label: "Role", value: "Rigging & texturing" },
       { label: "Studio", value: "BlackSun Entertainment" },
+      {
+        label: "Director",
+        value: "David Weinstein",
+        href: "https://www.imdb.com/fr/name/nm1313488/?ref_=fn_t_3",
+      },
       { label: "Supervision", value: "Mason Doran" },
     ],
-    credits: [
-      {
-        role: "Director",
-        name: "DAVID WEINSTEIN",
-        imdb: "https://www.imdb.com/fr/name/nm1313488/?ref_=fn_t_3",
-      },
-    ],
+    identityCard: true,
   },
   {
     slug: "crown-reinterpretation",
